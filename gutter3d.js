@@ -7,16 +7,18 @@ const GIRTH = 12;          // sheet width in inches
 const LENGTH = 24;         // length of the piece shown (2 ft)
 const T = 0.09;            // sheet thickness (exaggerated slightly so it is visible)
 
-// Cross-section from the photos: back hook → tall back wall (with kink) → flat bottom →
-// stepped decorative front → rolled top edge.  (x = toward front, y = up)
+// Cross-section traced from the end-view photo (x = across, y = up):
+// plain wall with a small inward fold at the top → flat bottom →
+// stepped wall that climbs outward in 4 rises / 3 steps → small outward fold at the top.
 const RAW = [
-  [-0.55, 5.55], [-0.55, 6.15], [0, 6.15],            // Z-hook that clips onto the fascia
-  [0, 3.7], [0.35, 3.3],                              // back wall with kink
-  [0.35, 0],                                          // down to bottom
-  [3.25, 0],                                          // flat bottom
-  [3.25, 0.95], [3.4, 1.05], [3.4, 1.95],             // front face, step 1
-  [3.55, 2.05], [3.55, 2.95], [3.7, 3.05], [3.7, 3.95], // steps 2–3
-  [3.35, 3.95], [3.35, 3.7]                           // rolled top edge (bead)
+  [0.30, 2.27], [0, 2.55],                 // inward fold on the plain wall
+  [0, 0],                                  // plain wall
+  [3.0, 0],                                // flat bottom
+  [3.0, 0.80], [3.48, 0.80],               // step 1
+  [3.48, 1.93], [3.96, 1.93],              // step 2
+  [3.96, 3.06], [4.45, 3.06],              // step 3
+  [4.45, 4.20],                            // top of the stepped wall
+  [4.75, 3.92]                             // outward fold at the top
 ];
 
 function scaledProfile(){
