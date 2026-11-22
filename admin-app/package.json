@@ -1,0 +1,19 @@
+{
+  "name": "ad-engineering-admin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A.D. Engineering admin app (Android)",
+  "scripts": {
+    "prepare-web": "node scripts/prepare-web.js",
+    "sync": "npm run prepare-web && npx cap sync android",
+    "build:apk": "npm run sync && cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

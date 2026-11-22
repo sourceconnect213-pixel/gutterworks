@@ -1,0 +1,6 @@
+{
+  "appId": "lk.adengineering.admin",
+  "appName": "AD Admin",
+  "webDir": "www",
+  "android": { "allowMixedContent": false }
+}
