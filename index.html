@@ -163,8 +163,8 @@
 
 <!--
   ===== EDIT YOUR DETAILS HERE / ඔබේ විස්තර මෙතන වෙනස් කරන්න =====
-  Phone / WhatsApp number is set in the <script> at the bottom (PHONE variable)
-  and in the Contact section below. Search for "07X XXX XXXX".
+  Orders/WhatsApp number: PHONE variable in the <script> at the bottom.
+  Owner number and email: Contact section.
 -->
 
 <header>
@@ -344,9 +344,10 @@
     <div class="c-info">
       <h2>Contact Us</h2>
       <p class="si">නොමිලේ ඇස්තමේන්තුවක් සඳහා අදම අමතන්න.</p>
-      <div class="c-row"><div class="i">☎</div><div><small>Phone</small><a href="#" class="js-call js-phone-text">07X XXX XXXX</a></div></div>
-      <div class="c-row"><div class="i">W</div><div><small>WhatsApp</small><a href="#" class="js-wa js-phone-text">07X XXX XXXX</a></div></div>
-      <div class="c-row"><div class="i">@</div><div><small>Email</small><a href="mailto:info@adengineering.lk">info@adengineering.lk</a></div></div>
+      <div class="c-row"><div class="i">☎</div><div><small>Prices &amp; Orders · මිල ගණන් / ඇණවුම්</small><a href="tel:+94755350030">075 535 0030</a></div></div>
+      <div class="c-row"><div class="i">W</div><div><small>WhatsApp · Orders</small><a href="#" class="js-wa">075 535 0030</a></div></div>
+      <div class="c-row"><div class="i">☏</div><div><small>Owner · අයිතිකරු</small><a href="tel:+94764493749">076 449 3749</a></div></div>
+      <div class="c-row"><div class="i">@</div><div><small>Email</small><a href="mailto:adengineering486@gmail.com">adengineering486@gmail.com</a></div></div>
       <div class="c-row"><div class="i">⌖</div><div><small>Location</small>Your Address, Sri Lanka</div></div>
       <div class="c-row"><div class="i">◷</div><div><small>Hours</small>Mon – Sat · 8.00 AM – 6.00 PM</div></div>
     </div>
@@ -384,14 +385,12 @@
 </a>
 
 <script>
-  // ===== SET YOUR PHONE NUMBER HERE (Sri Lanka format, no leading 0) =====
-  const PHONE = "94700000000";       // e.g. 94771234567
-  const PHONE_DISPLAY = "07X XXX XXXX"; // e.g. 077 123 4567
+  // Prices & orders number (used for Call Now, WhatsApp button and quote form)
+  const PHONE = "94755350030";
 
   document.getElementById('yr').textContent = new Date().getFullYear();
   document.querySelectorAll('.js-call').forEach(a => a.href = 'tel:+' + PHONE);
   document.querySelectorAll('.js-wa').forEach(a => { a.href = 'https://wa.me/' + PHONE; a.target = '_blank'; a.rel = 'noopener'; });
-  document.querySelectorAll('.js-phone-text').forEach(a => a.textContent = PHONE_DISPLAY);
 
   document.getElementById('quote').addEventListener('submit', e => {
     e.preventDefault();
