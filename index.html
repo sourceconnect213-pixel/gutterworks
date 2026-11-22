@@ -196,6 +196,24 @@
     form,.c-card{padding:22px}
   }
 
+  /* Owner */
+  .owner{background:#fff}
+  .owner-grid{display:grid;grid-template-columns:minmax(240px,380px) 1fr;gap:56px;align-items:center}
+  .owner-photo{position:relative;justify-self:center}
+  .owner-photo img{width:100%;height:auto;max-width:380px;aspect-ratio:1;object-fit:cover;border-radius:50%;
+    border:10px solid #fff;outline:4px solid var(--blue);box-shadow:0 24px 50px rgba(11,78,162,.25)}
+  .owner-photo::before{content:"";position:absolute;inset:-26px;border-radius:50%;border:3px dashed rgba(227,30,36,.35);z-index:-1}
+  .owner-badge{position:absolute;right:-6px;bottom:18px;width:112px;height:112px;border-radius:50%;background:var(--red);color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-family:"Noto Sans Sinhala";font-weight:700;font-size:.78rem;line-height:1.2;
+    border:5px solid #fff;box-shadow:0 10px 24px rgba(227,30,36,.35)}
+  .owner-badge b{font-family:Oswald;font-size:2rem;line-height:1}
+  .owner-txt h2{font-size:clamp(2rem,4vw,2.8rem);color:var(--blue);margin:8px 0 16px}
+  .owner-txt h2 span{font-family:"Noto Sans Sinhala";font-weight:800;font-size:.62em;color:var(--red)}
+  .owner-txt p.si{font-size:1.1rem;line-height:1.75;margin-bottom:10px;max-width:60ch}
+  .owner-txt p.en{color:var(--muted);margin-bottom:24px;max-width:60ch}
+  .owner-txt .btn b{font-weight:800}
+  @media (max-width:860px){.owner-grid{grid-template-columns:1fr;gap:40px;text-align:center}.owner-photo img{max-width:280px}.owner-txt p{margin-left:auto;margin-right:auto}.owner-txt .btns{justify-content:center}.owner-badge{width:96px;height:96px;right:0}}
+
   /* 12" gutter 3D */
   .g12{background:linear-gradient(180deg,#fff,var(--bg))}
   .g12-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:28px;align-items:center}
@@ -347,6 +365,7 @@
       <ul id="menu" onclick="this.classList.remove('open')">
         <li><a href="#services">සේවා</a></li>
         <li><a href="#why">ඇයි අපි?</a></li>
+        <li><a href="#owner">අයිතිකරු</a></li>
         <li><a href="#gutter12">12" Gutter</a></li>
         <li id="nav-shop" hidden><a href="#shop">භාණ්ඩ</a></li>
         <li id="nav-prices" hidden><a href="#prices">මිල ගණන්</a></li>
@@ -475,6 +494,25 @@
       <div class="stat"><b id="st-projects" data-count="500" data-suffix="+">500+</b><span>Projects Completed</span></div>
       <div class="stat"><b id="st-warranty" data-count="10">10</b><span>Year Warranty</span></div>
       <div class="stat"><b data-count="2">2</b><span>Shops · Udugampola &amp; Minuwangoda</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="owner" class="owner">
+  <div class="wrap owner-grid reveal">
+    <div class="owner-photo">
+      <img src="images/owner.jpg" alt="A.D. Engineering owner" width="640" height="640" loading="lazy">
+      <span class="owner-badge"><b>16+</b>අවුරුදු<br>පළපුරුද්ද</span>
+    </div>
+    <div class="owner-txt">
+      <span class="kicker">අයිතිකරු · Owner</span>
+      <h2 id="owner-name">A.D. Engineering<br><span>කුමාරගේ පීලි කඩේ</span></h2>
+      <p class="si">වැහිපීලි, සිවිලිම් සහ යකඩ වහල වැඩ අවුරුදු 16කට වැඩි කාලයක් තිස්සේ කරනවා. හැම වැඩක්ම මම පෞද්ගලිකව බලාගන්නවා — ඔබේ නිවසට ගුණාත්මක වැඩක්, සාධාරණ මිලකට.</p>
+      <p class="en">Over 16 years of gutter, ceiling and roofing work. I personally oversee every job — quality work at a fair price.</p>
+      <div class="btns">
+        <a class="btn btn-red" href="tel:+94755350030">📞 අයිතිකරුට කතා කරන්න · <b>075 535 0030</b></a>
+        <a class="btn btn-wa" href="https://wa.me/94755350030" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
     </div>
   </div>
 </section>
