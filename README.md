@@ -6,13 +6,14 @@ Website for A.D. Engineering (Amano gutters, i-Panel ceilings, iron roofing).
 - `images/` — logo
 - `gallery/` — work photos (full size), `gallery/thumbs/` — small versions for fast loading
 
-## Put the site online (GitHub Pages, free)
+## Live site
 
-1. Repo → **Settings** → **Pages**
-2. **Source:** Deploy from a branch
-3. **Branch:** `claude/dazzling-dirac-e1qjy3`, folder `/ (root)` → **Save**
-4. After 1–2 minutes the site is live at
-   `https://sourceconnect213-pixel.github.io/gutterworks/`
+https://sourceconnect213-pixel.github.io/gutterworks/
+
+The site is served by GitHub Pages from the `gh-pages` branch.
+After changing anything, update that branch too:
+
+    git push origin HEAD:gh-pages
 
 ## Add more photos
 
