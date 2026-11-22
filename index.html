@@ -196,6 +196,35 @@
     form,.c-card{padding:22px}
   }
 
+  /* 12" gutter 3D */
+  .g12{background:linear-gradient(180deg,#fff,var(--bg))}
+  .g12-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:28px;align-items:center}
+  .g12-view{position:relative;border-radius:18px;overflow:hidden;background:radial-gradient(circle at 50% 35%,#ffffff,#e3eaf5 70%);box-shadow:0 18px 40px rgba(11,78,162,.14);aspect-ratio:4/3}
+  .g3d{position:absolute;inset:0;touch-action:none;cursor:grab}
+  .g3d:active{cursor:grabbing}
+  .g3d canvas{width:100%!important;height:100%!important;display:block}
+  .g3d-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-weight:600;pointer-events:none}
+  .g3d-btns{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .g3d-btns button{font:inherit;font-family:"Noto Sans Sinhala",Inter;font-weight:700;font-size:.82rem;background:rgba(255,255,255,.92);color:var(--blue);border:1.5px solid #c9d6ea;padding:7px 13px;border-radius:30px;cursor:pointer;backdrop-filter:blur(4px)}
+  .g3d-btns button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .g12-info{background:#fff;border-radius:18px;padding:28px;box-shadow:0 10px 30px rgba(11,78,162,.09)}
+  .g12-tag{display:inline-block;background:#fde5e6;color:var(--red);font-weight:700;font-size:.75rem;letter-spacing:.06em;padding:4px 10px;border-radius:20px;text-transform:uppercase}
+  .g12-info h3{font-size:2rem;color:var(--blue);margin:10px 0 14px}
+  .g12-info h3 .si{font-size:1.25rem;color:var(--ink);font-weight:800}
+  .g12-spec{list-style:none;margin-bottom:18px}
+  .g12-spec li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.92rem}
+  .g12-spec span{color:var(--muted)}
+  .sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px;border:1px solid rgba(0,0,0,.15)}
+  .g12-prices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+  .g12-prices div{border-radius:14px;padding:14px;text-align:center;background:var(--bg)}
+  .g12-prices div:first-child{background:linear-gradient(135deg,var(--blue),var(--blue-d));color:#fff}
+  .g12-prices div:last-child{background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff}
+  .g12-prices small{display:block;font-family:"Noto Sans Sinhala";font-weight:700;opacity:.9}
+  .g12-prices b{display:block;font-family:Oswald;font-size:2.1rem;line-height:1.1}
+  .g12-prices em{font-style:normal;font-size:.78rem;opacity:.85}
+  @media (max-width:980px){.g12-grid{grid-template-columns:1fr}}
+  @media (max-width:560px){.g12-view{aspect-ratio:4/5}.g3d-btns{gap:6px}.g3d-btns button{padding:6px 10px;font-size:.76rem}.g12-info{padding:20px}.g12-prices b{font-size:1.8rem}}
+
   /* Shop + price list */
   .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px}
   .prod{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(11,78,162,.09);display:flex;flex-direction:column;animation:fadeUp .6s both}
@@ -302,6 +331,7 @@
       <ul id="menu" onclick="this.classList.remove('open')">
         <li><a href="#services">සේවා</a></li>
         <li><a href="#why">ඇයි අපි?</a></li>
+        <li><a href="#gutter12">12" Gutter</a></li>
         <li id="nav-shop" hidden><a href="#shop">භාණ්ඩ</a></li>
         <li id="nav-prices" hidden><a href="#prices">මිල ගණන්</a></li>
         <li><a href="#projects">අපේ වැඩ</a></li>
@@ -429,6 +459,46 @@
       <div class="stat"><b id="st-projects" data-count="500" data-suffix="+">500+</b><span>Projects Completed</span></div>
       <div class="stat"><b id="st-warranty" data-count="10">10</b><span>Year Warranty</span></div>
       <div class="stat"><b data-count="2">2</b><span>Shops · Udugampola &amp; Minuwangoda</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="gutter12" class="g12">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="kicker">New · 3D View</span>
+      <h2>12" වැහිපීලි</h2>
+      <p class="si">ඇඟිල්ලෙන් කරකවලා හැම පැත්තෙන්ම බලන්න · Drag to rotate, pinch to zoom</p>
+      <div class="bar"></div>
+    </div>
+    <div class="g12-grid reveal">
+      <div class="g12-view">
+        <div id="g3d" class="g3d" aria-label="12 inch gutter 3D model"></div>
+        <div class="g3d-loading" id="g3d-loading">3D model loading…</div>
+        <div class="g3d-btns">
+          <button id="g3d-rot" class="on">⟳ කරකවන්න</button>
+          <button id="g3d-end">◧ හරස්කඩ</button>
+          <button id="g3d-dim" class="on">📏 මිනුම්</button>
+          <button id="g3d-reset">↺</button>
+        </div>
+      </div>
+      <div class="g12-info">
+        <span class="g12-tag">Amano · Colour coated</span>
+        <h3>12" Box Gutter<br><span class="si">12" අමානෝ වැහිපීලි</span></h3>
+        <ul class="g12-spec" id="g12-spec">
+          <li><span>තහඩු පළල · Sheet width</span><b>12"</b></li>
+          <li><span>පිට පාට · Outside</span><b><i class="sw" style="background:#9b3640"></i>Maroon</b></li>
+          <li><span>ඇතුළත · Inside</span><b><i class="sw" style="background:#c9d1d8"></i>Galvalume</b></li>
+        </ul>
+        <div class="g12-prices">
+          <div><small>විකුණුම් මිල</small><b>Rs. 275</b><em>/ අඩියක් · per ft</em></div>
+          <div><small>සවි කිරීමේ මිල</small><b>Rs. 500</b><em>/ අඩියක් · per ft</em></div>
+        </div>
+        <div class="btns">
+          <a class="btn btn-wa js-wa-g12" href="#" target="_blank" rel="noopener">WhatsApp ඇණවුම</a>
+          <a class="btn btn-red" href="tel:+94764493749">📞 අමතන්න</a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -679,7 +749,7 @@
       if (s){
         setPhone('tel:+94764493749', s.phone_orders);
         setPhone('tel:+94755350030', s.phone_owner);
-        if (s.whatsapp){ PHONE = fmtPhone(s.whatsapp); document.querySelectorAll('.js-wa').forEach(a=>a.href='https://wa.me/'+PHONE); }
+        if (s.whatsapp){ PHONE = fmtPhone(s.whatsapp); window.AD_PHONE = PHONE; window.dispatchEvent(new Event('ad:phone')); document.querySelectorAll('.js-wa').forEach(a=>a.href='https://wa.me/'+PHONE); }
         setText('c-email', s.email); if(s.email) document.getElementById('c-email').href='mailto:'+s.email;
         setText('c-main', s.shop_main, true); setText('c-branch', s.shop_branch, true);
         setText('c-hours', s.hours); setText('c-closed', s.closed_note);
@@ -708,6 +778,32 @@
     }catch(err){ console.warn('Live content not loaded', err); }
   }
   loadLive();
+</script>
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/"}}</script>
+<script type="module">
+  import { mountGutter } from './gutter3d.js';
+  const box = document.getElementById('g3d');
+  const $ = id => document.getElementById(id);
+  let g = null;
+  const start = () => {
+    if (g) return;
+    try {
+      g = mountGutter(box);
+      $('g3d-loading').remove();
+      const spec = $('g12-spec');
+      spec.insertAdjacentHTML('beforeend', `<li><span>පළල · Width</span><b>≈ ${g.width.toFixed(1)}"</b></li><li><span>උස · Height</span><b>≈ ${g.height.toFixed(1)}"</b></li>`);
+      $('g3d-rot').onclick = e => e.currentTarget.classList.toggle('on', g.toggleRotate());
+      $('g3d-end').onclick = () => { g.endView(); $('g3d-rot').classList.remove('on'); };
+      $('g3d-dim').onclick = e => e.currentTarget.classList.toggle('on', g.toggleDims());
+      $('g3d-reset').onclick = () => { g.reset(); $('g3d-rot').classList.add('on'); };
+      box.addEventListener('gutter:auto', () => $('g3d-rot').classList.remove('on'));
+    } catch (err) { $('g3d-loading').textContent = '3D not supported on this device'; console.warn(err); }
+  };
+  // load the 3D model only when the section comes near the screen
+  new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { start(); o.disconnect(); } }, { rootMargin: '300px' }).observe(box);
+  const wa = document.querySelector('.js-wa-g12');
+  const setWa = () => wa.href = 'https://wa.me/' + (window.AD_PHONE || '94764493749') + '?text=' + encodeURIComponent('Hello A.D. Engineering, I want to order 12" gutter (Rs. 275/ft, fixing Rs. 500/ft).');
+  setWa(); window.addEventListener('ad:phone', setWa);
 </script>
 </body>
 </html>
