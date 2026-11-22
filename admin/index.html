@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#05285a">
+<title>AD Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Noto+Sans+Sinhala:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- ============ Login ============ -->
+<div id="login" class="screen login" hidden>
+  <div class="login-card">
+    <img src="logo-mark.png" alt="A.D. Engineering" class="login-logo">
+    <h1>A.D. Engineering</h1>
+    <p class="sub">Admin · පරිපාලක</p>
+    <form id="login-form">
+      <label>Email<input id="l-email" type="email" autocomplete="username" required></label>
+      <label>Password · මුරපදය<span class="pw-wrap"><input id="l-pass" type="password" autocomplete="current-password" required><button type="button" class="pw-eye" id="pw-eye" aria-label="Show password">👁</button></span></label>
+      <label class="pw-show"><input type="checkbox" id="pw-show"> Password පෙන්වන්න · Show password</label>
+      <button class="btn primary block" type="submit">ඇතුල් වන්න · Login</button>
+      <p class="err" id="l-err"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ============ Not configured ============ -->
+<div id="noconfig" class="screen login" hidden>
+  <div class="login-card">
+    <img src="logo-mark.png" alt="" class="login-logo">
+    <h1>Setup</h1>
+    <p class="sub">Supabase project details දාන්න (එක පාරක් විතරයි)</p>
+    <form id="cfg-form">
+      <label>Project URL<input id="cfg-url" placeholder="https://xxxx.supabase.co" required></label>
+      <label>anon / publishable key<input id="cfg-key" required></label>
+      <button class="btn primary block" type="submit">Save</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ App ============ -->
+<div id="app" class="screen" hidden>
+  <header class="top">
+    <img src="logo-mark.png" alt="">
+    <div class="ttl"><b id="page-title">ඉල්ලීම්</b><small>A.D. Engineering Admin</small></div>
+    <button class="icon-btn" id="refresh" aria-label="Refresh">⟳</button>
+    <button class="icon-btn" id="logout" aria-label="Logout">⏻</button>
+  </header>
+
+  <main>
+    <!-- Requests -->
+    <section class="tab" id="tab-requests">
+      <div class="chips" id="req-filter">
+        <button class="chip on" data-s="new">අලුත් · New <span id="cnt-new"></span></button>
+        <button class="chip" data-s="contacted">කතා කළා</button>
+        <button class="chip" data-s="done">අවසන්</button>
+        <button class="chip" data-s="all">සියල්ල</button>
+      </div>
+      <div id="req-list" class="list"></div>
+    </section>
+
+    <!-- Items -->
+    <section class="tab" id="tab-items" hidden>
+      <div id="item-list" class="list"></div>
+    </section>
+
+    <!-- Prices -->
+    <section class="tab" id="tab-prices" hidden>
+      <p class="hint">Website එකේ "මිල ගණන්" කොටසේ පෙන්වන list එක.</p>
+      <div id="price-list" class="list"></div>
+      <button class="fab" data-new="price">＋</button>
+    </section>
+
+    <!-- Photos -->
+    <section class="tab" id="tab-photos" hidden>
+      <div class="upload-box">
+        <div class="seg" id="ph-cat">
+          <button class="on" data-c="gutter">වැහිපීලි / වහල</button>
+          <button data-c="ceiling">සිවිලිම්</button>
+        </div>
+        <label class="btn primary block">
+          📷 Photos එකතු කරන්න
+          <input type="file" id="ph-input" accept="image/*" multiple hidden>
+        </label>
+        <p class="hint" id="ph-status">අලුත් photos website gallery එකේ මුලින්ම පෙන්වයි.</p>
+      </div>
+      <div id="photo-grid" class="pgrid"></div>
+    </section>
+
+    <!-- Settings -->
+    <section class="tab" id="tab-settings" hidden>
+      <form id="set-form" class="card form">
+        <h3>දුරකථන · Phones</h3>
+        <label>මිල ගණන් / ඇණවුම් (Gutter Kumara)<input name="phone_orders"></label>
+        <label>අයිතිකරු · Owner<input name="phone_owner"></label>
+        <label>WhatsApp number (94 සමඟ, උදා: 94764493749)<input name="whatsapp" inputmode="numeric"></label>
+        <label>Email<input name="email" type="email"></label>
+        <h3>ලිපින · Shops</h3>
+        <label>Main Shop<input name="shop_main"></label>
+        <label>Branch<input name="shop_branch"></label>
+        <h3>වේලාවන් · Hours</h3>
+        <label>විවෘත වේලාවන්<input name="hours"></label>
+        <label>වසා ඇති දින<input name="closed_note"></label>
+        <h3>ගණන් · Figures</h3>
+        <div class="row3">
+          <label>අවුරුදු<input name="years" inputmode="numeric"></label>
+          <label>Projects<input name="projects" inputmode="numeric"></label>
+          <label>Warranty<input name="warranty" inputmode="numeric"></label>
+        </div>
+        <button class="btn primary block" type="submit">Save · සුරකින්න</button>
+      </form>
+      <p class="hint center">Website: <a href="https://sourceconnect213-pixel.github.io/gutterworks/" target="_blank">sourceconnect213-pixel.github.io/gutterworks</a></p>
+    </section>
+  </main>
+
+  <nav class="bottom">
+    <button class="on" data-tab="requests"><i>📥</i><span>ඉල්ලීම්</span><em id="badge" hidden></em></button>
+    <button data-tab="items"><i>📦</i><span>භාණ්ඩ</span></button>
+    <button data-tab="prices"><i>🏷️</i><span>මිල</span></button>
+    <button data-tab="photos"><i>🖼️</i><span>Photos</span></button>
+    <button data-tab="settings"><i>⚙️</i><span>සැකසුම්</span></button>
+  </nav>
+</div>
+
+<!-- ============ Edit sheet ============ -->
+<div class="sheet-bg" id="sheet-bg" hidden>
+  <form class="sheet" id="sheet">
+    <div class="sheet-head"><b id="sheet-title"></b><button type="button" class="icon-btn" id="sheet-close">✕</button></div>
+    <div id="sheet-body"></div>
+    <div class="sheet-actions">
+      <button type="button" class="btn danger" id="sheet-del">මකන්න</button>
+      <button type="submit" class="btn primary">Save · සුරකින්න</button>
+    </div>
+  </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="supabase.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

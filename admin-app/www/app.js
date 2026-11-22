@@ -167,63 +167,218 @@
     if (!confirm('මකන්නද? · Delete?')) return;
     try { await sheetDelete(); closeSheet(); toast('Deleted'); } catch (err) { fail(err, 'Delete'); }
   };
-  $$('.fab').forEach(f => f.onclick = () => f.dataset.new === 'item' ? editItem() : editPrice());
+  $$('.fab').forEach(f => f.onclick = () => editPrice());
 
-  // ---------- items ----------
-  let ITEMS = [];
+  // ---------- items: category browser ----------
+  // path: [] = all main categories, [mainId] = inside a main category, [mainId, subId] = inside a size / type
+  let CATS = [], PRODS = [], path = [], needsStep2 = false;
+  const MODELS = { '': 'නැත · None', gutter12: '12" Box Gutter (3D)' };
+  const UNITS = ['per ft', 'each', 'per sq.ft', 'per sheet', 'per meter'];
+  const catById = id => CATS.find(c => c.id == id);
+  const childrenOf = id => CATS.filter(c => (c.parent_id ?? null) == (id ?? null)).sort((a,b) => (a.sort-b.sort) || (a.id-b.id));
+  const itemsIn = id => PRODS.filter(p => (p.category_id ?? null) == (id ?? null));
+  const countDeep = id => itemsIn(id).length + childrenOf(id).reduce((n,c) => n + itemsIn(c.id).length, 0);
+  const priceTxt = p => p.price != null ? money(p.price) : 'මිල අමතන්න';
+
   async function loadItems(){
     const box = $('#item-list'); box.innerHTML = '<div class="loading">Loading…</div>';
-    const { data, error } = await sb.from('products').select('*').order('sort').order('created_at', { ascending:false });
-    if (error) { box.innerHTML=''; return fail(error, 'Items'); }
-    ITEMS = data;
-    box.innerHTML = data.length ? data.map((p,i) => `
-      <div class="card item" data-id="${p.id}" style="animation-delay:${Math.min(i,10)*30}ms">
-        <div class="th" style="${p.image_url ? `background-image:url('${esc(p.image_url)}')` : ''}">${p.image_url ? '' : '📦'}</div>
-        <div class="info"><b>${esc(p.name)}</b>
-          <small>${esc(CAT[p.category]||p.category)}${p.unit ? ' · '+esc(p.unit) : ''}</small><br>
-          <span class="pr">${p.price!=null ? money(p.price) : 'මිල සඳහා අමතන්න'}</span>
-          <span class="tag ${p.in_stock?'':'out'}">${p.in_stock?'තොගයේ ඇත':'තොගය නැත'}</span>
-        </div>
-      </div>`).join('') : '<div class="empty"><i>📦</i>භාණ්ඩ නැහැ. ＋ ඔබලා එකතු කරන්න.<br><small>තොගයේ ඇති භාණ්ඩ විතරක් website එකේ පෙන්වයි.</small></div>';
+    const [c, pr] = await Promise.all([
+      sb.from('categories').select('*').order('sort').order('id'),
+      sb.from('products').select('*').order('sort').order('created_at', { ascending:false })
+    ]);
+    if (pr.error) { box.innerHTML=''; return fail(pr.error, 'Items'); }
+    needsStep2 = !!c.error;
+    CATS = c.error ? [] : c.data; PRODS = pr.data;
+    // drop path parts that no longer exist
+    path = path.filter(id => catById(id));
+    renderItems();
   }
-  $('#item-list').onclick = e => { const c = e.target.closest('.item'); if (c) editItem(ITEMS.find(x => x.id == c.dataset.id)); };
+
+  function crumbs(){
+    const parts = [`<button data-go="">සියල්ල</button>`];
+    path.forEach((id,i) => parts.push(`<span>›</span><button data-go="${path.slice(0,i+1).join(',')}">${esc(catById(id)?.name)}</button>`));
+    return `<nav class="crumbs">${parts.join('')}</nav>`;
+  }
+
+  function itemRow(p, i){
+    const sub = [p.size, p.colour, p.unit].filter(Boolean).map(esc).join(' · ');
+    return `
+      <div class="card irow" data-item="${p.id}" style="animation-delay:${Math.min(i,10)*25}ms">
+        <div class="th" style="${p.image_url ? `background-image:url('${esc(p.image_url)}')` : ''}">${p.image_url ? '' : (p.model ? '🧊' : '📦')}</div>
+        <div class="info">
+          <b>${esc(p.name)}</b>
+          ${sub ? `<small>${sub}</small>` : ''}
+          <div class="prices"><span class="pr">${priceTxt(p)}</span>${p.fixing_price != null ? `<span class="fx">සවි කිරීම ${money(p.fixing_price)}</span>` : ''}</div>
+        </div>
+        <label class="stock-sw" title="තොගයේ ඇත">
+          <input type="checkbox" data-stock="${p.id}" ${p.in_stock ? 'checked' : ''}><i></i>
+          <em>${p.in_stock ? 'තොගයේ' : 'නැත'}</em>
+        </label>
+      </div>`;
+  }
+
+  function renderItems(){
+    const box = $('#item-list');
+    let html = '';
+    if (needsStep2) html += `<div class="card warn">⚠️ වර්ග (categories) පාවිච්චි කරන්න Supabase එකේ <b>02_categories.sql</b> එක Run කරන්න ඕන.</div>`;
+    html += crumbs();
+
+    if (!path.length){
+      const mains = childrenOf(null);
+      html += `<div class="tiles">` + mains.map((c,i) => `
+        <button class="tile" data-open="${c.id}" style="animation-delay:${i*40}ms">
+          <span class="tile-img" style="${c.image_url ? `background-image:url('${esc(c.image_url)}')` : ''}">${c.image_url ? '' : esc(firstLetter(c.name))}</span>
+          <b>${esc(c.name)}</b>${c.name_en ? `<small>${esc(c.name_en)}</small>` : ''}
+          <em>${childrenOf(c.id).length} වර්ග · ${countDeep(c.id)} භාණ්ඩ</em>
+        </button>`).join('') +
+        (needsStep2 ? '' : `<button class="tile add" data-addcat=""><span class="tile-img">＋</span><b>අලුත් ප්‍රධාන වර්ගයක්</b><small>උදා: වැහිපීලි, සිවිලිම්</small></button>`) + `</div>`;
+      const loose = itemsIn(null);
+      if (loose.length || needsStep2){
+        html += `<h4 class="grp">${needsStep2 ? 'භාණ්ඩ' : 'වර්ගයක් නැති භාණ්ඩ'} <small>${loose.length}</small></h4>` + loose.map(itemRow).join('');
+        html += `<button class="btn ghost block addrow" data-additem="">＋ භාණ්ඩයක් එකතු කරන්න</button>`;
+      }
+    } else {
+      const cur = catById(path[path.length-1]);
+      const isMain = path.length === 1;
+      html += `
+        <div class="cat-head">
+          <div class="ch-img" style="${cur.image_url ? `background-image:url('${esc(cur.image_url)}')` : ''}"></div>
+          <div class="ch-txt"><h2>${esc(cur.name)}</h2>${cur.name_en ? `<small>${esc(cur.name_en)}</small>` : ''}${cur.note ? `<p>${esc(cur.note)}</p>` : ''}</div>
+          <button class="icon-btn" data-editcat="${cur.id}" aria-label="Edit category">✎</button>
+        </div>`;
+      if (isMain){
+        const subs = childrenOf(cur.id);
+        html += `<h4 class="grp">ප්‍රමාණ / වර්ග <small>${subs.length}</small></h4><div class="stamps">` +
+          subs.map((c,i) => `
+            <button class="stamp" data-open="${c.id}" style="animation-delay:${i*35}ms">
+              <span class="stamp-big">${esc(bigLabel(c.name))}</span>
+              <span class="stamp-txt"><b>${esc(c.name)}</b><small>${itemsIn(c.id).length} භාණ්ඩ</small></span>
+              <span class="chev">›</span>
+            </button>`).join('') +
+          `<button class="stamp add" data-addcat="${cur.id}"><span class="stamp-big">＋</span><span class="stamp-txt"><b>ප්‍රමාණයක් / වර්ගයක් එකතු කරන්න</b><small>උදා: 12" වැහිපීලි, PVC සිවිලිම්</small></span></button></div>`;
+      }
+      const items = itemsIn(cur.id);
+      html += `<h4 class="grp">භාණ්ඩ <small>${items.length}</small></h4>` +
+        (items.length ? items.map(itemRow).join('') : `<p class="hint">මේ ${isMain ? 'වර්ගයට' : 'ප්‍රමාණයට'} තාම භාණ්ඩ නැහැ.</p>`) +
+        `<button class="btn primary block addrow" data-additem="${cur.id}">＋ ${esc(cur.name)} භාණ්ඩයක් එකතු කරන්න</button>`;
+    }
+    box.innerHTML = html;
+  }
+  const firstLetter = t => { try { return [...new Intl.Segmenter('si',{granularity:'grapheme'}).segment(String(t))][0]?.segment || ''; } catch { return String(t).slice(0,1); } };
+  // "12" වැහිපීලි" → 12"   ·  "PVC සිවිලිම්" → PVC
+  function bigLabel(name){
+    const m = String(name).match(/\d+(\.\d+)?\s*("|”|inch|in\b|mm|ft)?/i);
+    if (m) return m[0].replace(/\s*(inch|in)\b/i,'"').replace(/\s+/g,'');
+    return String(name).split(/\s+/)[0].slice(0,5);
+  }
+
+  $('#item-list').onclick = async e => {
+    const t = e.target;
+    const go = t.closest('[data-go]'); if (go){ path = go.dataset.go ? go.dataset.go.split(',').map(Number) : []; renderItems(); window.scrollTo(0,0); return; }
+    const open = t.closest('[data-open]'); if (open){ path = [...path, +open.dataset.open]; renderItems(); window.scrollTo(0,0); return; }
+    const addc = t.closest('[data-addcat]'); if (addc){ editCategory({ parent_id: addc.dataset.addcat ? +addc.dataset.addcat : null }); return; }
+    const edc = t.closest('[data-editcat]'); if (edc){ editCategory(catById(edc.dataset.editcat)); return; }
+    const addi = t.closest('[data-additem]'); if (addi){ editItem({ category_id: addi.dataset.additem ? +addi.dataset.additem : null }); return; }
+    if (t.closest('.stock-sw')) return;   // handled by change event
+    const row = t.closest('[data-item]'); if (row) editItem(PRODS.find(p => p.id == row.dataset.item));
+  };
+  $('#item-list').addEventListener('change', async e => {
+    const cb = e.target.closest('[data-stock]'); if (!cb) return;
+    const p = PRODS.find(x => x.id == cb.dataset.stock);
+    const { error } = await sb.from('products').update({ in_stock: cb.checked }).eq('id', p.id);
+    if (error) { cb.checked = !cb.checked; return fail(error); }
+    p.in_stock = cb.checked; cb.parentElement.querySelector('em').textContent = cb.checked ? 'තොගයේ' : 'නැත';
+    toast(cb.checked ? '✓ Website එකේ පෙන්වයි' : 'Website එකෙන් හැංගුවා');
+  });
+
+  function catOptions(selected){
+    const opt = (c, label) => `<option value="${c.id}" ${c.id == selected ? 'selected' : ''}>${label}</option>`;
+    return `<option value="">— වර්ගයක් නැත —</option>` + childrenOf(null).map(m =>
+      opt(m, esc(m.name)) + childrenOf(m.id).map(s => opt(s, '&nbsp;&nbsp;&nbsp;└ ' + esc(s.name))).join('')).join('');
+  }
+
+  function editCategory(c = {}){
+    const isNew = !c.id, isSub = !!c.parent_id;
+    const kind = isSub ? 'ප්‍රමාණය / වර්ගය' : 'ප්‍රධාන වර්ගය';
+    const nSubs = isNew ? 0 : childrenOf(c.id).length, nItems = isNew ? 0 : countDeep(c.id);
+    openSheet(isNew ? (isSub ? 'අලුත් ප්‍රමාණයක් / වර්ගයක්' : 'අලුත් ප්‍රධාන වර්ගයක්') : kind + ' වෙනස් කරන්න', `
+      ${isSub ? `<p class="hint">"${esc(catById(c.parent_id)?.name)}" යටතේ</p>` : ''}
+      <div class="img-pick">
+        <div class="th" id="ct-th" style="${c.image_url ? `background-image:url('${esc(c.image_url)}')` : ''}">${c.image_url ? '' : '📷'}</div>
+        <label class="btn ghost">Photo තෝරන්න<input type="file" name="image" accept="image/*" hidden id="ct-img"></label>
+      </div>
+      <label>නම (සිංහලෙන්) *<input name="name" required value="${esc(c.name)}" placeholder="${isSub ? 'උදා: 12&quot; වැහිපීලි' : 'උදා: වැහිපීලි'}"></label>
+      <label>English name<input name="name_en" value="${esc(c.name_en)}" placeholder="${isSub ? 'e.g. 12&quot; Gutters' : 'e.g. Gutters'}"></label>
+      <label>කෙටි විස්තරයක් (අවශ්‍ය නම්)<input name="note" value="${esc(c.note)}"></label>
+      ${isSub ? `<label>ප්‍රධාන වර්ගය<select name="parent_id">${childrenOf(null).map(m => `<option value="${m.id}" ${m.id == c.parent_id ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label>` : ''}
+      <label>පිළිවෙල (අඩු අංකය මුලින්)<input name="sort" inputmode="numeric" value="${c.sort ?? (isNew ? childrenOf(c.parent_id).length + 1 : 0)}"></label>
+      ${!isNew && (nSubs || nItems) ? `<p class="hint">මකුවොත්: ${nSubs ? nSubs + ' වර්ග මැකෙනවා, ' : ''}${nItems} භාණ්ඩ "වර්ගයක් නැති භාණ්ඩ" වලට යනවා.</p>` : ''}`,
+      async fd => {
+        const row = { name: fd.get('name').trim(), name_en: fd.get('name_en').trim(), note: fd.get('note').trim(), sort: parseInt(fd.get('sort'),10) || 0 };
+        if (isSub) row.parent_id = +fd.get('parent_id');
+        else if (isNew) row.parent_id = null;
+        const file = fd.get('image');
+        if (file && file.size) { const up = await upload(await resize(file, 900), 'categories'); row.image_url = up.url; }
+        const res = isNew ? await sb.from('categories').insert(row).select().single() : await sb.from('categories').update(row).eq('id', c.id);
+        if (res.error) throw res.error;
+        if (row.image_url && c.image_url) removeFiles([pathOf(c.image_url)]);
+        if (isNew && res.data) path = isSub ? [row.parent_id, res.data.id] : [res.data.id];
+        if (!isNew && isSub && path.length === 2) path = [row.parent_id, c.id];
+        await loadItems();
+      },
+      isNew ? null : async () => {
+        const { error } = await sb.from('categories').delete().eq('id', c.id); if (error) throw error;
+        path = path.slice(0, path.indexOf(c.id) < 0 ? path.length : path.indexOf(c.id));
+        await loadItems();
+      });
+    $('#ct-img').onchange = e => { const f=e.target.files[0]; if(f){ const th=$('#ct-th'); th.style.backgroundImage=`url('${URL.createObjectURL(f)}')`; th.textContent=''; } };
+  }
 
   function editItem(p = {}){
     const isNew = !p.id;
+    const unitOpts = UNITS.map(u => `<option value="${u}">`).join('');
     openSheet(isNew ? 'අලුත් භාණ්ඩයක්' : 'භාණ්ඩය වෙනස් කරන්න', `
       <div class="img-pick">
         <div class="th" id="it-th" style="${p.image_url ? `background-image:url('${esc(p.image_url)}')` : ''}">${p.image_url ? '' : '📷'}</div>
         <label class="btn ghost">Photo තෝරන්න<input type="file" name="image" accept="image/*" hidden id="it-img"></label>
       </div>
-      <label>නම · Name *<input name="name" required value="${esc(p.name)}"></label>
+      <label>නම · Name *<input name="name" required value="${esc(p.name)}" placeholder='උදා: 12" Box Gutter'></label>
+      ${needsStep2 ? '' : `<label>වර්ගය · Category<select name="category_id">${catOptions(p.category_id)}</select></label>`}
+      <div class="row2">
+        ${needsStep2 ? '' : `<label>ප්‍රමාණය · Size<input name="size" value="${esc(p.size)}" placeholder='12"'></label>
+        <label>පාට · Colour<input name="colour" value="${esc(p.colour)}" placeholder="Maroon"></label>`}
+      </div>
+      <div class="money-row">
+        <label>විකුණුම් මිල (Rs.)<input name="price" inputmode="decimal" placeholder="හිස් = අමතන්න" value="${p.price ?? ''}"></label>
+        ${needsStep2 ? '' : `<label>සවි කිරීමේ මිල (Rs.)<input name="fixing_price" inputmode="decimal" placeholder="නැත්නම් හිස්ව තියන්න" value="${p.fixing_price ?? ''}"></label>`}
+      </div>
+      <label>ඒකකය · Unit<input name="unit" list="unit-list" value="${esc(p.unit || (isNew ? 'per ft' : ''))}"><datalist id="unit-list">${unitOpts}</datalist></label>
       <label>විස්තරය · Description<textarea name="description" rows="2">${esc(p.description)}</textarea></label>
-      <div class="row2">
-        <label>මිල (Rs.)<input name="price" inputmode="decimal" placeholder="හිස් = අමතන්න" value="${p.price ?? ''}"></label>
-        <label>ඒකකය · Unit<input name="unit" placeholder="per foot" value="${esc(p.unit)}"></label>
-      </div>
-      <div class="row2">
-        <label>වර්ගය<select name="category">${Object.entries(CAT).map(([k,v]) => `<option value="${k}" ${p.category===k?'selected':''}>${v}</option>`).join('')}</select></label>
-        <label>පිළිවෙල · Order<input name="sort" inputmode="numeric" value="${p.sort ?? 0}"></label>
-      </div>
-      <div class="switch">තොගයේ ඇත · In stock (website එකේ පෙන්වන්න)<input type="checkbox" name="in_stock" ${p.in_stock!==false?'checked':''}></div>`,
+      ${needsStep2 ? '' : `<label>3D model<select name="model">${Object.entries(MODELS).map(([k,v]) => `<option value="${k}" ${(p.model||'')===k?'selected':''}>${v}</option>`).join('')}</select></label>`}
+      <label>පිළිවෙල (අඩු අංකය මුලින්)<input name="sort" inputmode="numeric" value="${p.sort ?? 0}"></label>
+      <div class="switch">තොගයේ ඇත · Website එකේ පෙන්වන්න<input type="checkbox" name="in_stock" ${p.in_stock!==false?'checked':''}></div>`,
       async fd => {
         const row = {
           name: fd.get('name').trim(), description: fd.get('description').trim(),
-          price: num(fd.get('price')),
-          unit: fd.get('unit').trim(), category: fd.get('category'), sort: parseInt(fd.get('sort'),10) || 0,
-          in_stock: fd.get('in_stock') === 'on'
+          price: num(fd.get('price')), unit: fd.get('unit').trim(),
+          sort: parseInt(fd.get('sort'),10) || 0, in_stock: fd.get('in_stock') === 'on'
         };
+        if (!needsStep2){
+          row.category_id = fd.get('category_id') ? +fd.get('category_id') : null;
+          row.size = fd.get('size').trim(); row.colour = fd.get('colour').trim();
+          row.fixing_price = num(fd.get('fixing_price')); row.model = fd.get('model');
+        }
         const file = fd.get('image');
         if (file && file.size) { const up = await upload(await resize(file, 1000), 'items'); row.image_url = up.url; }
         const { error } = isNew ? await sb.from('products').insert(row) : await sb.from('products').update(row).eq('id', p.id);
         if (error) throw error;
         if (row.image_url && p.image_url) removeFiles([pathOf(p.image_url)]);
-        loadItems();
+        await loadItems();
       },
       isNew ? null : async () => {
         const { error } = await sb.from('products').delete().eq('id', p.id); if (error) throw error;
         if (p.image_url) removeFiles([pathOf(p.image_url)]);
-        loadItems();
+        await loadItems();
       });
     $('#it-img').onchange = e => { const f=e.target.files[0]; if(f){ const th=$('#it-th'); th.style.backgroundImage=`url('${URL.createObjectURL(f)}')`; th.textContent=''; } };
   }

@@ -6,7 +6,8 @@
   "scripts": {
     "prepare-web": "node scripts/prepare-web.js",
     "sync": "npm run prepare-web && npx cap sync android",
-    "build:apk": "npm run sync && cd android && ./gradlew assembleRelease"
+    "build:apk": "npm run sync && cd android && ./gradlew assembleRelease",
+    "build:web": "node scripts/build-web-admin.js"
   },
   "dependencies": {
     "@capacitor/android": "^7.0.0",

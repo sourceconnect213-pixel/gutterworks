@@ -232,11 +232,27 @@
   .prod .pb{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
   .prod h3{font-family:"Noto Sans Sinhala",Inter;font-weight:800;font-size:1.08rem;color:var(--blue)}
   .prod p{font-size:.88rem;color:var(--muted)}
-  .prod .price{margin-top:auto;font-family:Oswald;font-size:1.5rem;color:var(--red);font-weight:700}
-  .prod .price small{font-family:Inter;font-size:.78rem;color:var(--muted);font-weight:500;margin-left:4px}
-  .prod .stock{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;background:#e3f8ea;color:#16803c;align-self:flex-start}
-  .prod .stock.out{background:#fde5e6;color:var(--red)}
-  .prod .order{margin-top:8px;justify-content:center;padding:10px 16px;font-size:.92rem}
+  .prod .psub{font-size:.82rem;font-weight:600;color:var(--muted)}
+  .pimg-size{font-family:Oswald;font-weight:700;font-size:3rem;color:var(--blue);opacity:.75}
+  .pprices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:8px}
+  .pprices div{background:var(--bg);border-radius:10px;padding:8px 10px}
+  .pprices div:only-child{grid-column:span 2}
+  .pprices small{display:block;font-family:"Noto Sans Sinhala";font-size:.72rem;font-weight:700;color:var(--muted)}
+  .pprices b{font-family:Oswald;font-size:1.3rem;color:var(--red);line-height:1.2}
+  .pprices .fx b{color:var(--blue)}
+  .pprices em{font-style:normal;font-size:.72rem;color:var(--muted);margin-left:3px}
+  .pbtns{display:flex;gap:8px;margin-top:10px}
+  .prod .order{flex:1;justify-content:center;padding:10px 12px;font-size:.88rem}
+  .sizes{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:-6px 0 24px}
+  .sizes button{font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:82px;padding:8px 14px;border-radius:12px;
+    background:linear-gradient(160deg,#fbfcfe,#e3e9f2);border:2px solid #c6d2e2;color:var(--blue);box-shadow:inset 0 2px 0 #fff}
+  .sizes button b{font-family:Oswald,"Noto Sans Sinhala";font-size:1.5rem;line-height:1.1}
+  .sizes button small{font-size:.7rem;color:var(--muted);font-family:"Noto Sans Sinhala"}
+  .sizes button[data-sub="all"] b{font-family:"Noto Sans Sinhala";font-size:1rem;font-weight:800}
+  .sizes button.on{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:none}
+  .sizes button.on small{color:#cfdcf0}
+  .shop-grp{font-family:"Noto Sans Sinhala";font-weight:800;color:var(--blue);font-size:1.2rem;margin:26px 0 12px}
+  .shop-grp small{font-weight:500;font-size:.85rem;color:var(--muted)}
   .price-list{max-width:820px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(11,78,162,.09);overflow:hidden}
   .pl-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line)}
   .pl-row:last-child{border-bottom:0}
@@ -512,7 +528,7 @@
       <div class="bar"></div>
     </div>
     <div class="shop-filters filters" id="shop-filters"></div>
-    <div class="products" id="products"></div>
+    <div class="shop-body" id="products"></div>
   </div>
 </section>
 
@@ -720,30 +736,66 @@
   }
   const CAT = {gutter:'වැහිපීලි', ceiling:'සිවිලිම්', roofing:'වහල', other:'වෙනත්'};
   const money = n => 'Rs. ' + Number(n).toLocaleString('en-LK', {maximumFractionDigits:2});
-  let PRODUCTS = [], shopCat = 'all';
-  function renderShop(){
-    const box=document.getElementById('products');
-    const items = PRODUCTS.filter(p=>shopCat==='all'||p.category===shopCat);
-    box.innerHTML = items.map(p=>`
+  let PRODUCTS = [], CATS = [], shopMain = null, shopSub = 'all';
+  const kids = id => CATS.filter(c => (c.parent_id ?? null) == (id ?? null)).sort((a,b)=>(a.sort-b.sort)||(a.id-b.id));
+  const bigLabel = n => { const m = String(n).match(/\d+(\.\d+)?\s*("|”|inch|in\b|mm|ft)?/i); return m ? m[0].replace(/\s*(inch|in)\b/i,'"').replace(/\s+/g,'') : String(n).split(/\s+/)[0]; };
+  function prodCard(p){
+    const sub = [p.size, p.colour].filter(Boolean).map(esc).join(' · ');
+    const has = v => v != null && v !== '';
+    return `
       <div class="prod">
-        <div class="pimg" ${p.image_url?`style="background-image:url('${esc(p.image_url)}')"`:''}>${p.image_url?'':'🏠'}</div>
+        <div class="pimg" ${p.image_url?`style="background-image:url('${esc(p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>
         <div class="pb">
-          <span class="stock ${p.in_stock?'':'out'}">${p.in_stock?'තොගයේ ඇත · In stock':'තොගය අවසන් · Out of stock'}</span>
           <h3>${esc(p.name)}</h3>
+          ${sub?`<span class="psub">${sub}</span>`:''}
           ${p.description?`<p>${esc(p.description)}</p>`:''}
-          <div class="price">${p.price!=null&&p.price!==''?money(p.price):'<span style="font-size:1rem">මිල සඳහා අමතන්න</span>'}${p.unit?`<small>/ ${esc(p.unit)}</small>`:''}</div>
-          <a class="btn btn-wa order" target="_blank" rel="noopener" href="https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name)}">WhatsApp ඇණවුම</a>
+          <div class="pprices">
+            <div><small>විකුණුම් මිල</small><b>${has(p.price)?money(p.price):'අමතන්න'}</b>${has(p.price)&&p.unit?`<em>/ ${esc(p.unit)}</em>`:''}</div>
+            ${has(p.fixing_price)?`<div class="fx"><small>සවි කිරීමේ මිල</small><b>${money(p.fixing_price)}</b>${p.unit?`<em>/ ${esc(p.unit)}</em>`:''}</div>`:''}
+          </div>
+          <div class="pbtns">
+            ${p.model==='gutter12'?`<a class="btn btn-blue order" href="#gutter12">🧊 3D බලන්න</a>`:''}
+            <a class="btn btn-wa order" target="_blank" rel="noopener" href="https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name+(p.size?' ('+p.size+')':''))}">WhatsApp ඇණවුම</a>
+          </div>
         </div>
-      </div>`).join('');
+      </div>`;
   }
+  function renderShop(){
+    const tabs=document.getElementById('shop-filters'), box=document.getElementById('products');
+    if (!CATS.length){ tabs.innerHTML=''; box.innerHTML = `<div class="products">${PRODUCTS.map(prodCard).join('')}</div>`; return; }
+    // only categories that have items
+    const deep = id => PRODUCTS.filter(p=>p.category_id==id).length + kids(id).reduce((n,c)=>n+PRODUCTS.filter(p=>p.category_id==c.id).length,0);
+    const mains = kids(null).filter(c=>deep(c.id));
+    const loose = PRODUCTS.filter(p=>!p.category_id || !CATS.some(c=>c.id==p.category_id));
+    if (!(shopMain==='other' && loose.length) && !mains.some(c=>c.id==shopMain)) shopMain = mains[0]?.id ?? (loose.length ? 'other' : null);
+    tabs.innerHTML = mains.map(c=>`<button data-main="${c.id}" class="${c.id==shopMain?'on':''}">${esc(c.name)}${c.name_en?` <span>${esc(c.name_en)}</span>`:''}</button>`).join('')
+      + (loose.length ? `<button data-main="other" class="${shopMain==='other'?'on':''}">වෙනත් <span>Other</span></button>` : '');
+    if (shopMain==='other'){ box.innerHTML = `<div class="products">${loose.map(prodCard).join('')}</div>`; return; }
+    const subs = kids(shopMain).filter(c=>PRODUCTS.some(p=>p.category_id==c.id));
+    const direct = PRODUCTS.filter(p=>p.category_id==shopMain);
+    if (shopSub!=='all' && !subs.some(c=>c.id==shopSub)) shopSub='all';
+    let html = subs.length>1 || (subs.length && direct.length) ? `<div class="sizes">
+        <button data-sub="all" class="${shopSub==='all'?'on':''}"><b>සියල්ල</b></button>
+        ${subs.map(c=>`<button data-sub="${c.id}" class="${c.id==shopSub?'on':''}"><b>${esc(bigLabel(c.name))}</b><small>${esc(c.name)}</small></button>`).join('')}
+      </div>` : '';
+    const groups = (shopSub==='all' ? subs : subs.filter(c=>c.id==shopSub)).map(c=>({c, items:PRODUCTS.filter(p=>p.category_id==c.id)}));
+    if (shopSub==='all' && direct.length) groups.push({c:null, items:direct});
+    html += groups.map(g=>`
+      ${g.c && groups.length>1 ? `<h3 class="shop-grp">${esc(g.c.name)}${g.c.note?` <small>${esc(g.c.note)}</small>`:''}</h3>` : ''}
+      <div class="products">${g.items.map(prodCard).join('')}</div>`).join('');
+    box.innerHTML = html;
+  }
+  document.getElementById('shop-filters').onclick = e => { const b=e.target.closest('[data-main]'); if(!b) return; shopMain = b.dataset.main==='other'?'other':+b.dataset.main; shopSub='all'; renderShop(); };
+  document.getElementById('products').onclick = e => { const b=e.target.closest('[data-sub]'); if(!b) return; shopSub = b.dataset.sub==='all'?'all':+b.dataset.sub; renderShop(); };
   async function loadLive(){
     if(!DB) return;
     try{
-      const [st, pr, pl, ph] = await Promise.all([
+      const [st, pr, pl, ph, ct] = await Promise.all([
         api('settings?id=eq.1&select=*').then(r=>r.ok?r.json():[]),
         api('products?select=*&in_stock=eq.true&order=sort.asc,created_at.desc').then(r=>r.ok?r.json():[]),
         api('prices?select=*&order=sort.asc,created_at.asc').then(r=>r.ok?r.json():[]),
         api('photos?select=*&order=created_at.desc').then(r=>r.ok?r.json():[]),
+        api('categories?select=*&order=sort.asc,id.asc').then(r=>r.ok?r.json():[]).catch(()=>[]),
       ]);
       const s = st[0];
       if (s){
@@ -756,13 +808,17 @@
         setCount('st-years', s.years); setCount('st-projects', s.projects); setCount('st-warranty', s.warranty);
       }
       if (pr.length){
-        PRODUCTS = pr;
-        const cats=[...new Set(pr.map(p=>p.category))];
-        const f=document.getElementById('shop-filters');
-        f.innerHTML = cats.length>1 ? ['all',...cats].map(c=>`<button data-c="${esc(c)}" class="${c==='all'?'on':''}">${c==='all'?'සියල්ල':esc(CAT[c]||c)}</button>`).join('') : '';
-        f.onclick=e=>{const b=e.target.closest('button'); if(!b) return; f.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); shopCat=b.dataset.c; renderShop();};
+        PRODUCTS = pr; CATS = Array.isArray(ct) ? ct : [];
         renderShop();
         document.getElementById('shop').hidden=false; document.getElementById('nav-shop').hidden=false;
+        // the 12" gutter panel takes its prices from the admin app
+        const g12 = pr.find(p=>p.model==='gutter12');
+        if (g12){
+          const box=document.querySelectorAll('.g12-prices > div');
+          if (g12.price!=null) box[0].querySelector('b').textContent = money(g12.price);
+          if (g12.fixing_price!=null) box[1].querySelector('b').textContent = money(g12.fixing_price);
+          if (g12.unit) box.forEach(d=>d.querySelector('em').textContent='/ '+g12.unit);
+        }
       }
       if (pl.length){
         document.getElementById('price-list').innerHTML = pl.map(x=>`
