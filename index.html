@@ -42,7 +42,7 @@
 
   /* Hero */
   .hero{position:relative;overflow:hidden;background:#fff}
-  .hero-photo{position:absolute;top:0;right:0;bottom:0;width:52%;background:url(images/house.jpg) center/cover no-repeat}
+  .hero-photo{position:absolute;top:0;right:0;bottom:0;width:52%;background:url(gallery/gutter-16.jpg) center/cover no-repeat}
   .hero-swoosh{position:absolute;top:0;bottom:0;left:40%;width:20%;height:100%;pointer-events:none}
   .hero .wrap{position:relative;z-index:2;min-height:620px;display:flex;align-items:center}
   .hero-text{max-width:560px;padding:50px 0 70px}
@@ -82,7 +82,7 @@
   .ph-item small{color:#bcd0ee;font-size:.82rem}
 
   /* Sections */
-  section{padding:92px 0}
+  section{padding:92px 0;scroll-margin-top:70px}
   .head{text-align:center;max-width:680px;margin:0 auto 52px}
   .kicker{color:var(--red);font-weight:700;letter-spacing:.16em;font-size:.8rem;text-transform:uppercase}
   .head h2{font-size:clamp(2.1rem,4vw,3rem);color:var(--blue);margin:8px 0 12px;font-family:"Noto Sans Sinhala";font-weight:800}
@@ -115,15 +115,24 @@
   .stat b{display:block;font-family:Oswald;font-size:2.6rem;line-height:1.1}
   .stat span{font-size:.88rem;color:#c3d4ee}
 
-  .gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:240px 240px;gap:16px}
-  .g{position:relative;border-radius:14px;overflow:hidden;background:var(--blue)}
-  .g:first-child{grid-row:span 2}
+  .filters{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:26px}
+  .filters button{font:inherit;font-family:"Noto Sans Sinhala";font-weight:700;border:2px solid var(--blue);background:#fff;color:var(--blue);padding:9px 18px;border-radius:40px;cursor:pointer}
+  .filters button span{font-family:Inter;font-weight:500;font-size:.78rem;opacity:.75;margin-left:4px}
+  .filters button.on,.filters button:hover{background:var(--blue);color:#fff}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .g{position:relative;border-radius:12px;overflow:hidden;background:#dde4ef;aspect-ratio:1/1;cursor:zoom-in;border:0;padding:0}
   .g img{width:100%;height:100%;object-fit:cover;transition:.4s}
-  .g:hover img{transform:scale(1.05)}
-  .g .cap{position:absolute;left:0;right:0;bottom:0;padding:16px 18px;color:#fff;font-weight:700;background:linear-gradient(transparent,rgba(5,40,90,.85))}
-  .g .cap small{display:block;color:#ffb3b5;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
-  .g.more{display:grid;place-items:center;text-align:center;color:#fff;padding:20px;background:linear-gradient(135deg,var(--red),var(--red-d))}
-  .g.more b{font-family:"Noto Sans Sinhala";font-weight:800;font-size:1.5rem;display:block}
+  .g:hover img{transform:scale(1.06)}
+  .g .tagc{position:absolute;left:8px;bottom:8px;background:rgba(5,40,90,.85);color:#fff;font-size:.72rem;font-weight:600;padding:3px 9px;border-radius:20px}
+  .g.ceiling .tagc{background:rgba(227,30,36,.9)}
+  .btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:var(--blue-d)}
+  .lb{position:fixed;inset:0;z-index:100;background:rgba(3,15,35,.94);display:none;align-items:center;justify-content:center}
+  .lb.open{display:flex}
+  .lb img{max-width:94vw;max-height:86vh;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .lb button{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;width:52px;height:52px;border-radius:50%;font-size:1.6rem;cursor:pointer}
+  .lb button:hover{background:var(--red)}
+  .lb .x{top:16px;right:16px}.lb .pv{left:14px;top:50%;transform:translateY(-50%)}.lb .nx{right:14px;top:50%;transform:translateY(-50%)}
+  .lb .cnt{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:#b8c9e4;font-size:.9rem}
 
   .contact{background:var(--blue-dd);color:#fff;position:relative;overflow:hidden}
   .contact::before{content:"";position:absolute;width:900px;height:900px;border-radius:50%;right:-420px;top:-360px;background:var(--blue);opacity:.6}
@@ -171,15 +180,15 @@
     .phones .lbl{justify-self:start}
     .services,.why-grid,.stats{grid-template-columns:1fr 1fr}
     .stat:nth-child(2){border-right:0}
-    .gallery{grid-template-columns:1fr 1fr;grid-template-rows:auto}
-    .g{height:220px}.g:first-child{grid-row:auto;grid-column:span 2;height:280px}
     .contact-grid{grid-template-columns:1fr}
   }
   @media (max-width:560px){
     .topbar .hide-sm{display:none}
     .brand img{height:40px}.brand-text{font-size:1.3rem}
     .services,.why-grid,.row2{grid-template-columns:1fr}
-    .gallery{grid-template-columns:1fr}.g:first-child{grid-column:auto}
+    .gallery{grid-template-columns:repeat(2,1fr);gap:8px}
+    .filters button{padding:7px 12px;font-size:.9rem}.filters button span{display:none}
+    .lb .pv,.lb .nx{top:auto;bottom:50px;transform:none}
     section{padding:66px 0}
     form,.c-card{padding:22px}
   }
@@ -189,7 +198,7 @@
 
 <!--
   WhatsApp number: PHONE variable in the <script> at the bottom.
-  Photos and logo are in the images/ folder.
+  Logo: images/ folder. Work photos: gallery/ (full size) and gallery/thumbs/ (small).
 -->
 
 <div class="topbar">
@@ -271,7 +280,7 @@
     </div>
     <div class="services">
       <div class="svc">
-        <div class="img" style="background-image:url(images/house.jpg)"></div>
+        <div class="img" style="background-image:url(gallery/thumbs/gutter-13.jpg)"></div>
         <div class="body">
           <h3>අමානෝ වැහිපීලි සවිකිරීම</h3>
           <div class="en">Amano Gutter Installation</div>
@@ -279,7 +288,7 @@
         </div>
       </div>
       <div class="svc">
-        <div class="img"><div class="svc-ico"><svg viewBox="0 0 64 64"><path d="M6 20h52v6a8 8 0 0 1-8 8H14a8 8 0 0 1-8-8z"/><path d="M46 34v22"/><path d="M22 40v3M22 49v3"/><path d="M30 6l12 12-6 6-12-12z"/></svg></div></div>
+        <div class="img" style="background-image:url(gallery/thumbs/gutter-05.jpg)"><div class="svc-ico" style="display:none"><svg viewBox="0 0 64 64"><path d="M6 20h52v6a8 8 0 0 1-8 8H14a8 8 0 0 1-8-8z"/><path d="M46 34v22"/><path d="M22 40v3M22 49v3"/><path d="M30 6l12 12-6 6-12-12z"/></svg></div></div>
         <div class="body">
           <h3>අමානෝ වැහිපීලි අලුත්වැඩියාව</h3>
           <div class="en">Gutter Repairs</div>
@@ -287,7 +296,7 @@
         </div>
       </div>
       <div class="svc">
-        <div class="img" style="background-image:url(images/ceiling-1.jpg)"></div>
+        <div class="img" style="background-image:url(gallery/thumbs/ceiling-46.jpg)"></div>
         <div class="body">
           <h3>අයි පැනල් සිවිලිම</h3>
           <div class="en">i-Panel Ceiling</div>
@@ -295,7 +304,7 @@
         </div>
       </div>
       <div class="svc">
-        <div class="img" style="background-image:url(images/roof.jpg)"></div>
+        <div class="img" style="background-image:url(gallery/thumbs/gutter-08.jpg)"></div>
         <div class="body">
           <h3>යකඩ වහල</h3>
           <div class="en">Iron / Metal Roofing</div>
@@ -347,13 +356,13 @@
       <h2>අපේ වැඩ</h2>
       <div class="bar"></div>
     </div>
-    <div class="gallery">
-      <div class="g"><img src="images/house.jpg" alt="Amano gutters on a two-storey house" loading="lazy"><div class="cap"><small>Gutters</small>අමානෝ වැහිපීලි</div></div>
-      <div class="g"><img src="images/ceiling-1.jpg" alt="i-Panel ceiling with chandelier" loading="lazy"><div class="cap"><small>Ceiling</small>අයි පැනල් සිවිලිම</div></div>
-      <div class="g"><img src="images/ceiling-2.jpg" alt="Wooden i-Panel ceiling in a living room" loading="lazy"><div class="cap"><small>Ceiling</small>Living room ceiling</div></div>
-      <div class="g"><img src="images/roof.jpg" alt="Red metal roofing" loading="lazy"><div class="cap"><small>Roofing</small>යකඩ වහල</div></div>
-      <a class="g more js-wa" href="#"><div><b>ඔබේ ගෙදරටත්?</b>WhatsApp us for a free quote →</div></a>
+    <div class="filters" role="tablist">
+      <button class="on" data-f="all">සියල්ල <span>All</span></button>
+      <button data-f="gutter">වැහිපීලි / වහල <span>Gutters &amp; Roofing</span></button>
+      <button data-f="ceiling">සිවිලිම් <span>Ceilings</span></button>
     </div>
+    <div class="gallery" id="gallery"></div>
+    <div style="text-align:center;margin-top:26px"><button class="btn btn-blue" id="more">තව පින්තූර · Show more</button></div>
   </div>
 </section>
 
@@ -376,8 +385,6 @@
           <div><small>Main Shop</small><a href="https://www.google.com/maps/search/?api=1&query=Weediyawatta+Junction+Udugampola" target="_blank" rel="noopener">Weediyawatta Junction, Udugampola</a></div></div>
         <div class="c-row"><div class="i"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11.5 2.5 2.5 0 0 0 12 6.5z"/></svg></div>
           <div><small>Branch</small><a href="https://www.google.com/maps/search/?api=1&query=Airport+Road+Unnaruwa+Minuwangoda" target="_blank" rel="noopener">Airport Road, Unnaruwa, Minuwangoda</a></div></div>
-        <div class="c-row"><div class="i"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11.5 2.5 2.5 0 0 0 12 6.5z"/></svg></div>
-          <div><small>Address · ලිපිනය</small><a href="https://www.google.com/maps/search/?api=1&query=357%2F2+Peellawatta%2C+Yatiyana%2C+Minuwangoda" target="_blank" rel="noopener">357/2, Peellawatta, Yatiyana, Minuwangoda</a></div></div>
         <div class="c-row"><div class="i"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm1 5h-2v6l5 3 1-1.7-4-2.3z"/></svg></div>
           <div><small>Hours · වේලාවන්</small>Tue – Sun · 8.30 AM – 5.30 PM<br><span class="si" style="color:#ff8a8e;font-weight:700">සඳුදා වසා ඇත · Closed on Mondays</span></div></div>
       </div>
@@ -412,6 +419,14 @@
   </div>
 </footer>
 
+<div class="lb" id="lb" aria-hidden="true">
+  <img id="lbimg" alt="">
+  <button class="x" aria-label="Close">✕</button>
+  <button class="pv" aria-label="Previous">‹</button>
+  <button class="nx" aria-label="Next">›</button>
+  <div class="cnt" id="lbcnt"></div>
+</div>
+
 <a href="#" class="wa-float js-wa" aria-label="WhatsApp">
   <svg viewBox="0 0 32 32"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3zm0 23.6a10.6 10.6 0 0 1-5.4-1.5l-.4-.2-3.9 1 1-3.8-.2-.4A10.6 10.6 0 1 1 16 26.6zm5.8-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a8.7 8.7 0 0 1-4.3-3.8c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.6 3.6 0 0 0-1.100 2.7 6.3 6.3 0 0 0 1.3 3.3 14.4 14.4 0 0 0 5.5 4.9c2 .9 2.8.9 3.9.8a3.3 3.3 0 0 0 2.1-1.5 2.7 2.7 0 0 0 .2-1.5c-.1-.2-.3-.3-.6-.4z"/></svg>
 </a>
@@ -422,6 +437,46 @@
 
   document.getElementById('yr').textContent = new Date().getFullYear();
   document.querySelectorAll('.js-wa').forEach(a => { a.href = 'https://wa.me/' + PHONE; a.target = '_blank'; a.rel = 'noopener'; });
+
+  // ---------- Gallery ----------
+  const PHOTOS = [
+    ...Array.from({length:39},(_,i)=>({f:'gutter-'+String(i+1).padStart(2,'0')+'.jpg',c:'gutter'})),
+    ...Array.from({length:51},(_,i)=>({f:'ceiling-'+String(i+1).padStart(2,'0')+'.jpg',c:'ceiling'})),
+  ];
+  const LABEL = {gutter:'වැහිපීලි / වහල', ceiling:'සිවිලිම'};
+  const PAGE = 16;
+  const gal = document.getElementById('gallery'), moreBtn = document.getElementById('more');
+  let filter = 'all', shown = PAGE, list = [];
+  function render(){
+    list = filter==='all' ? interleave() : PHOTOS.filter(p=>p.c===filter);
+    gal.innerHTML = list.slice(0,shown).map((p,i)=>
+      `<button class="g ${p.c}" data-i="${i}" aria-label="${LABEL[p.c]} photo ${i+1}"><img src="gallery/thumbs/${p.f}" alt="${LABEL[p.c]} - A.D. Engineering" loading="lazy" decoding="async"><span class="tagc si">${LABEL[p.c]}</span></button>`).join('');
+    moreBtn.style.display = shown < list.length ? '' : 'none';
+  }
+  function interleave(){ // mix gutters and ceilings
+    const g0=PHOTOS.filter(p=>p.c==='gutter'), g=g0.slice(11).concat(g0.slice(0,11)), c=PHOTOS.filter(p=>p.c==='ceiling'), r=[];
+    for(let i=0;i<Math.max(g.length,c.length);i++){ if(g[i]) r.push(g[i]); if(c[i]) r.push(c[i]); }
+    return r;
+  }
+  document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.filters button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); filter=b.dataset.f; shown=PAGE; render();
+  });
+  moreBtn.onclick=()=>{ shown+=PAGE; render(); };
+
+  const lb=document.getElementById('lb'), lbimg=document.getElementById('lbimg'), lbcnt=document.getElementById('lbcnt');
+  let cur=0;
+  const show=i=>{ cur=(i+list.length)%list.length; lbimg.src='gallery/'+list[cur].f; lbcnt.textContent=(cur+1)+' / '+list.length; };
+  gal.onclick=e=>{ const b=e.target.closest('.g'); if(!b) return; show(+b.dataset.i); lb.classList.add('open'); };
+  lb.querySelector('.x').onclick=()=>lb.classList.remove('open');
+  lb.querySelector('.pv').onclick=()=>show(cur-1);
+  lb.querySelector('.nx').onclick=()=>show(cur+1);
+  lb.onclick=e=>{ if(e.target===lb) lb.classList.remove('open'); };
+  document.addEventListener('keydown',e=>{ if(!lb.classList.contains('open')) return;
+    if(e.key==='Escape') lb.classList.remove('open'); if(e.key==='ArrowLeft') show(cur-1); if(e.key==='ArrowRight') show(cur+1); });
+  let sx=0; lb.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+  lb.addEventListener('touchend',e=>{ const d=e.changedTouches[0].clientX-sx; if(Math.abs(d)>50) show(cur+(d<0?1:-1)); });
+  render();
 
   document.getElementById('quote').addEventListener('submit', e => {
     e.preventDefault();
