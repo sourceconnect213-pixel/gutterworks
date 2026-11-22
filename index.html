@@ -215,33 +215,20 @@
   @media (max-width:860px){.owner-grid{grid-template-columns:1fr;gap:40px;text-align:center}.owner-photo img{max-width:280px}.owner-txt p{margin-left:auto;margin-right:auto}.owner-txt .btns{justify-content:center}.owner-badge{width:96px;height:96px;right:0}}
 
   /* 12" gutter 3D */
-  .g12{background:linear-gradient(180deg,#fff,var(--bg))}
-  .g12-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:28px;align-items:center}
-  .g12-view{position:relative;border-radius:18px;overflow:hidden;background:radial-gradient(circle at 50% 35%,#ffffff,#e3eaf5 70%);box-shadow:0 18px 40px rgba(11,78,162,.14);aspect-ratio:4/3}
+  .m3d{position:fixed;inset:0;z-index:120;background:rgba(3,15,35,.72);display:none;align-items:center;justify-content:center;padding:16px}
+  .m3d.open{display:flex}
+  .m3d-box{position:relative;width:min(920px,100%);height:min(640px,88vh);border-radius:18px;overflow:hidden;background:radial-gradient(circle at 50% 35%,#ffffff,#e3eaf5 70%);box-shadow:0 30px 70px rgba(0,0,0,.45);animation:fadeUp .35s both}
+  .m3d-head{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;pointer-events:none}
+  .m3d-head b{font-family:Oswald;font-size:1.4rem;color:var(--blue);background:rgba(255,255,255,.85);padding:4px 12px;border-radius:10px}
+  .m3d-x{pointer-events:auto;width:44px;height:44px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:1.2rem;cursor:pointer}
   .g3d{position:absolute;inset:0;touch-action:none;cursor:grab}
   .g3d:active{cursor:grabbing}
   .g3d canvas{width:100%!important;height:100%!important;display:block}
   .g3d-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-weight:600;pointer-events:none}
   .g3d-btns{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-  .g3d-btns button{font:inherit;font-family:"Noto Sans Sinhala",Inter;font-weight:700;font-size:.82rem;background:rgba(255,255,255,.92);color:var(--blue);border:1.5px solid #c9d6ea;padding:7px 13px;border-radius:30px;cursor:pointer;backdrop-filter:blur(4px)}
+  .g3d-btns button{font:inherit;font-family:"Noto Sans Sinhala",Inter;font-weight:700;font-size:.82rem;background:rgba(255,255,255,.92);color:var(--blue);border:1.5px solid #c9d6ea;padding:7px 13px;border-radius:30px;cursor:pointer}
   .g3d-btns button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
-  .g12-info{background:#fff;border-radius:18px;padding:28px;box-shadow:0 10px 30px rgba(11,78,162,.09)}
-  .g12-tag{display:inline-block;background:#fde5e6;color:var(--red);font-weight:700;font-size:.75rem;letter-spacing:.06em;padding:4px 10px;border-radius:20px;text-transform:uppercase}
-  .g12-info h3{font-size:2rem;color:var(--blue);margin:10px 0 14px}
-  .g12-info h3 .si{font-size:1.25rem;color:var(--ink);font-weight:800}
-  .g12-spec{list-style:none;margin-bottom:18px}
-  .g12-spec li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.92rem}
-  .g12-spec span{color:var(--muted)}
-  .sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px;border:1px solid rgba(0,0,0,.15)}
-  .g12-prices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
-  .g12-prices div{border-radius:14px;padding:14px;text-align:center;background:var(--bg)}
-  .g12-prices div:first-child{background:linear-gradient(135deg,var(--blue),var(--blue-d));color:#fff}
-  .g12-prices div:last-child{background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff}
-  .g12-prices small{display:block;font-family:"Noto Sans Sinhala";font-weight:700;opacity:.9}
-  .g12-prices b{display:block;font-family:Oswald;font-size:2.1rem;line-height:1.1}
-  .g12-prices em{font-style:normal;font-size:.78rem;opacity:.85}
-  @media (max-width:980px){.g12-grid{grid-template-columns:1fr}}
-  @media (max-width:560px){.g12-view{aspect-ratio:4/5}.g3d-btns{gap:6px}.g3d-btns button{padding:6px 10px;font-size:.76rem}.g12-info{padding:20px}.g12-prices b{font-size:1.8rem}}
+  @media (max-width:560px){.m3d{padding:0}.m3d-box{height:100%;border-radius:0}.g3d-btns button{padding:6px 10px;font-size:.76rem}}
 
   /* Shop + price list */
   .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px}
@@ -259,7 +246,9 @@
   .pprices b{font-family:Oswald;font-size:1.3rem;color:var(--red);line-height:1.2}
   .pprices .fx b{color:var(--blue)}
   .pprices em{font-style:normal;font-size:.72rem;color:var(--muted);margin-left:3px}
-  .pbtns{display:flex;gap:8px;margin-top:10px}
+  .pbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .pbtns .order{white-space:nowrap;min-width:120px}
+  .pbtns button.order{font-family:inherit;font-weight:700}
   .prod .order{flex:1;justify-content:center;padding:10px 12px;font-size:.88rem}
   .sizes{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:-6px 0 24px}
   .sizes button{font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:82px;padding:8px 14px;border-radius:12px;
@@ -366,7 +355,6 @@
         <li><a href="#services">සේවා</a></li>
         <li><a href="#why">ඇයි අපි?</a></li>
         <li><a href="#owner">අයිතිකරු</a></li>
-        <li><a href="#gutter12">12" Gutter</a></li>
         <li id="nav-shop" hidden><a href="#shop">භාණ්ඩ</a></li>
         <li id="nav-prices" hidden><a href="#prices">මිල ගණන්</a></li>
         <li><a href="#projects">අපේ වැඩ</a></li>
@@ -517,46 +505,6 @@
   </div>
 </section>
 
-<section id="gutter12" class="g12">
-  <div class="wrap">
-    <div class="head reveal">
-      <span class="kicker">New · 3D View</span>
-      <h2>12" වැහිපීලි</h2>
-      <p class="si">ඇඟිල්ලෙන් කරකවලා හැම පැත්තෙන්ම බලන්න · Drag to rotate, pinch to zoom</p>
-      <div class="bar"></div>
-    </div>
-    <div class="g12-grid reveal">
-      <div class="g12-view">
-        <div id="g3d" class="g3d" aria-label="12 inch gutter 3D model"></div>
-        <div class="g3d-loading" id="g3d-loading">3D model loading…</div>
-        <div class="g3d-btns">
-          <button id="g3d-rot" class="on">⟳ කරකවන්න</button>
-          <button id="g3d-end">◧ හරස්කඩ</button>
-          <button id="g3d-dim" class="on">📏 මිනුම්</button>
-          <button id="g3d-reset">↺</button>
-        </div>
-      </div>
-      <div class="g12-info">
-        <span class="g12-tag">Amano · Colour coated</span>
-        <h3>12" Box Gutter<br><span class="si">12" අමානෝ වැහිපීලි</span></h3>
-        <ul class="g12-spec" id="g12-spec">
-          <li><span>තහඩු පළල · Sheet width</span><b>12"</b></li>
-          <li><span>පිට පාට · Outside</span><b><i class="sw" style="background:#9b3640"></i>Maroon</b></li>
-          <li><span>ඇතුළත · Inside</span><b><i class="sw" style="background:#c9d1d8"></i>Galvalume</b></li>
-        </ul>
-        <div class="g12-prices">
-          <div><small>විකුණුම් මිල</small><b>Rs. 275</b><em>/ අඩියක් · per ft</em></div>
-          <div><small>සවි කිරීමේ මිල</small><b>Rs. 500</b><em>/ අඩියක් · per ft</em></div>
-        </div>
-        <div class="btns">
-          <a class="btn btn-wa js-wa-g12" href="#" target="_blank" rel="noopener">WhatsApp ඇණවුම</a>
-          <a class="btn btn-red" href="tel:+94764493749">📞 අමතන්න</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section id="shop" class="why" hidden>
   <div class="wrap">
     <div class="head reveal">
@@ -651,6 +599,20 @@
     <span class="si">වැහිපීලි · සිවිලිම් · යකඩ වහල</span>
   </div>
 </footer>
+
+<div class="m3d" id="m3d" role="dialog" aria-modal="true" aria-label="3D view">
+  <div class="m3d-box">
+    <div class="m3d-head"><b id="m3d-title">3D</b><button class="m3d-x" id="m3d-x" aria-label="Close">✕</button></div>
+    <div id="g3d" class="g3d"></div>
+    <div class="g3d-loading" id="g3d-loading">3D model loading…</div>
+    <div class="g3d-btns">
+      <button id="g3d-rot" class="on">⟳ කරකවන්න</button>
+      <button id="g3d-end">◧ හරස්කඩ</button>
+      <button id="g3d-dim" class="on">📏 මිනුම්</button>
+      <button id="g3d-reset">↺</button>
+    </div>
+  </div>
+</div>
 
 <div class="lb" id="lb" aria-hidden="true">
   <img id="lbimg" alt="">
@@ -792,7 +754,7 @@
             ${has(p.fixing_price)?`<div class="fx"><small>සවි කිරීමේ මිල</small><b>${money(p.fixing_price)}</b>${p.unit?`<em>/ ${esc(p.unit)}</em>`:''}</div>`:''}
           </div>
           <div class="pbtns">
-            ${p.model==='gutter12'?`<a class="btn btn-blue order" href="#gutter12">🧊 3D බලන්න</a>`:''}
+            ${p.model==='gutter12'?`<button type="button" class="btn btn-blue order js-3d" data-name="${esc(p.name)}">🧊 3D බලන්න</button>`:''}
             <a class="btn btn-wa order" target="_blank" rel="noopener" href="https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name+(p.size?' ('+p.size+')':''))}">WhatsApp ඇණවුම</a>
           </div>
         </div>
@@ -849,14 +811,6 @@
         PRODUCTS = pr; CATS = Array.isArray(ct) ? ct : [];
         renderShop();
         document.getElementById('shop').hidden=false; document.getElementById('nav-shop').hidden=false;
-        // the 12" gutter panel takes its prices from the admin app
-        const g12 = pr.find(p=>p.model==='gutter12');
-        if (g12){
-          const box=document.querySelectorAll('.g12-prices > div');
-          if (g12.price!=null) box[0].querySelector('b').textContent = money(g12.price);
-          if (g12.fixing_price!=null) box[1].querySelector('b').textContent = money(g12.fixing_price);
-          if (g12.unit) box.forEach(d=>d.querySelector('em').textContent='/ '+g12.unit);
-        }
       }
       if (pl.length){
         document.getElementById('price-list').innerHTML = pl.map(x=>`
@@ -875,29 +829,30 @@
 </script>
 <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/"}}</script>
 <script type="module">
-  import { mountGutter } from './gutter3d.js';
-  const box = document.getElementById('g3d');
+  // 3D view opens in a popup from an item's "3D බලන්න" button
   const $ = id => document.getElementById(id);
+  const modal = $('m3d');
   let g = null;
-  const start = () => {
-    if (g) return;
+  async function open3d(name){
+    $('m3d-title').textContent = name || '3D';
+    modal.classList.add('open'); document.body.style.overflow = 'hidden';
+    if (g) { g.reset(); $('g3d-rot').classList.add('on'); return; }
     try {
-      g = mountGutter(box);
+      const { mountGutter } = await import('./gutter3d.js');
+      g = mountGutter($('g3d'));
       $('g3d-loading').remove();
-      const spec = $('g12-spec');
-      spec.insertAdjacentHTML('beforeend', `<li><span>පළල · Width</span><b>≈ ${g.width.toFixed(1)}"</b></li><li><span>උස · Height</span><b>≈ ${g.height.toFixed(1)}"</b></li>`);
       $('g3d-rot').onclick = e => e.currentTarget.classList.toggle('on', g.toggleRotate());
       $('g3d-end').onclick = () => { g.endView(); $('g3d-rot').classList.remove('on'); };
       $('g3d-dim').onclick = e => e.currentTarget.classList.toggle('on', g.toggleDims());
       $('g3d-reset').onclick = () => { g.reset(); $('g3d-rot').classList.add('on'); };
-      box.addEventListener('gutter:auto', () => $('g3d-rot').classList.remove('on'));
+      $('g3d').addEventListener('gutter:auto', () => $('g3d-rot').classList.remove('on'));
     } catch (err) { $('g3d-loading').textContent = '3D not supported on this device'; console.warn(err); }
-  };
-  // load the 3D model only when the section comes near the screen
-  new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { start(); o.disconnect(); } }, { rootMargin: '300px' }).observe(box);
-  const wa = document.querySelector('.js-wa-g12');
-  const setWa = () => wa.href = 'https://wa.me/' + (window.AD_PHONE || '94764493749') + '?text=' + encodeURIComponent('Hello A.D. Engineering, I want to order 12" gutter (Rs. 275/ft, fixing Rs. 500/ft).');
-  setWa(); window.addEventListener('ad:phone', setWa);
+  }
+  const close3d = () => { modal.classList.remove('open'); document.body.style.overflow = ''; };
+  document.addEventListener('click', e => { const b = e.target.closest('.js-3d'); if (b) open3d(b.dataset.name); });
+  $('m3d-x').onclick = close3d;
+  modal.addEventListener('click', e => { if (e.target === modal) close3d(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) close3d(); });
 </script>
 </body>
 </html>
