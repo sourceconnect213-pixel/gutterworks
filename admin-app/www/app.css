@@ -128,3 +128,11 @@ main{padding:14px 12px}
 .spin{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .loading{text-align:center;padding:30px;color:var(--muted)}
+
+/* show / hide password */
+.pw-wrap{position:relative;display:block}
+.pw-wrap input{padding-right:48px}
+.pw-eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);margin-top:2px;width:40px;height:40px;border-radius:8px;font-size:1.15rem;opacity:.55}
+.pw-eye.on{opacity:1}
+.pw-show{display:flex;align-items:center;gap:8px;font-weight:500;color:var(--muted);margin-top:-4px}
+.pw-show input{width:auto;margin:0;transform:scale(1.2)}

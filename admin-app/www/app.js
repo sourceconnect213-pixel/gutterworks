@@ -62,6 +62,14 @@
   const removeFiles = paths => { paths = paths.filter(Boolean); return paths.length ? sb.storage.from('photos').remove(paths) : null; };
 
   // ---------- auth ----------
+  const setPwVisible = on => {
+    $('#l-pass').type = on ? 'text' : 'password';
+    $('#pw-show').checked = on; $('#pw-eye').classList.toggle('on', on);
+    $('#pw-eye').textContent = on ? '🙈' : '👁';
+    $('#pw-eye').setAttribute('aria-label', on ? 'Hide password' : 'Show password');
+  };
+  $('#pw-eye').onclick = () => setPwVisible($('#l-pass').type === 'password');
+  $('#pw-show').onchange = e => setPwVisible(e.target.checked);
   $('#login-form').onsubmit = async e => {
     e.preventDefault();
     const btn = e.target.querySelector('button'); btn.disabled = true; $('#l-err').textContent = '';

@@ -17,7 +17,8 @@
     <p class="sub">Admin · පරිපාලක</p>
     <form id="login-form">
       <label>Email<input id="l-email" type="email" autocomplete="username" required></label>
-      <label>Password · මුරපදය<input id="l-pass" type="password" autocomplete="current-password" required></label>
+      <label>Password · මුරපදය<span class="pw-wrap"><input id="l-pass" type="password" autocomplete="current-password" required><button type="button" class="pw-eye" id="pw-eye" aria-label="Show password">👁</button></span></label>
+      <label class="pw-show"><input type="checkbox" id="pw-show"> Password පෙන්වන්න · Show password</label>
       <button class="btn primary block" type="submit">ඇතුල් වන්න · Login</button>
       <p class="err" id="l-err"></p>
     </form>
