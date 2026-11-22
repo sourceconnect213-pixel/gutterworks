@@ -3,287 +3,300 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A.D Engineering | Gutter Works, Ceiling & Iron Works</title>
-<meta name="description" content="A.D Engineering - Professional gutter works, ceiling works and iron works in Sri Lanka. පීලි, සිවිලිම් සහ යකඩ වැඩ.">
+<title>A.D. Engineering | Amano Gutters, i-Panel Ceiling & Iron Roofing</title>
+<meta name="description" content="A.D. Engineering — අමානෝ වැහිපීලි සවිකිරීම, අලුත්වැඩියාව, අයි පැනල් සිවිලිම, යකඩ වහල. Udugampola & Minuwangoda. Call 076 449 3749 / 075 535 0030.">
+<link rel="icon" href="images/logo-mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Inter:wght@400;500;600&family=Noto+Sans+Sinhala:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --steel:#1c2228;
-    --steel-2:#2a323a;
-    --iron:#3b444d;
-    --orange:#f26b1d;
-    --orange-d:#d4570f;
-    --paper:#f4f2ee;
-    --ink:#14181c;
-    --muted:#6b7480;
+    --blue:#0b4ea2; --blue-d:#073a7c; --blue-dd:#05285a;
+    --red:#e31e24; --red-d:#b8141a;
+    --ink:#15181d; --muted:#5d6672; --line:#e3e7ee; --bg:#f5f7fb;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
-  body{font-family:"Inter","Noto Sans Sinhala",sans-serif;color:var(--ink);background:var(--paper);line-height:1.6}
+  body{font-family:"Inter","Noto Sans Sinhala",sans-serif;color:var(--ink);background:#fff;line-height:1.6}
   .si{font-family:"Noto Sans Sinhala",sans-serif}
-  h1,h2,h3{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.02em;line-height:1.05}
+  h1,h2,h3{font-family:"Oswald","Noto Sans Sinhala",sans-serif;line-height:1.1}
   a{color:inherit;text-decoration:none}
-  .wrap{max-width:1150px;margin:0 auto;padding:0 22px}
+  img{display:block;max-width:100%}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
 
   /* Header */
-  header{position:sticky;top:0;z-index:50;background:rgba(28,34,40,.96);backdrop-filter:blur(6px);color:#fff;border-bottom:3px solid var(--orange)}
-  .nav{display:flex;align-items:center;justify-content:space-between;height:68px}
-  .logo{display:flex;align-items:center;gap:10px;font-family:"Barlow Condensed";font-weight:800;font-size:1.6rem;letter-spacing:.04em}
-  .logo-mark{width:38px;height:38px;background:var(--orange);display:grid;place-items:center;clip-path:polygon(0 0,100% 0,100% 70%,70% 100%,0 100%);font-size:1.1rem;color:var(--steel)}
-  .logo small{display:block;font-size:.7rem;font-family:Inter;font-weight:500;letter-spacing:.18em;color:#aab3bc;margin-top:-4px}
-  nav ul{display:flex;gap:26px;list-style:none;font-weight:500;font-size:.95rem}
-  nav a:hover{color:var(--orange)}
-  .menu-btn{display:none;background:none;border:0;color:#fff;font-size:1.7rem;cursor:pointer}
+  .topbar{background:var(--blue-dd);color:#cfdcf0;font-size:.85rem}
+  .topbar .wrap{display:flex;justify-content:space-between;gap:12px;padding-top:7px;padding-bottom:7px;flex-wrap:wrap}
+  .topbar b{color:#fff}
+  header{position:sticky;top:0;z-index:50;background:#fff;box-shadow:0 2px 14px rgba(11,78,162,.12)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:78px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand img{height:50px;width:auto}
+  .brand-text{font-family:Oswald;font-weight:700;font-size:1.65rem;line-height:1}
+  .brand-text .r{color:var(--red)} .brand-text .b{color:var(--blue)}
+  .brand-text small{display:block;font-family:Inter;font-weight:600;font-size:.62rem;letter-spacing:.32em;color:#444;margin-top:4px}
+  nav ul{display:flex;gap:28px;list-style:none;font-weight:600;font-size:.95rem;align-items:center}
+  nav a:hover{color:var(--blue)}
+  nav .call{background:var(--red);color:#fff;padding:10px 18px;border-radius:40px}
+  nav .call:hover{background:var(--red-d);color:#fff}
+  .menu-btn{display:none;background:none;border:0;color:var(--blue);font-size:1.9rem;cursor:pointer}
 
   /* Hero */
-  .hero{position:relative;background:var(--steel);color:#fff;overflow:hidden}
-  .hero::before{content:"";position:absolute;inset:0;
-    background:
-      repeating-linear-gradient(90deg,transparent 0 58px,rgba(255,255,255,.035) 58px 60px),
-      linear-gradient(115deg,var(--steel) 45%,var(--steel-2) 45%);}
-  .hero .wrap{position:relative;display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center;padding-top:90px;padding-bottom:110px}
-  .tag{display:inline-block;background:var(--orange);color:var(--steel);font-weight:600;font-size:.8rem;letter-spacing:.15em;padding:6px 12px;text-transform:uppercase;margin-bottom:22px}
-  .hero h1{font-size:clamp(2.8rem,6vw,5rem);font-weight:800}
-  .hero h1 span{color:var(--orange)}
-  .hero p.si{font-size:1.15rem;color:#cfd6dc;margin:20px 0 10px}
-  .hero p.en{color:#9aa4ad;max-width:520px}
-  .btns{display:flex;gap:14px;flex-wrap:wrap;margin-top:32px}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;font-weight:600;border:2px solid var(--orange);transition:.2s}
-  .btn-primary{background:var(--orange);color:var(--steel)}
-  .btn-primary:hover{background:var(--orange-d);border-color:var(--orange-d)}
-  .btn-ghost{color:#fff}
-  .btn-ghost:hover{background:rgba(242,107,29,.12)}
+  .hero{position:relative;overflow:hidden;background:#fff}
+  .hero-photo{position:absolute;top:0;right:0;bottom:0;width:52%;background:url(images/house.jpg) center/cover no-repeat}
+  .hero-swoosh{position:absolute;top:0;bottom:0;left:40%;width:20%;height:100%;pointer-events:none}
+  .hero .wrap{position:relative;z-index:2;min-height:620px;display:flex;align-items:center}
+  .hero-text{max-width:560px;padding:50px 0 70px}
+  .hero-logo{width:220px;margin-bottom:4px}
+  .hero h1{font-size:clamp(2.8rem,6vw,4.6rem);font-weight:700;color:var(--red);text-shadow:2px 3px 0 rgba(0,0,0,.08)}
+  .checks{list-style:none;margin:16px 0 28px}
+  .checks li{display:flex;align-items:center;gap:14px;font-family:"Noto Sans Sinhala";font-weight:800;font-size:clamp(1.15rem,2.4vw,1.55rem);padding:5px 0}
+  .tick{flex:none;width:30px;height:30px;border:3px solid var(--red);border-radius:50%;position:relative}
+  .tick::after{content:"";position:absolute;left:8px;top:2px;width:7px;height:14px;border:solid var(--red);border-width:0 4px 4px 0;transform:rotate(45deg)}
+  .btns{display:flex;gap:12px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:40px;font-weight:700;font-size:1rem;transition:.2s;border:0;cursor:pointer;font-family:inherit}
+  .btn-red{background:var(--red);color:#fff;box-shadow:0 8px 20px rgba(227,30,36,.3)}
+  .btn-red:hover{background:var(--red-d)}
+  .btn-wa{background:#25d366;color:#fff}
+  .btn-wa:hover{background:#1eb858}
 
-  /* Hero illustration: gutter + roof line */
-  .hero-art{position:relative;aspect-ratio:1/1;max-width:440px;justify-self:end;width:100%}
-  .hero-art svg{width:100%;height:100%}
+  .badge{position:absolute;z-index:3;right:5%;bottom:40px;width:170px;height:170px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#ff4a4f,var(--red) 45%,var(--red-d));
+    border:7px solid #fff;outline:3px solid #c9ced6;box-shadow:0 14px 30px rgba(0,0,0,.3);
+    color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Oswald;font-weight:700;line-height:.95}
+  .badge .stars{font-size:.8rem;letter-spacing:.3em}
+  .badge .num{font-size:3.6rem}
+  .badge .yr{font-size:1.45rem}
+  .badge .w{font-size:.95rem;letter-spacing:.08em}
 
-  .stats{position:relative;margin-top:-50px;z-index:5}
-  .stats .wrap{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;box-shadow:0 20px 40px rgba(0,0,0,.12)}
-  .stat{padding:26px 20px;text-align:center;border-right:1px solid #e6e3dd}
-  .stat:last-child{border-right:0}
-  .stat b{display:block;font-family:"Barlow Condensed";font-size:2.4rem;color:var(--orange)}
-  .stat span{font-size:.88rem;color:var(--muted)}
+  /* Phone strip */
+  .phones{background:linear-gradient(90deg,var(--blue-d),var(--blue));color:#fff}
+  .phones .wrap{display:grid;grid-template-columns:auto 1fr 1fr;gap:30px;align-items:center;padding-top:26px;padding-bottom:26px}
+  .phones .lbl{font-family:"Noto Sans Sinhala";font-weight:800;font-size:1.25rem;background:var(--red);padding:10px 20px;border-radius:40px}
+  .ph-item{display:flex;align-items:center;gap:14px}
+  .ph-ico{flex:none;width:52px;height:52px;border-radius:50%;background:#fff;display:grid;place-items:center}
+  .ph-ico svg{width:26px;height:26px;fill:var(--blue)}
+  .ph-item b{font-weight:800;font-size:clamp(1.5rem,3vw,2.1rem);display:block;line-height:1.1}
+  .ph-item small{color:#bcd0ee;font-size:.82rem}
 
-  section{padding:96px 0}
-  .head{max-width:640px;margin-bottom:50px}
-  .head .kicker{color:var(--orange);font-weight:600;letter-spacing:.18em;font-size:.8rem;text-transform:uppercase}
-  .head h2{font-size:clamp(2.2rem,4vw,3.2rem);margin:8px 0 12px}
+  /* Sections */
+  section{padding:92px 0}
+  .head{text-align:center;max-width:680px;margin:0 auto 52px}
+  .kicker{color:var(--red);font-weight:700;letter-spacing:.16em;font-size:.8rem;text-transform:uppercase}
+  .head h2{font-size:clamp(2.1rem,4vw,3rem);color:var(--blue);margin:8px 0 12px;font-family:"Noto Sans Sinhala";font-weight:800}
   .head p{color:var(--muted)}
+  .bar{width:70px;height:4px;background:var(--red);margin:14px auto 0;border-radius:4px}
 
-  /* Services */
-  .services{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-  .svc{background:#fff;padding:34px 30px;border-top:4px solid var(--steel);transition:.25s;position:relative}
-  .svc:hover{border-top-color:var(--orange);transform:translateY(-4px);box-shadow:0 18px 36px rgba(0,0,0,.08)}
-  .svc .ico{width:58px;height:58px;background:var(--steel);display:grid;place-items:center;margin-bottom:22px}
-  .svc .ico svg{width:30px;height:30px;stroke:var(--orange);fill:none;stroke-width:2}
-  .svc h3{font-size:1.7rem}
-  .svc .si-title{color:var(--orange);font-weight:600;margin-bottom:12px}
-  .svc ul{list-style:none;margin-top:16px}
-  .svc li{padding:6px 0 6px 22px;position:relative;font-size:.95rem;border-bottom:1px dashed #e4e1db}
-  .svc li::before{content:"";position:absolute;left:0;top:14px;width:10px;height:3px;background:var(--orange)}
+  .services{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+  .svc{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(11,78,162,.09);transition:.25s}
+  .svc:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(11,78,162,.18)}
+  .svc .img{height:180px;background:var(--blue) center/cover no-repeat;position:relative}
+  .svc .img::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:34px;background:#fff;clip-path:ellipse(75% 100% at 50% 100%)}
+  .svc .body{padding:6px 24px 26px}
+  .svc h3{font-family:"Noto Sans Sinhala";font-weight:800;font-size:1.2rem;color:var(--blue)}
+  .svc .en{font-weight:700;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin:2px 0 10px}
+  .svc p{font-size:.93rem;color:var(--muted)}
+  .svc-ico{width:100%;height:100%;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--blue-dd))}
+  .svc-ico svg{width:72px;height:72px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
 
-  /* Why */
-  .why{background:var(--steel);color:#fff}
-  .why .head p{color:#9aa4ad}
-  .why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--iron)}
-  .why-item{background:var(--steel);padding:32px 26px}
-  .why-item .n{font-family:"Barlow Condensed";font-size:2.6rem;color:var(--orange);font-weight:800}
-  .why-item h3{font-size:1.3rem;margin:6px 0 8px}
-  .why-item p{color:#aab3bc;font-size:.92rem}
+  .why{background:var(--bg)}
+  .why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+  .why-item{background:#fff;border-radius:14px;padding:30px 22px;text-align:center;border-bottom:4px solid var(--blue)}
+  .why-item .ic{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:var(--blue);display:grid;place-items:center}
+  .why-item .ic svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:2}
+  .why-item:nth-child(even) .ic{background:var(--red)}
+  .why-item h3{font-family:"Noto Sans Sinhala";font-weight:800;font-size:1.15rem;color:var(--blue)}
+  .why-item p{font-size:.9rem;color:var(--muted);margin-top:4px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:50px;background:var(--blue);border-radius:14px;color:#fff;overflow:hidden}
+  .stat{padding:28px 16px;text-align:center;border-right:1px solid rgba(255,255,255,.15)}
+  .stat:last-child{border-right:0}
+  .stat b{display:block;font-family:Oswald;font-size:2.6rem;line-height:1.1}
+  .stat span{font-size:.88rem;color:#c3d4ee}
 
-  /* Gallery */
-  .gallery{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:200px;gap:14px}
-  .g{position:relative;overflow:hidden;background:var(--iron);display:flex;align-items:flex-end}
-  .g.big{grid-column:span 2;grid-row:span 2}
-  .g.wide{grid-column:span 2}
-  .g .ph{position:absolute;inset:0;background:
-      repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 12px,transparent 12px 24px),
-      linear-gradient(160deg,var(--iron),var(--steel));}
-  .g img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .g .cap{position:relative;z-index:2;width:100%;padding:14px 16px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff;font-weight:600}
-  .g .cap small{display:block;color:var(--orange);font-weight:500;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
-  .note{margin-top:16px;font-size:.85rem;color:var(--muted)}
+  .gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:240px 240px;gap:16px}
+  .g{position:relative;border-radius:14px;overflow:hidden;background:var(--blue)}
+  .g:first-child{grid-row:span 2}
+  .g img{width:100%;height:100%;object-fit:cover;transition:.4s}
+  .g:hover img{transform:scale(1.05)}
+  .g .cap{position:absolute;left:0;right:0;bottom:0;padding:16px 18px;color:#fff;font-weight:700;background:linear-gradient(transparent,rgba(5,40,90,.85))}
+  .g .cap small{display:block;color:#ffb3b5;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+  .g.more{display:grid;place-items:center;text-align:center;color:#fff;padding:20px;background:linear-gradient(135deg,var(--red),var(--red-d))}
+  .g.more b{font-family:"Noto Sans Sinhala";font-weight:800;font-size:1.5rem;display:block}
 
-  /* Process */
-  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;counter-reset:s}
-  .step{padding:26px;border-left:3px solid var(--orange);background:#fff}
-  .step::before{counter-increment:s;content:"0" counter(s);font-family:"Barlow Condensed";font-weight:800;font-size:1.1rem;color:var(--orange)}
-  .step h3{font-size:1.3rem;margin:4px 0 6px}
-  .step p{font-size:.92rem;color:var(--muted)}
+  .contact{background:var(--blue-dd);color:#fff;position:relative;overflow:hidden}
+  .contact::before{content:"";position:absolute;width:900px;height:900px;border-radius:50%;right:-420px;top:-360px;background:var(--blue);opacity:.6}
+  .contact .wrap{position:relative}
+  .contact .head h2{color:#fff}
+  .contact .head p{color:#b8c9e4}
+  .contact-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:28px}
+  .c-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:26px 30px}
+  .c-row{display:flex;gap:16px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+  .c-row:last-child{border-bottom:0}
+  .c-row .i{width:44px;height:44px;flex:none;border-radius:50%;background:#fff;display:grid;place-items:center}
+  .c-row .i svg{width:22px;height:22px;fill:var(--blue)}
+  .c-row.red .i{background:var(--red)} .c-row.red .i svg{fill:#fff}
+  .c-row small{display:block;color:#9fb5d8;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase}
+  .c-row .big{font-size:1.45rem;font-weight:800}
+  .c-row a:hover{color:#ffb3b5}
+  form{background:#fff;color:var(--ink);border-radius:16px;padding:34px;display:grid;gap:15px;align-content:start}
+  form h3{font-size:1.6rem;color:var(--blue);font-family:"Noto Sans Sinhala";font-weight:800}
+  label{font-size:.85rem;font-weight:600;display:block;margin-bottom:5px}
+  input,select,textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);font:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  form .btn{justify-content:center}
 
-  /* Contact */
-  .contact{background:linear-gradient(115deg,var(--orange) 0 40%,var(--steel) 40%)}
-  .contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:0;box-shadow:0 30px 60px rgba(0,0,0,.25)}
-  .c-info{background:var(--steel-2);color:#fff;padding:46px 40px}
-  .c-info h2{font-size:2.5rem;margin-bottom:10px}
-  .c-info p{color:#aab3bc;margin-bottom:28px}
-  .c-row{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-top:1px solid rgba(255,255,255,.08)}
-  .c-row .i{width:40px;height:40px;flex:none;background:var(--orange);display:grid;place-items:center;color:var(--steel);font-weight:800}
-  .c-row small{display:block;color:#8e98a2;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase}
-  .c-row a:hover{color:var(--orange)}
-  form{background:#fff;padding:46px 40px;display:grid;gap:16px}
-  form h3{font-size:1.8rem}
-  label{font-size:.85rem;font-weight:600;display:block;margin-bottom:6px}
-  input,select,textarea{width:100%;padding:13px 14px;border:1.5px solid #dcd8d1;background:var(--paper);font:inherit}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange)}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  form .btn{justify-content:center;cursor:pointer;font-size:1rem}
+  footer{background:#03183a;color:#8ea3c4;padding:24px 0;font-size:.86rem}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  footer img{height:34px;background:#fff;border-radius:6px;padding:3px 6px}
 
-  footer{background:var(--ink);color:#8e98a2;padding:30px 0;font-size:.88rem}
-  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  .wa-float{position:fixed;right:20px;bottom:20px;z-index:60;width:60px;height:60px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 10px 25px rgba(0,0,0,.25)}
+  .wa-float svg{width:32px;height:32px;fill:#fff}
 
-  .wa-float{position:fixed;right:20px;bottom:20px;z-index:60;width:58px;height:58px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 10px 25px rgba(0,0,0,.25)}
-  .wa-float svg{width:30px;height:30px;fill:#fff}
-
-  @media (max-width:900px){
-    nav ul{display:none;position:absolute;top:68px;left:0;right:0;flex-direction:column;gap:0;background:var(--steel)}
+  @media (max-width:980px){
+    nav ul{display:none;position:absolute;top:78px;left:0;right:0;flex-direction:column;gap:0;background:#fff;box-shadow:0 10px 20px rgba(0,0,0,.1);align-items:stretch}
     nav ul.open{display:flex}
-    nav li a{display:block;padding:14px 22px;border-top:1px solid var(--iron)}
+    nav li a{display:block;padding:14px 22px;border-top:1px solid var(--line)}
+    nav .call{border-radius:0}
     .menu-btn{display:block}
-    .hero .wrap{grid-template-columns:1fr;padding-bottom:90px}
-    .hero-art{display:none}
-    .stats .wrap{grid-template-columns:repeat(2,1fr)}
+    .hero-photo{position:relative;width:100%;height:300px}
+    .hero-swoosh{display:none}
+    .hero .wrap{min-height:0}
+    .hero-text{padding:24px 0 40px}
+    .badge{width:118px;height:118px;right:16px;top:190px;bottom:auto;border-width:5px}
+    .badge .num{font-size:2.4rem}.badge .yr{font-size:1rem}.badge .w{font-size:.7rem}.badge .stars{font-size:.55rem}
+    .phones .wrap{grid-template-columns:1fr;gap:16px}
+    .phones .lbl{justify-self:start}
+    .services,.why-grid,.stats{grid-template-columns:1fr 1fr}
     .stat:nth-child(2){border-right:0}
-    .services,.why-grid,.steps{grid-template-columns:1fr 1fr}
-    .gallery{grid-template-columns:1fr 1fr}
-    .contact{background:var(--steel)}
+    .gallery{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+    .g{height:220px}.g:first-child{grid-row:auto;grid-column:span 2;height:280px}
     .contact-grid{grid-template-columns:1fr}
   }
   @media (max-width:560px){
-    .services,.why-grid,.steps,.row2{grid-template-columns:1fr}
-    .gallery .g.big,.gallery .g.wide{grid-column:span 2}
-    section{padding:70px 0}
-    form,.c-info{padding:34px 24px}
+    .topbar .hide-sm{display:none}
+    .brand img{height:40px}.brand-text{font-size:1.3rem}
+    .services,.why-grid,.row2{grid-template-columns:1fr}
+    .gallery{grid-template-columns:1fr}.g:first-child{grid-column:auto}
+    section{padding:66px 0}
+    form,.c-card{padding:22px}
   }
 </style>
 </head>
 <body>
 
 <!--
-  ===== EDIT YOUR DETAILS HERE / ඔබේ විස්තර මෙතන වෙනස් කරන්න =====
-  Orders/WhatsApp number: PHONE variable in the <script> at the bottom.
-  Owner number and email: Contact section.
+  WhatsApp number: PHONE variable in the <script> at the bottom.
+  Photos and logo are in the images/ folder.
 -->
+
+<div class="topbar">
+  <div class="wrap">
+    <span class="hide-sm">📍 Udugampola · Minuwangoda</span>
+    <span>📞 <a href="tel:+94764493749"><b>076 449 3749</b></a> &nbsp;|&nbsp; <a href="tel:+94755350030"><b>075 535 0030</b></a></span>
+  </div>
+</div>
 
 <header>
   <div class="wrap nav">
-    <a href="#home" class="logo">
-      <div class="logo-mark">AD</div>
-      <div>A.D ENGINEERING<small>GUTTER · CEILING · IRON</small></div>
+    <a href="#home" class="brand">
+      <img src="images/logo-mark.png" alt="A.D. Engineering logo">
+      <div class="brand-text"><span class="r">A.D.</span> <span class="b">Engineering</span><small>ENGINEERING</small></div>
     </a>
     <nav>
       <button class="menu-btn" aria-label="Menu" onclick="document.getElementById('menu').classList.toggle('open')">☰</button>
       <ul id="menu" onclick="this.classList.remove('open')">
-        <li><a href="#services">සේවා / Services</a></li>
+        <li><a href="#services">සේවා</a></li>
         <li><a href="#why">ඇයි අපි?</a></li>
-        <li><a href="#projects">Projects</a></li>
+        <li><a href="#projects">අපේ වැඩ</a></li>
         <li><a href="#contact">අමතන්න</a></li>
+        <li><a href="tel:+94764493749" class="call">📞 Call Now</a></li>
       </ul>
     </nav>
   </div>
 </header>
 
 <section class="hero" id="home" style="padding:0">
+  <div class="hero-photo" role="img" aria-label="House with Amano gutters"></div>
+  <svg class="hero-swoosh" viewBox="0 0 200 600" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 0 H130 C40 170 40 420 160 600 H0 Z" fill="#fff"/>
+    <path d="M130 0 C40 170 40 420 160 600 H190 C70 420 70 170 160 0 Z" fill="#0b4ea2"/>
+    <path d="M160 0 C70 170 70 420 190 600 H200 C80 420 80 170 170 0 Z" fill="#073a7c"/>
+  </svg>
   <div class="wrap">
-    <div>
-      <span class="tag">Minuwangoda · Islandwide</span>
-      <h1>Gutter Works,<br>Ceiling &amp; <span>Iron Works</span></h1>
-      <p class="si">පීලි වැඩ, සිවිලිම් වැඩ සහ යකඩ වැඩ — ගුණාත්මකව, විශ්වාසයෙන්, නියමිත වේලාවට.</p>
-      <p class="en">A.D Engineering delivers durable gutter systems, modern ceilings and custom iron fabrication for homes, shops and commercial buildings.</p>
+    <div class="hero-text">
+      <img class="hero-logo" src="images/logo-mark.png" alt="">
+      <h1>A.D.Engineering</h1>
+      <ul class="checks">
+        <li><span class="tick"></span>අමානෝ වැහිපීලි සවිකිරීම</li>
+        <li><span class="tick"></span>අමානෝ වැහිපීලි අලුත්වැඩියාව</li>
+        <li><span class="tick"></span>අයි පැනල් සිවිලිම</li>
+        <li><span class="tick"></span>යකඩ වහල</li>
+      </ul>
       <div class="btns">
-        <a href="#contact" class="btn btn-primary">නොමිලේ ඇස්තමේන්තුවක් →</a>
-        <a href="#" class="btn btn-ghost js-call">📞 Call Now</a>
+        <a href="tel:+94755350030" class="btn btn-red">📞 අදම අමතන්න</a>
+        <a href="#" class="btn btn-wa js-wa">WhatsApp</a>
       </div>
     </div>
-    <div class="hero-art" aria-hidden="true">
-      <svg viewBox="0 0 400 400">
-        <!-- roof -->
-        <polygon points="20,190 200,60 380,190" fill="#3b444d"/>
-        <polygon points="40,190 200,78 360,190" fill="#2a323a"/>
-        <g stroke="#1c2228" stroke-width="2">
-          <line x1="80" y1="190" x2="200" y2="104"/><line x1="120" y1="190" x2="200" y2="132"/>
-          <line x1="320" y1="190" x2="200" y2="104"/><line x1="280" y1="190" x2="200" y2="132"/>
-        </g>
-        <!-- gutter -->
-        <rect x="12" y="188" width="376" height="20" fill="#f26b1d"/>
-        <rect x="12" y="188" width="376" height="5" fill="#ff8c4a"/>
-        <!-- downpipe -->
-        <rect x="350" y="206" width="20" height="160" fill="#f26b1d"/>
-        <rect x="340" y="360" width="40" height="14" fill="#d4570f"/>
-        <!-- wall / ceiling grid -->
-        <rect x="50" y="208" width="290" height="160" fill="#20272e"/>
-        <g stroke="#3b444d" stroke-width="2">
-          <line x1="50" y1="248" x2="340" y2="248"/><line x1="50" y1="288" x2="340" y2="288"/><line x1="50" y1="328" x2="340" y2="328"/>
-          <line x1="108" y1="208" x2="108" y2="368"/><line x1="166" y1="208" x2="166" y2="368"/><line x1="224" y1="208" x2="224" y2="368"/><line x1="282" y1="208" x2="282" y2="368"/>
-        </g>
-        <!-- iron gate -->
-        <g stroke="#f26b1d" stroke-width="4" fill="none">
-          <rect x="130" y="270" width="130" height="98"/>
-          <line x1="156" y1="270" x2="156" y2="368"/><line x1="182" y1="270" x2="182" y2="368"/>
-          <line x1="208" y1="270" x2="208" y2="368"/><line x1="234" y1="270" x2="234" y2="368"/>
-          <path d="M130 300 Q195 280 260 300"/>
-        </g>
-        <!-- drops -->
-        <g fill="#7fc4ff" opacity=".8"><circle cx="360" cy="384" r="4"/><circle cx="352" cy="394" r="3"/></g>
-      </svg>
-    </div>
+  </div>
+  <div class="badge" aria-label="10 year warranty">
+    <span class="stars">★★★</span><span class="num">10</span><span class="yr">YEAR</span><span class="w">WARRANTY</span><span class="stars">★★★</span>
   </div>
 </section>
 
-<div class="stats">
+<div class="phones">
   <div class="wrap">
-    <div class="stat"><b>16+</b><span>Years Experience</span></div>
-    <div class="stat"><b>500+</b><span>Projects Completed</span></div>
-    <div class="stat"><b>3</b><span>Core Services</span></div>
-    <div class="stat"><b>100%</b><span>Customer Satisfaction</span></div>
+    <span class="lbl">අදම අමතන්න</span>
+    <a class="ph-item" href="tel:+94764493749">
+      <span class="ph-ico"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>
+      <span><b>076 449 3749</b><small>Owner · අයිතිකරු</small></span>
+    </a>
+    <a class="ph-item" href="tel:+94755350030">
+      <span class="ph-ico"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>
+      <span><b>075 535 0030</b><small>Gutter Kumara · මිල ගණන් / ඇණවුම්</small></span>
+    </a>
   </div>
 </div>
 
 <section id="services">
   <div class="wrap">
     <div class="head">
-      <div class="kicker">Our Services · අපගේ සේවා</div>
-      <h2>Built to last. Done right.</h2>
-      <p class="si">නිවාස, ව්‍යාපාරික ස්ථාන සහ කර්මාන්තශාලා සඳහා සම්පූර්ණ විසඳුම් — මැනීමේ සිට ස්ථාපනය දක්වා.</p>
+      <span class="kicker">Our Services</span>
+      <h2>අපගේ සේවා</h2>
+      <p class="si">ගුණාත්මක වැඩ · විශ්වාසදායක සේවාව</p>
+      <div class="bar"></div>
     </div>
     <div class="services">
       <div class="svc">
-        <div class="ico"><svg viewBox="0 0 24 24"><path d="M2 6h20v4a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3z"/><path d="M17 13v9"/><path d="M8 17v1M8 21v1"/></svg></div>
-        <h3>Gutter Works</h3>
-        <div class="si-title si">පීලි වැඩ</div>
-        <p>Seamless, rust-resistant gutter systems that protect your walls and foundation from rainwater.</p>
-        <ul>
-          <li>Zinc-Alum / Colour-coated gutters</li>
-          <li>Valley gutters &amp; box gutters</li>
-          <li>Down pipes &amp; flashing</li>
-          <li>Gutter repair &amp; replacement</li>
-        </ul>
+        <div class="img" style="background-image:url(images/house.jpg)"></div>
+        <div class="body">
+          <h3>අමානෝ වැහිපීලි සවිකිරීම</h3>
+          <div class="en">Amano Gutter Installation</div>
+          <p>Colour-coated Amano gutters, valley gutters, down pipes and flashing — measured and fitted to your roof.</p>
+        </div>
       </div>
       <div class="svc">
-        <div class="ico"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18"/><path d="M2 9h20M2 15h20M9 3v18M15 3v18"/></svg></div>
-        <h3>Ceiling Works</h3>
-        <div class="si-title si">සිවිලිම් වැඩ</div>
-        <p>Clean, modern ceilings that improve the look, insulation and value of your building.</p>
-        <ul>
-          <li>Gypsum board ceilings</li>
-          <li>PVC / T-bar (grid) ceilings</li>
-          <li>Cement board &amp; designer ceilings</li>
-          <li>Cove lighting &amp; finishing</li>
-        </ul>
+        <div class="img"><div class="svc-ico"><svg viewBox="0 0 64 64"><path d="M6 20h52v6a8 8 0 0 1-8 8H14a8 8 0 0 1-8-8z"/><path d="M46 34v22"/><path d="M22 40v3M22 49v3"/><path d="M30 6l12 12-6 6-12-12z"/></svg></div></div>
+        <div class="body">
+          <h3>අමානෝ වැහිපීලි අලුත්වැඩියාව</h3>
+          <div class="en">Gutter Repairs</div>
+          <p>Leaks, rust, broken joints and blocked down pipes fixed fast — or full replacement when needed.</p>
+        </div>
       </div>
       <div class="svc">
-        <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17"/><path d="M7.5 4v17M12 4v17M16.5 4v17"/><path d="M3 9q9-4 18 0"/></svg></div>
-        <h3>Iron Works</h3>
-        <div class="si-title si">යකඩ වැඩ</div>
-        <p>Strong, custom-fabricated steel work — designed, welded and finished to your needs.</p>
-        <ul>
-          <li>Gates, grills &amp; railings</li>
-          <li>Roof trusses &amp; steel structures</li>
-          <li>Staircases &amp; handrails</li>
-          <li>Shop fronts &amp; roller doors</li>
-        </ul>
+        <div class="img" style="background-image:url(images/ceiling-1.jpg)"></div>
+        <div class="body">
+          <h3>අයි පැනල් සිවිලිම</h3>
+          <div class="en">i-Panel Ceiling</div>
+          <p>Modern i-Panel ceilings in wood and white finishes, with cove lighting and spotlights.</p>
+        </div>
+      </div>
+      <div class="svc">
+        <div class="img" style="background-image:url(images/roof.jpg)"></div>
+        <div class="body">
+          <h3>යකඩ වහල</h3>
+          <div class="en">Iron / Metal Roofing</div>
+          <p>Steel roof frames and metal roofing sheets, plus iron works such as gates, grills and railings.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -292,15 +305,33 @@
 <section class="why" id="why">
   <div class="wrap">
     <div class="head">
-      <div class="kicker">ඇයි A.D Engineering?</div>
-      <h2>Why choose us</h2>
-      <p>Honest pricing, skilled workers and quality materials on every job.</p>
+      <span class="kicker">Why A.D. Engineering</span>
+      <h2>ඇයි අපිව තෝරාගන්නේ?</h2>
+      <div class="bar"></div>
     </div>
     <div class="why-grid">
-      <div class="why-item"><div class="n">01</div><h3>Free Site Visit</h3><p class="si">නොමිලේ ස්ථාන පරීක්ෂාව සහ ඇස්තමේන්තුව.</p></div>
-      <div class="why-item"><div class="n">02</div><h3>Quality Materials</h3><p class="si">ප්‍රමිතියෙන් යුත් ද්‍රව්‍ය පමණක් භාවිතා කරයි.</p></div>
-      <div class="why-item"><div class="n">03</div><h3>Skilled Team</h3><p class="si">පළපුරුදු, පුහුණු කාර්ය මණ්ඩලයක්.</p></div>
-      <div class="why-item"><div class="n">04</div><h3>On-Time Finish</h3><p class="si">පොරොන්දු වූ දිනට වැඩ අවසන් කරයි.</p></div>
+      <div class="why-item">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></div>
+        <h3>අවුරුදු 10 වගකීම</h3><p>10 Year Warranty</p>
+      </div>
+      <div class="why-item">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7-6.3-3.6-6.3 3.6 1.5-7L2 9.3l7-.8z"/></svg></div>
+        <h3>ගුණාත්මක වැඩ</h3><p>Quality Workmanship</p>
+      </div>
+      <div class="why-item">
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/></svg></div>
+        <h3>නොමිලේ ස්ථාන පරීක්ෂාව</h3><p>Free Site Visit &amp; Estimate</p>
+      </div>
+      <div class="why-item">
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <h3>නියමිත වේලාවට</h3><p>On-Time Completion</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>16+</b><span>Years Experience</span></div>
+      <div class="stat"><b>500+</b><span>Projects Completed</span></div>
+      <div class="stat"><b>10</b><span>Year Warranty</span></div>
+      <div class="stat"><b>2</b><span>Shops · Udugampola &amp; Minuwangoda</span></div>
     </div>
   </div>
 </section>
@@ -308,99 +339,90 @@
 <section id="projects">
   <div class="wrap">
     <div class="head">
-      <div class="kicker">Recent Projects</div>
-      <h2>Our Work</h2>
-      <p class="si">අප විසින් සිදු කළ ව්‍යාපෘති කිහිපයක්.</p>
+      <span class="kicker">Our Work</span>
+      <h2>අපේ වැඩ</h2>
+      <div class="bar"></div>
     </div>
-    <!-- Replace each .ph div with <img src="images/your-photo.jpg" alt="..."> -->
     <div class="gallery">
-      <div class="g big"><div class="ph"></div><div class="cap"><small>Gutter</small>Colour-coated gutter system — House</div></div>
-      <div class="g"><div class="ph"></div><div class="cap"><small>Ceiling</small>Gypsum ceiling</div></div>
-      <div class="g"><div class="ph"></div><div class="cap"><small>Iron</small>Main gate</div></div>
-      <div class="g wide"><div class="ph"></div><div class="cap"><small>Iron</small>Steel roof truss</div></div>
-      <div class="g wide"><div class="ph"></div><div class="cap"><small>Ceiling</small>T-bar ceiling — Office</div></div>
-      <div class="g wide"><div class="ph"></div><div class="cap"><small>Gutter</small>Box gutter — Warehouse</div></div>
-    </div>
-  </div>
-</section>
-
-<section style="padding-top:0">
-  <div class="wrap">
-    <div class="head">
-      <div class="kicker">How it works · ක්‍රියාවලිය</div>
-      <h2>Simple 4-step process</h2>
-    </div>
-    <div class="steps">
-      <div class="step"><h3>Call / WhatsApp</h3><p class="si">අපට කතා කරන්න හෝ පණිවිඩයක් එවන්න.</p></div>
-      <div class="step"><h3>Site Visit</h3><p class="si">අපි පැමිණ මැනුම් ගන්නවා.</p></div>
-      <div class="step"><h3>Quotation</h3><p class="si">පැහැදිලි, සාධාරණ මිල ගණන්.</p></div>
-      <div class="step"><h3>Installation</h3><p class="si">ගුණාත්මකව වැඩ නිම කරනවා.</p></div>
+      <div class="g"><img src="images/house.jpg" alt="Amano gutters on a two-storey house" loading="lazy"><div class="cap"><small>Gutters</small>අමානෝ වැහිපීලි</div></div>
+      <div class="g"><img src="images/ceiling-1.jpg" alt="i-Panel ceiling with chandelier" loading="lazy"><div class="cap"><small>Ceiling</small>අයි පැනල් සිවිලිම</div></div>
+      <div class="g"><img src="images/ceiling-2.jpg" alt="Wooden i-Panel ceiling in a living room" loading="lazy"><div class="cap"><small>Ceiling</small>Living room ceiling</div></div>
+      <div class="g"><img src="images/roof.jpg" alt="Red metal roofing" loading="lazy"><div class="cap"><small>Roofing</small>යකඩ වහල</div></div>
+      <a class="g more js-wa" href="#"><div><b>ඔබේ ගෙදරටත්?</b>WhatsApp us for a free quote →</div></a>
     </div>
   </div>
 </section>
 
 <section class="contact" id="contact">
-  <div class="wrap contact-grid">
-    <div class="c-info">
-      <h2>Contact Us</h2>
-      <p class="si">නොමිලේ ඇස්තමේන්තුවක් සඳහා අදම අමතන්න.</p>
-      <div class="c-row"><div class="i">☎</div><div><small>Prices &amp; Orders · මිල ගණන් / ඇණවුම්</small><a href="tel:+94755350030">075 535 0030</a></div></div>
-      <div class="c-row"><div class="i">W</div><div><small>WhatsApp · Orders</small><a href="#" class="js-wa">075 535 0030</a></div></div>
-      <div class="c-row"><div class="i">☏</div><div><small>Owner · අයිතිකරු</small><a href="tel:+94764493749">076 449 3749</a></div></div>
-      <div class="c-row"><div class="i">@</div><div><small>Email</small><a href="mailto:adengineering486@gmail.com">adengineering486@gmail.com</a></div></div>
-      <div class="c-row"><div class="i">⌖</div><div><small>Location · ලිපිනය</small><a href="https://www.google.com/maps/search/?api=1&query=357%2F2+Peellawatta%2C+Yatiyana%2C+Minuwangoda" target="_blank" rel="noopener">357/2, Peellawatta, Yatiyana,<br>Minuwangoda</a></div></div>
-      <div class="c-row"><div class="i">◷</div><div><small>Hours · වේලාවන්</small>Tue – Sun · 8.30 AM – 5.30 PM<br><span class="si" style="color:#f26b1d">සඳුදා වසා ඇත · Closed on Mondays</span></div></div>
+  <div class="wrap">
+    <div class="head">
+      <span class="kicker" style="color:#ff8a8e">Contact</span>
+      <h2>අදම අමතන්න</h2>
+      <p class="si">නොමිලේ ඇස්තමේන්තුවක් සඳහා අපට කතා කරන්න හෝ WhatsApp කරන්න.</p>
     </div>
-    <form id="quote">
-      <h3>Get a Free Quote</h3>
-      <div class="row2">
-        <div><label for="name">Name / නම</label><input id="name" required></div>
-        <div><label for="tel">Phone / දුරකථන</label><input id="tel" type="tel" required></div>
+    <div class="contact-grid">
+      <div class="c-card">
+        <div class="c-row red"><div class="i"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></div>
+          <div><small>Owner · අයිතිකරු</small><a class="big" href="tel:+94764493749">076 449 3749</a></div></div>
+        <div class="c-row red"><div class="i"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></div>
+          <div><small>Prices &amp; Orders · Gutter Kumara</small><a class="big" href="tel:+94755350030">075 535 0030</a></div></div>
+        <div class="c-row"><div class="i"><svg viewBox="0 0 24 24"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm9 7.2L4 7.3V17h16V7.3z"/></svg></div>
+          <div><small>Email</small><a href="mailto:adengineering486@gmail.com">adengineering486@gmail.com</a></div></div>
+        <div class="c-row"><div class="i"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11.5 2.5 2.5 0 0 0 12 6.5z"/></svg></div>
+          <div><small>Main Shop</small><a href="https://www.google.com/maps/search/?api=1&query=Weediyawatta+Junction+Udugampola" target="_blank" rel="noopener">Weediyawatta Junction, Udugampola</a></div></div>
+        <div class="c-row"><div class="i"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11.5 2.5 2.5 0 0 0 12 6.5z"/></svg></div>
+          <div><small>Branch</small><a href="https://www.google.com/maps/search/?api=1&query=Airport+Road+Unnaruwa+Minuwangoda" target="_blank" rel="noopener">Airport Road, Unnaruwa, Minuwangoda</a></div></div>
+        <div class="c-row"><div class="i"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11.5 2.5 2.5 0 0 0 12 6.5z"/></svg></div>
+          <div><small>Address · ලිපිනය</small><a href="https://www.google.com/maps/search/?api=1&query=357%2F2+Peellawatta%2C+Yatiyana%2C+Minuwangoda" target="_blank" rel="noopener">357/2, Peellawatta, Yatiyana, Minuwangoda</a></div></div>
+        <div class="c-row"><div class="i"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm1 5h-2v6l5 3 1-1.7-4-2.3z"/></svg></div>
+          <div><small>Hours · වේලාවන්</small>Tue – Sun · 8.30 AM – 5.30 PM<br><span class="si" style="color:#ff8a8e;font-weight:700">සඳුදා වසා ඇත · Closed on Mondays</span></div></div>
       </div>
-      <div class="row2">
-        <div><label for="svc">Service / සේවාව</label>
-          <select id="svc">
-            <option>Gutter Works (පීලි)</option>
-            <option>Ceiling Works (සිවිලිම්)</option>
-            <option>Iron Works (යකඩ)</option>
-            <option>Other</option>
-          </select></div>
-        <div><label for="loc">Location / ප්‍රදේශය</label><input id="loc"></div>
-      </div>
-      <div><label for="msg">Details / විස්තර</label><textarea id="msg" rows="4"></textarea></div>
-      <button class="btn btn-primary" type="submit">Send via WhatsApp →</button>
-    </form>
+      <form id="quote">
+        <h3>නොමිලේ ඇස්තමේන්තුවක්</h3>
+        <div class="row2">
+          <div><label for="name">නම / Name</label><input id="name" required></div>
+          <div><label for="tel">දුරකථන / Phone</label><input id="tel" type="tel" required></div>
+        </div>
+        <div class="row2">
+          <div><label for="svc">සේවාව / Service</label>
+            <select id="svc">
+              <option>අමානෝ වැහිපීලි සවිකිරීම (Gutter Installation)</option>
+              <option>වැහිපීලි අලුත්වැඩියාව (Gutter Repair)</option>
+              <option>අයි පැනල් සිවිලිම (i-Panel Ceiling)</option>
+              <option>යකඩ වහල (Iron Roofing)</option>
+              <option>වෙනත් (Other)</option>
+            </select></div>
+          <div><label for="loc">ප්‍රදේශය / Location</label><input id="loc"></div>
+        </div>
+        <div><label for="msg">විස්තර / Details</label><textarea id="msg" rows="4"></textarea></div>
+        <button class="btn btn-wa" type="submit">WhatsApp මගින් යවන්න →</button>
+      </form>
+    </div>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
-    <span>© <span id="yr"></span> A.D Engineering. All rights reserved.</span>
-    <span>Gutter Works · Ceiling Works · Iron Works</span>
+    <span style="display:flex;align-items:center;gap:12px"><img src="images/logo-mark.png" alt=""> © <span id="yr"></span> A.D. Engineering</span>
+    <span class="si">වැහිපීලි · සිවිලිම් · යකඩ වහල</span>
   </div>
 </footer>
 
 <a href="#" class="wa-float js-wa" aria-label="WhatsApp">
-  <svg viewBox="0 0 32 32"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3zm0 23.6a10.6 10.6 0 0 1-5.4-1.5l-.4-.2-3.9 1 1-3.8-.2-.4A10.6 10.6 0 1 1 16 26.6zm5.8-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a8.7 8.7 0 0 1-4.3-3.8c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.6 3.6 0 0 0-1.1 2.7 6.3 6.3 0 0 0 1.3 3.3 14.4 14.4 0 0 0 5.5 4.9c2 .9 2.8.9 3.9.8a3.3 3.3 0 0 0 2.1-1.5 2.7 2.7 0 0 0 .2-1.5c-.1-.2-.3-.3-.6-.4z"/></svg>
+  <svg viewBox="0 0 32 32"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3zm0 23.6a10.6 10.6 0 0 1-5.4-1.5l-.4-.2-3.9 1 1-3.8-.2-.4A10.6 10.6 0 1 1 16 26.6zm5.8-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7 0a8.7 8.7 0 0 1-4.3-3.8c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.6 3.6 0 0 0-1.100 2.7 6.3 6.3 0 0 0 1.3 3.3 14.4 14.4 0 0 0 5.5 4.9c2 .9 2.8.9 3.9.8a3.3 3.3 0 0 0 2.1-1.5 2.7 2.7 0 0 0 .2-1.5c-.1-.2-.3-.3-.6-.4z"/></svg>
 </a>
 
 <script>
-  // Prices & orders number (used for Call Now, WhatsApp button and quote form)
+  // Prices & orders number (WhatsApp buttons and quote form)
   const PHONE = "94755350030";
 
   document.getElementById('yr').textContent = new Date().getFullYear();
-  document.querySelectorAll('.js-call').forEach(a => a.href = 'tel:+' + PHONE);
   document.querySelectorAll('.js-wa').forEach(a => { a.href = 'https://wa.me/' + PHONE; a.target = '_blank'; a.rel = 'noopener'; });
 
   document.getElementById('quote').addEventListener('submit', e => {
     e.preventDefault();
-    const v = id => document.getElementById(id).value.trim();
-    const text = `Hello A.D Engineering,%0A` +
-      `Name: ${encodeURIComponent(v('name'))}%0A` +
-      `Phone: ${encodeURIComponent(v('tel'))}%0A` +
-      `Service: ${encodeURIComponent(v('svc'))}%0A` +
-      `Location: ${encodeURIComponent(v('loc'))}%0A` +
-      `Details: ${encodeURIComponent(v('msg'))}`;
+    const v = id => encodeURIComponent(document.getElementById(id).value.trim());
+    const text = `Hello A.D. Engineering,%0AName: ${v('name')}%0APhone: ${v('tel')}%0AService: ${v('svc')}%0ALocation: ${v('loc')}%0ADetails: ${v('msg')}`;
     window.open(`https://wa.me/${PHONE}?text=${text}`, '_blank');
   });
 </script>
