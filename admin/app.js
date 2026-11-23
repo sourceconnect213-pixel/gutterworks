@@ -172,7 +172,7 @@
   // ---------- items: category browser ----------
   // path: [] = all main categories, [mainId] = inside a main category, [mainId, subId] = inside a size / type
   let CATS = [], PRODS = [], path = [], needsStep2 = false;
-  const MODELS = { '': 'නැත · None', gutter12: '12" Box Gutter (3D)' };
+  const MODELS = { '': 'නැත · None', gutter12: '12" වැහිපීලි හරස්කඩ (මිනුම් සමඟ)' };
   const UNITS = ['per ft', 'each', 'per sq.ft', 'per sheet', 'per meter'];
   const catById = id => CATS.find(c => c.id == id);
   const childrenOf = id => CATS.filter(c => (c.parent_id ?? null) == (id ?? null)).sort((a,b) => (a.sort-b.sort) || (a.id-b.id));
@@ -204,7 +204,7 @@
     const sub = [p.size, p.colour, p.unit].filter(Boolean).map(esc).join(' · ');
     return `
       <div class="card irow" data-item="${p.id}" style="animation-delay:${Math.min(i,10)*25}ms">
-        <div class="th" style="${p.image_url ? `background-image:url('${esc(p.image_url)}')` : ''}">${p.image_url ? '' : (p.model ? '🧊' : '📦')}</div>
+        <div class="th" style="${p.image_url ? `background-image:url('${esc(p.image_url)}')` : ''}">${p.image_url ? '' : (p.model ? '📏' : '📦')}</div>
         <div class="info">
           <b>${esc(p.name)}</b>
           ${sub ? `<small>${sub}</small>` : ''}
@@ -354,7 +354,7 @@
       </div>
       <label>ඒකකය · Unit<input name="unit" list="unit-list" value="${esc(p.unit || (isNew ? 'per ft' : ''))}"><datalist id="unit-list">${unitOpts}</datalist></label>
       <label>විස්තරය · Description<textarea name="description" rows="2">${esc(p.description)}</textarea></label>
-      ${needsStep2 ? '' : `<label>3D model<select name="model">${Object.entries(MODELS).map(([k,v]) => `<option value="${k}" ${(p.model||'')===k?'selected':''}>${v}</option>`).join('')}</select></label>`}
+      ${needsStep2 ? '' : `<label>මිනුම් රූපය · Measurements drawing<select name="model">${Object.entries(MODELS).map(([k,v]) => `<option value="${k}" ${(p.model||'')===k?'selected':''}>${v}</option>`).join('')}</select></label>`}
       <label>පිළිවෙල (අඩු අංකය මුලින්)<input name="sort" inputmode="numeric" value="${p.sort ?? 0}"></label>
       <div class="switch">තොගයේ ඇත · Website එකේ පෙන්වන්න<input type="checkbox" name="in_stock" ${p.in_stock!==false?'checked':''}></div>`,
       async fd => {

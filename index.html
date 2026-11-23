@@ -215,21 +215,6 @@
   @media (max-width:860px){.owner-grid{grid-template-columns:1fr;gap:40px;text-align:center}.owner-photo img{max-width:280px}.owner-txt p{margin-left:auto;margin-right:auto}.owner-txt .btns{justify-content:center}.owner-badge{width:96px;height:96px;right:0}}
 
   /* 12" gutter 3D */
-  .m3d{position:fixed;inset:0;z-index:120;background:rgba(3,15,35,.72);display:none;align-items:center;justify-content:center;padding:16px}
-  .m3d.open{display:flex}
-  .m3d-box{position:relative;width:min(920px,100%);height:min(640px,88vh);border-radius:18px;overflow:hidden;background:radial-gradient(circle at 50% 35%,#ffffff,#e3eaf5 70%);box-shadow:0 30px 70px rgba(0,0,0,.45);animation:fadeUp .35s both}
-  .m3d-head{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;pointer-events:none}
-  .m3d-head b{font-family:Oswald;font-size:1.4rem;color:var(--blue);background:rgba(255,255,255,.85);padding:4px 12px;border-radius:10px}
-  .m3d-x{pointer-events:auto;width:44px;height:44px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:1.2rem;cursor:pointer}
-  .g3d{position:absolute;inset:0;touch-action:none;cursor:grab}
-  .g3d:active{cursor:grabbing}
-  .g3d canvas{width:100%!important;height:100%!important;display:block}
-  .g3d-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-weight:600;pointer-events:none}
-  .g3d-btns{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-  .g3d-btns button{font:inherit;font-family:"Noto Sans Sinhala",Inter;font-weight:700;font-size:.82rem;background:rgba(255,255,255,.92);color:var(--blue);border:1.5px solid #c9d6ea;padding:7px 13px;border-radius:30px;cursor:pointer}
-  .g3d-btns button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
-  @media (max-width:560px){.m3d{padding:0}.m3d-box{height:100%;border-radius:0}.g3d-btns button{padding:6px 10px;font-size:.76rem}}
-
   /* Shop + price list */
   .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px}
   .prod{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(11,78,162,.09);display:flex;flex-direction:column;animation:fadeUp .6s both}
@@ -238,6 +223,12 @@
   .prod h3{font-family:"Noto Sans Sinhala",Inter;font-weight:800;font-size:1.08rem;color:var(--blue)}
   .prod p{font-size:.88rem;color:var(--muted)}
   .prod .psub{font-size:.82rem;font-weight:600;color:var(--muted)}
+  .p3d{position:relative;background:radial-gradient(circle at 50% 38%,#ffffff,#e1e8f2 72%)}
+  .p3d canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;touch-action:pan-y;cursor:grab}
+  .p3d canvas:active{cursor:grabbing}
+  .p3d-hint{position:absolute;left:10px;bottom:8px;z-index:1;font:700 .72rem "Noto Sans Sinhala",Inter;color:var(--blue);background:rgba(255,255,255,.85);padding:3px 9px;border-radius:12px;pointer-events:none;opacity:0;transition:opacity .4s}
+  .p3d.ready .p3d-hint{opacity:1}
+  .p3d.no3d{background:#e8eef7 url(images/logo-mark.png) center/50% no-repeat}
   .pimg-size{font-family:Oswald;font-weight:700;font-size:3rem;color:var(--blue);opacity:.75}
   .pprices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:8px}
   .pprices div{background:var(--bg);border-radius:10px;padding:8px 10px}
@@ -246,6 +237,12 @@
   .pprices b{font-family:Oswald;font-size:1.3rem;color:var(--red);line-height:1.2}
   .pprices .fx b{color:var(--blue)}
   .pprices em{font-style:normal;font-size:.72rem;color:var(--muted);margin-left:3px}
+  .prof{background:#fff;border:1.5px dashed #c6d2e2;border-radius:12px;padding:6px;margin-top:4px;animation:fadeUp .3s both}
+  .prof-svg{display:block;width:100%;height:auto}
+  .prof-line{fill:none;stroke:var(--blue);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+  .prof-in{fill:none;stroke:#9b3640;stroke-width:9;stroke-linejoin:round;opacity:.18}
+  .prof-svg text{font:700 13px Inter,sans-serif;fill:var(--red);text-anchor:middle}
+  .prof-svg .prof-note{font:600 11px "Noto Sans Sinhala",Inter,sans-serif;fill:var(--muted)}
   .pbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .pbtns .order{white-space:nowrap;min-width:120px}
   .pbtns button.order{font-family:inherit;font-weight:700}
@@ -600,20 +597,6 @@
   </div>
 </footer>
 
-<div class="m3d" id="m3d" role="dialog" aria-modal="true" aria-label="3D view">
-  <div class="m3d-box">
-    <div class="m3d-head"><b id="m3d-title">3D</b><button class="m3d-x" id="m3d-x" aria-label="Close">✕</button></div>
-    <div id="g3d" class="g3d"></div>
-    <div class="g3d-loading" id="g3d-loading">3D model loading…</div>
-    <div class="g3d-btns">
-      <button id="g3d-rot" class="on">⟳ කරකවන්න</button>
-      <button id="g3d-end">◧ හරස්කඩ</button>
-      <button id="g3d-dim" class="on">📏 මිනුම්</button>
-      <button id="g3d-reset">↺</button>
-    </div>
-  </div>
-</div>
-
 <div class="lb" id="lb" aria-hidden="true">
   <img id="lbimg" alt="">
   <button class="x" aria-label="Close">✕</button>
@@ -627,6 +610,7 @@
 </a>
 
 <script src="config.js"></script>
+<script src="profiles.js"></script>
 <script>
   // Prices & orders number (WhatsApp buttons and quote form) — overridden by admin settings
   let PHONE = "94764493749";
@@ -739,22 +723,25 @@
   let PRODUCTS = [], CATS = [], shopMain = null, shopSub = 'all';
   const kids = id => CATS.filter(c => (c.parent_id ?? null) == (id ?? null)).sort((a,b)=>(a.sort-b.sort)||(a.id-b.id));
   const bigLabel = n => { const m = String(n).match(/\d+(\.\d+)?\s*("|”|inch|in\b|mm|ft)?/i); return m ? m[0].replace(/\s*(inch|in)\b/i,'"').replace(/\s+/g,'') : String(n).split(/\s+/)[0]; };
+  const hasProf = p => !!(p.model && window.AD_PROFILES && AD_PROFILES[p.model]);
   function prodCard(p){
     const sub = [p.size, p.colour].filter(Boolean).map(esc).join(' · ');
     const has = v => v != null && v !== '';
     return `
       <div class="prod">
-        <div class="pimg" ${p.image_url?`style="background-image:url('${esc(p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>
+        ${hasProf(p) ? `<div class="pimg p3d" data-model="${esc(p.model)}"><span class="p3d-hint">↔ කරකවන්න</span></div>`
+          : `<div class="pimg" ${p.image_url?`style="background-image:url('${esc(p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>`}
         <div class="pb">
           <h3>${esc(p.name)}</h3>
           ${sub?`<span class="psub">${sub}</span>`:''}
           ${p.description?`<p>${esc(p.description)}</p>`:''}
+          ${hasProf(p) ? `<div class="prof" hidden>${profileSVG(p.model)}</div>` : ''}
           <div class="pprices">
             <div><small>විකුණුම් මිල</small><b>${has(p.price)?money(p.price):'අමතන්න'}</b>${has(p.price)&&p.unit?`<em>/ ${esc(p.unit)}</em>`:''}</div>
             ${has(p.fixing_price)?`<div class="fx"><small>සවි කිරීමේ මිල</small><b>${money(p.fixing_price)}</b>${p.unit?`<em>/ ${esc(p.unit)}</em>`:''}</div>`:''}
           </div>
           <div class="pbtns">
-            ${p.model==='gutter12'?`<button type="button" class="btn btn-blue order js-3d" data-name="${esc(p.name)}">🧊 3D බලන්න</button>`:''}
+            ${hasProf(p) ? `<button type="button" class="btn btn-blue order js-dims" aria-expanded="false">📏 මිනුම් පෙන්වන්න</button>` : ''}
             <a class="btn btn-wa order" target="_blank" rel="noopener" href="https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name+(p.size?' ('+p.size+')':''))}">WhatsApp ඇණවුම</a>
           </div>
         </div>
@@ -762,7 +749,7 @@
   }
   function renderShop(){
     const tabs=document.getElementById('shop-filters'), box=document.getElementById('products');
-    if (!CATS.length){ tabs.innerHTML=''; box.innerHTML = `<div class="products">${PRODUCTS.map(prodCard).join('')}</div>`; return; }
+    if (!CATS.length){ tabs.innerHTML=''; box.innerHTML = `<div class="products">${PRODUCTS.map(prodCard).join('')}</div>`; window.dispatchEvent(new Event('shop:render')); return; }
     // only categories that have items
     const deep = id => PRODUCTS.filter(p=>p.category_id==id).length + kids(id).reduce((n,c)=>n+PRODUCTS.filter(p=>p.category_id==c.id).length,0);
     const mains = kids(null).filter(c=>deep(c.id));
@@ -770,7 +757,7 @@
     if (!(shopMain==='other' && loose.length) && !mains.some(c=>c.id==shopMain)) shopMain = mains[0]?.id ?? (loose.length ? 'other' : null);
     tabs.innerHTML = mains.map(c=>`<button data-main="${c.id}" class="${c.id==shopMain?'on':''}">${esc(c.name)}${c.name_en?` <span>${esc(c.name_en)}</span>`:''}</button>`).join('')
       + (loose.length ? `<button data-main="other" class="${shopMain==='other'?'on':''}">වෙනත් <span>Other</span></button>` : '');
-    if (shopMain==='other'){ box.innerHTML = `<div class="products">${loose.map(prodCard).join('')}</div>`; return; }
+    if (shopMain==='other'){ box.innerHTML = `<div class="products">${loose.map(prodCard).join('')}</div>`; window.dispatchEvent(new Event('shop:render')); return; }
     const subs = kids(shopMain).filter(c=>PRODUCTS.some(p=>p.category_id==c.id));
     const direct = PRODUCTS.filter(p=>p.category_id==shopMain);
     if (shopSub!=='all' && !subs.some(c=>c.id==shopSub)) shopSub='all';
@@ -784,9 +771,14 @@
       ${g.c && groups.length>1 ? `<h3 class="shop-grp">${esc(g.c.name)}${g.c.note?` <small>${esc(g.c.note)}</small>`:''}</h3>` : ''}
       <div class="products">${g.items.map(prodCard).join('')}</div>`).join('');
     box.innerHTML = html;
+    window.dispatchEvent(new Event('shop:render'));
   }
   document.getElementById('shop-filters').onclick = e => { const b=e.target.closest('[data-main]'); if(!b) return; shopMain = b.dataset.main==='other'?'other':+b.dataset.main; shopSub='all'; renderShop(); };
-  document.getElementById('products').onclick = e => { const b=e.target.closest('[data-sub]'); if(!b) return; shopSub = b.dataset.sub==='all'?'all':+b.dataset.sub; renderShop(); };
+  document.getElementById('products').onclick = e => {
+    const d=e.target.closest('.js-dims');
+    if (d){ const box=d.closest('.prod').querySelector('.prof'); const show=box.hidden; box.hidden=!show; d.setAttribute('aria-expanded',show); d.textContent = show ? '📏 මිනුම් හංගන්න' : '📏 මිනුම් පෙන්වන්න';
+      const v=d.closest('.prod').querySelector('.p3d'); if (v) v.dispatchEvent(new CustomEvent('dims', { detail: show })); return; }
+    const b=e.target.closest('[data-sub]'); if(!b) return; shopSub = b.dataset.sub==='all'?'all':+b.dataset.sub; renderShop(); };
   async function loadLive(){
     if(!DB) return;
     try{
@@ -829,30 +821,27 @@
 </script>
 <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/"}}</script>
 <script type="module">
-  // 3D view opens in a popup from an item's "3D බලන්න" button
-  const $ = id => document.getElementById(id);
-  const modal = $('m3d');
-  let g = null;
-  async function open3d(name){
-    $('m3d-title').textContent = name || '3D';
-    modal.classList.add('open'); document.body.style.overflow = 'hidden';
-    if (g) { g.reset(); $('g3d-rot').classList.add('on'); return; }
+  // Live 3D models inside item cards (built from the measured cross-section in profiles.js)
+  const live = new Map();   // element → model
+  let lib = null;
+  const getLib = () => lib ||= import('./gutter3d.js');
+  const io = new IntersectionObserver(es => es.forEach(async e => {
+    if (!e.isIntersecting || live.has(e.target)) return;
+    io.unobserve(e.target);
     try {
-      const { mountGutter } = await import('./gutter3d.js');
-      g = mountGutter($('g3d'));
-      $('g3d-loading').remove();
-      $('g3d-rot').onclick = e => e.currentTarget.classList.toggle('on', g.toggleRotate());
-      $('g3d-end').onclick = () => { g.endView(); $('g3d-rot').classList.remove('on'); };
-      $('g3d-dim').onclick = e => e.currentTarget.classList.toggle('on', g.toggleDims());
-      $('g3d-reset').onclick = () => { g.reset(); $('g3d-rot').classList.add('on'); };
-      $('g3d').addEventListener('gutter:auto', () => $('g3d-rot').classList.remove('on'));
-    } catch (err) { $('g3d-loading').textContent = '3D not supported on this device'; console.warn(err); }
+      const { mountGutter } = await getLib();
+      const g = mountGutter(e.target, e.target.dataset.model);
+      live.set(e.target, g);
+      e.target.addEventListener('dims', ev => g.setDims(ev.detail));
+      e.target.classList.add('ready');
+    } catch (err) { console.warn('3D not available', err); e.target.classList.add('no3d'); }
+  }), { rootMargin: '200px' });
+  function scan(){
+    for (const [el, g] of live) if (!el.isConnected) { g.dispose(); live.delete(el); }
+    document.querySelectorAll('.p3d:not(.ready)').forEach(el => io.observe(el));
   }
-  const close3d = () => { modal.classList.remove('open'); document.body.style.overflow = ''; };
-  document.addEventListener('click', e => { const b = e.target.closest('.js-3d'); if (b) open3d(b.dataset.name); });
-  $('m3d-x').onclick = close3d;
-  modal.addEventListener('click', e => { if (e.target === modal) close3d(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) close3d(); });
+  window.addEventListener('shop:render', scan);
+  scan();
 </script>
 </body>
 </html>
