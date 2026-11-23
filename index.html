@@ -224,10 +224,9 @@
   .prod p{font-size:.88rem;color:var(--muted)}
   .prod .psub{font-size:.82rem;font-weight:600;color:var(--muted)}
   .p3d{position:relative;background:radial-gradient(circle at 50% 38%,#ffffff,#e1e8f2 72%)}
-  .p3d canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;touch-action:pan-y;cursor:grab}
-  .p3d canvas:active{cursor:grabbing}
-  .p3d-hint{position:absolute;left:10px;bottom:8px;z-index:1;font:700 .72rem "Noto Sans Sinhala",Inter;color:var(--blue);background:rgba(255,255,255,.85);padding:3px 9px;border-radius:12px;pointer-events:none;opacity:0;transition:opacity .4s}
-  .p3d.ready .p3d-hint{opacity:1}
+  .p3d canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+  .iv-3d canvas{cursor:grab}
+  .iv-3d canvas:active{cursor:grabbing}
   .p3d.no3d{background:#e8eef7 url(images/logo-mark.png) center/50% no-repeat}
   .pimg-size{font-family:Oswald;font-weight:700;font-size:3rem;color:var(--blue);opacity:.75}
   .pprices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:8px}
@@ -236,13 +235,43 @@
   .pprices small{display:block;font-family:"Noto Sans Sinhala";font-size:.72rem;font-weight:700;color:var(--muted)}
   .pprices b{font-family:Oswald;font-size:1.3rem;color:var(--red);line-height:1.2}
   .pprices .fx b{color:var(--blue)}
-  .pprices em{font-style:normal;font-size:.72rem;color:var(--muted);margin-left:3px}
+  .pprices em{display:block;font-style:normal;font-size:.72rem;color:var(--muted);line-height:1.2}
   .prof{background:#fff;border:1.5px dashed #c6d2e2;border-radius:12px;padding:6px;margin-top:4px;animation:fadeUp .3s both}
   .prof-svg{display:block;width:100%;height:auto}
   .prof-line{fill:none;stroke:var(--blue);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
   .prof-in{fill:none;stroke:#9b3640;stroke-width:9;stroke-linejoin:round;opacity:.18}
   .prof-svg text{font:700 13px Inter,sans-serif;fill:var(--red);text-anchor:middle}
   .prof-svg .prof-note{font:600 11px "Noto Sans Sinhala",Inter,sans-serif;fill:var(--muted)}
+  .prod{cursor:pointer;transition:transform .2s,box-shadow .2s}
+  .prod:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(11,78,162,.16)}
+  .prod:focus-visible{outline:3px solid #9cc0ff;outline-offset:3px}
+  .iv{position:fixed;inset:0;z-index:130;background:rgba(3,15,35,.7);display:flex;align-items:center;justify-content:center;padding:20px}
+  .iv[hidden]{display:none}
+  body.iv-open{overflow:hidden}
+  .iv-box{position:relative;width:min(1040px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border-radius:20px;box-shadow:0 30px 70px rgba(0,0,0,.4);animation:fadeUp .3s both}
+  .iv-close{position:absolute;top:12px;right:12px;z-index:5;width:44px;height:44px;border-radius:50%;border:0;background:var(--red);color:#fff;font-size:1.2rem;cursor:pointer;box-shadow:0 6px 16px rgba(227,30,36,.35)}
+  .iv-body{display:grid;grid-template-columns:1.25fr 1fr;min-height:520px}
+  .iv-body{align-items:start}
+  .iv-media{position:sticky;top:0;height:min(620px,calc(100vh - 40px));background:radial-gradient(circle at 50% 40%,#ffffff,#e4ebf4 72%);display:flex;flex-direction:column}
+  .iv-media .pimg{flex:1;aspect-ratio:auto;min-height:360px;border-radius:0}
+  .iv-tip{text-align:center;font-family:"Noto Sans Sinhala";font-size:.8rem;color:var(--muted);padding:8px 12px 12px}
+  .iv-info{padding:34px 28px 28px;display:flex;flex-direction:column;gap:12px}
+  .iv-cat{align-self:flex-start;background:#e8eef7;color:var(--blue);font:700 .78rem "Noto Sans Sinhala";padding:4px 12px;border-radius:20px}
+  .iv-info h2{font-family:"Noto Sans Sinhala",Oswald;font-weight:800;font-size:1.7rem;color:var(--blue);line-height:1.25;padding-right:40px}
+  .iv-info .psub{font-weight:600;color:var(--muted)}
+  .iv-desc{color:#333}
+  .iv-info .pprices{padding-top:0}
+  .iv-info .pprices b{font-size:1.7rem}
+  .iv-info .btn.block{justify-content:center;width:100%;font-family:inherit}
+  .iv-info button.btn{border:0;cursor:pointer;font-size:1rem}
+  @media (max-width:820px){
+    .iv{padding:0;align-items:stretch}
+    .iv-box{max-height:none;height:100%;border-radius:0}
+    .iv-body{grid-template-columns:1fr;min-height:0}
+    .iv-media{position:relative;height:auto}
+    .iv-media .pimg{flex:none;min-height:0;height:52vh}
+    .iv-info{padding:20px 18px 28px}
+  }
   .pbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .pbtns .order{white-space:nowrap;min-width:120px}
   .pbtns button.order{font-family:inherit;font-weight:700}
@@ -597,6 +626,13 @@
   </div>
 </footer>
 
+<div class="iv" id="item-view" role="dialog" aria-modal="true" aria-label="Item" hidden>
+  <div class="iv-box">
+    <button type="button" class="iv-close" aria-label="Close">✕</button>
+    <div class="iv-body"></div>
+  </div>
+</div>
+
 <div class="lb" id="lb" aria-hidden="true">
   <img id="lbimg" alt="">
   <button class="x" aria-label="Close">✕</button>
@@ -724,29 +760,84 @@
   const kids = id => CATS.filter(c => (c.parent_id ?? null) == (id ?? null)).sort((a,b)=>(a.sort-b.sort)||(a.id-b.id));
   const bigLabel = n => { const m = String(n).match(/\d+(\.\d+)?\s*("|”|inch|in\b|mm|ft)?/i); return m ? m[0].replace(/\s*(inch|in)\b/i,'"').replace(/\s+/g,'') : String(n).split(/\s+/)[0]; };
   const hasProf = p => !!(p.model && window.AD_PROFILES && AD_PROFILES[p.model]);
+  const has = v => v != null && v !== '';
+  const waLink = p => `https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name+(p.size?' ('+p.size+')':''))}`;
+  const priceBoxes = p => `
+    <div class="pprices">
+      <div><small>විකුණුම් මිල</small><b>${has(p.price)?money(p.price):'අමතන්න'}</b>${has(p.price)&&p.unit?`<em>${esc(p.unit)}</em>`:''}</div>
+      ${has(p.fixing_price)?`<div class="fx"><small>සවි කිරීමේ මිල</small><b>${money(p.fixing_price)}</b>${p.unit?`<em>${esc(p.unit)}</em>`:''}</div>`:''}
+    </div>`;
+  const media = (p, cls='') => hasProf(p)
+    ? `<div class="pimg p3d ${cls}" data-model="${esc(p.model)}"></div>`
+    : `<div class="pimg ${cls}" ${p.image_url?`style="background-image:url('${esc(p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>`;
   function prodCard(p){
     const sub = [p.size, p.colour].filter(Boolean).map(esc).join(' · ');
-    const has = v => v != null && v !== '';
     return `
-      <div class="prod">
-        ${hasProf(p) ? `<div class="pimg p3d" data-model="${esc(p.model)}"><span class="p3d-hint">↔ කරකවන්න</span></div>`
-          : `<div class="pimg" ${p.image_url?`style="background-image:url('${esc(p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>`}
+      <article class="prod" data-item="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} — විස්තර බලන්න">
+        ${media(p)}
         <div class="pb">
           <h3>${esc(p.name)}</h3>
           ${sub?`<span class="psub">${sub}</span>`:''}
-          ${p.description?`<p>${esc(p.description)}</p>`:''}
-          ${hasProf(p) ? `<div class="prof" hidden>${profileSVG(p.model)}</div>` : ''}
-          <div class="pprices">
-            <div><small>විකුණුම් මිල</small><b>${has(p.price)?money(p.price):'අමතන්න'}</b>${has(p.price)&&p.unit?`<em>/ ${esc(p.unit)}</em>`:''}</div>
-            ${has(p.fixing_price)?`<div class="fx"><small>සවි කිරීමේ මිල</small><b>${money(p.fixing_price)}</b>${p.unit?`<em>/ ${esc(p.unit)}</em>`:''}</div>`:''}
-          </div>
+          ${priceBoxes(p)}
           <div class="pbtns">
-            ${hasProf(p) ? `<button type="button" class="btn btn-blue order js-dims" aria-expanded="false">📏 මිනුම් පෙන්වන්න</button>` : ''}
-            <a class="btn btn-wa order" target="_blank" rel="noopener" href="https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name+(p.size?' ('+p.size+')':''))}">WhatsApp ඇණවුම</a>
+            <span class="btn btn-blue order">විස්තර බලන්න</span>
+            <a class="btn btn-wa order" target="_blank" rel="noopener" href="${waLink(p)}">WhatsApp ඇණවුම</a>
           </div>
         </div>
-      </div>`;
+      </article>`;
   }
+
+  // ---------- item detail view ----------
+  const dlg = document.getElementById('item-view');
+  let openId = null;
+  function openItem(id, push = true){
+    const p = PRODUCTS.find(x => x.id == id); if (!p) return;
+    openId = p.id;
+    const sub = [p.size, p.colour].filter(Boolean).map(esc).join(' · ');
+    const cat = CATS.find(c => c.id == p.category_id);
+    dlg.querySelector('.iv-body').innerHTML = `
+      <div class="iv-media">
+        ${media(p, 'iv-3d')}
+        ${hasProf(p) ? `<p class="iv-tip">ඇඟිල්ලෙන් ඕනම පැත්තකට කරකවන්න · ඇඟිලි දෙකෙන් zoom කරන්න</p>` : ''}
+      </div>
+      <div class="iv-info">
+        ${cat ? `<span class="iv-cat">${esc(cat.name)}</span>` : ''}
+        <h2>${esc(p.name)}</h2>
+        ${sub?`<p class="psub">${sub}</p>`:''}
+        ${p.description?`<p class="iv-desc">${esc(p.description)}</p>`:''}
+        ${priceBoxes(p)}
+        ${hasProf(p) ? `<button type="button" class="btn btn-blue block js-dims" aria-expanded="false">📏 මිනුම් පෙන්වන්න</button>
+          <div class="prof" hidden>${profileSVG(p.model)}</div>` : ''}
+        <a class="btn btn-wa block" target="_blank" rel="noopener" href="${waLink(p)}">WhatsApp ඇණවුම</a>
+        <a class="btn btn-red block" href="tel:+${PHONE}">📞 අමතන්න</a>
+      </div>`;
+    dlg.hidden = false; document.body.classList.add('iv-open');
+    dlg.querySelector('.iv-close').focus({ preventScroll: true });
+    if (push) history.pushState({ item: p.id }, '', '#item-' + p.id);
+    window.dispatchEvent(new Event('item:open'));
+  }
+  function closeItem(fromHistory = false){
+    if (openId == null) return;
+    openId = null;
+    window.dispatchEvent(new Event('item:close'));
+    dlg.hidden = true; document.body.classList.remove('iv-open');
+    dlg.querySelector('.iv-body').innerHTML = '';
+    if (!fromHistory && location.hash.startsWith('#item-')) history.back();
+  }
+  dlg.querySelector('.iv-close').onclick = () => closeItem();
+  dlg.addEventListener('click', e => {
+    if (e.target === dlg) return closeItem();
+    const d = e.target.closest('.js-dims'); if (!d) return;
+    const box = dlg.querySelector('.prof'), show = box.hidden;
+    box.hidden = !show; d.setAttribute('aria-expanded', show);
+    d.textContent = show ? '📏 මිනුම් හංගන්න' : '📏 මිනුම් පෙන්වන්න';
+    const v = dlg.querySelector('.p3d'); if (v) v.dispatchEvent(new CustomEvent('dims', { detail: show }));
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && openId != null) closeItem(); });
+  window.addEventListener('popstate', () => {
+    const m = location.hash.match(/^#item-(\d+)$/);
+    if (m) openItem(m[1], false); else closeItem(true);
+  });
   function renderShop(){
     const tabs=document.getElementById('shop-filters'), box=document.getElementById('products');
     if (!CATS.length){ tabs.innerHTML=''; box.innerHTML = `<div class="products">${PRODUCTS.map(prodCard).join('')}</div>`; window.dispatchEvent(new Event('shop:render')); return; }
@@ -774,11 +865,13 @@
     window.dispatchEvent(new Event('shop:render'));
   }
   document.getElementById('shop-filters').onclick = e => { const b=e.target.closest('[data-main]'); if(!b) return; shopMain = b.dataset.main==='other'?'other':+b.dataset.main; shopSub='all'; renderShop(); };
-  document.getElementById('products').onclick = e => {
-    const d=e.target.closest('.js-dims');
-    if (d){ const box=d.closest('.prod').querySelector('.prof'); const show=box.hidden; box.hidden=!show; d.setAttribute('aria-expanded',show); d.textContent = show ? '📏 මිනුම් හංගන්න' : '📏 මිනුම් පෙන්වන්න';
-      const v=d.closest('.prod').querySelector('.p3d'); if (v) v.dispatchEvent(new CustomEvent('dims', { detail: show })); return; }
-    const b=e.target.closest('[data-sub]'); if(!b) return; shopSub = b.dataset.sub==='all'?'all':+b.dataset.sub; renderShop(); };
+  const shopBox = document.getElementById('products');
+  shopBox.onclick = e => {
+    const b=e.target.closest('[data-sub]'); if (b){ shopSub = b.dataset.sub==='all'?'all':+b.dataset.sub; renderShop(); return; }
+    if (e.target.closest('a')) return;                 // WhatsApp link works as normal
+    const card=e.target.closest('.prod'); if (card) openItem(card.dataset.item);
+  };
+  shopBox.onkeydown = e => { if ((e.key==='Enter'||e.key===' ') && e.target.matches('.prod')) { e.preventDefault(); openItem(e.target.dataset.item); } };
   async function loadLive(){
     if(!DB) return;
     try{
@@ -803,6 +896,7 @@
         PRODUCTS = pr; CATS = Array.isArray(ct) ? ct : [];
         renderShop();
         document.getElementById('shop').hidden=false; document.getElementById('nav-shop').hidden=false;
+        { const m = location.hash.match(/^#item-(\d+)$/); if (m) openItem(m[1], false); }
       }
       if (pl.length){
         document.getElementById('price-list').innerHTML = pl.map(x=>`
@@ -821,27 +915,42 @@
 </script>
 <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/"}}</script>
 <script type="module">
-  // Live 3D models inside item cards (built from the measured cross-section in profiles.js)
-  const live = new Map();   // element → model
-  let lib = null;
+  // 3D models built from the measured cross-section in profiles.js
+  //  · item cards: small preview that turns by itself (tap the card to open the item)
+  //  · item view: big model, drag in any direction, pinch / wheel to zoom
+  const cards = new Map();   // element → model
+  let big = null, lib = null;
   const getLib = () => lib ||= import('./gutter3d.js');
   const io = new IntersectionObserver(es => es.forEach(async e => {
-    if (!e.isIntersecting || live.has(e.target)) return;
+    if (!e.isIntersecting || cards.has(e.target)) return;
     io.unobserve(e.target);
     try {
       const { mountGutter } = await getLib();
-      const g = mountGutter(e.target, e.target.dataset.model);
-      live.set(e.target, g);
-      e.target.addEventListener('dims', ev => g.setDims(ev.detail));
+      if (!e.target.isConnected) return;
+      cards.set(e.target, mountGutter(e.target, e.target.dataset.model));
       e.target.classList.add('ready');
     } catch (err) { console.warn('3D not available', err); e.target.classList.add('no3d'); }
   }), { rootMargin: '200px' });
   function scan(){
-    for (const [el, g] of live) if (!el.isConnected) { g.dispose(); live.delete(el); }
-    document.querySelectorAll('.p3d:not(.ready)').forEach(el => io.observe(el));
+    for (const [el, g] of cards) if (!el.isConnected) { g.dispose(); cards.delete(el); }
+    document.querySelectorAll('.prod .p3d:not(.ready)').forEach(el => io.observe(el));
+  }
+  async function openBig(){
+    const el = document.querySelector('#item-view .iv-3d.p3d'); if (!el) return;
+    try {
+      const { mountGutter } = await getLib();
+      if (!el.isConnected) return;
+      big?.dispose();
+      big = mountGutter(el, el.dataset.model, { interactive: true });
+      el.addEventListener('dims', ev => big?.setDims(ev.detail));
+      el.classList.add('ready');
+    } catch (err) { console.warn('3D not available', err); el.classList.add('no3d'); }
   }
   window.addEventListener('shop:render', scan);
+  window.addEventListener('item:open', openBig);
+  window.addEventListener('item:close', () => { big?.dispose(); big = null; });
   scan();
+  if (document.querySelector('#item-view:not([hidden]) .iv-3d')) openBig();   // opened from a shared link before this loaded
 </script>
 </body>
 </html>
