@@ -1,5 +1,7 @@
 -- =====================================================================
--- A.D. Engineering — Step 3: 12" gutter items (K and C) from the measurement sketch
+-- A.D. Engineering — Step 3: 12" gutter items from the measurement sketch
+--   K = Korean   (sale Rs. 250 / ft, fixing Rs. 500 / ft)
+--   C = Chinese  (sale Rs. 175 / ft, fixing Rs. 400 / ft)
 -- Supabase → SQL Editor → New query → paste → Run.  Safe to run again.
 -- =====================================================================
 do $$
@@ -13,20 +15,27 @@ begin
     returning id into cat;
   end if;
 
-  -- K: the existing 12" gutter item becomes "12" Gutter — K"
+  -- Korean: reuse the existing 12" gutter item (old names included) so nothing is duplicated
   update public.products
-     set name = '12" Gutter — K', size = '12"', price = 250, fixing_price = 500, unit = 'per ft',
-         model = 'gutter12', category_id = cat, in_stock = true, sort = 1,
-         description = '12" තහඩුව · පළල 4½" · උස 4¼"'
-   where model = 'gutter12' and (name like '12" Box Gutter%' or name = '12" Gutter — K');
+     set name = '12" Gutter — Korean (K)', size = '12"', colour = 'Korean',
+         price = 250, fixing_price = 500, unit = 'per ft', model = 'gutter12',
+         category_id = cat, in_stock = true, sort = 1,
+         description = 'Korean තහඩුව · 12" · පළල 4½" · උස 4¼"'
+   where name in ('12" Box Gutter', '12" Gutter — K', '12" Gutter — Korean (K)');
   if not found then
-    insert into public.products (name, size, price, fixing_price, unit, model, category_id, in_stock, sort, description)
-    values ('12" Gutter — K', '12"', 250, 500, 'per ft', 'gutter12', cat, true, 1, '12" තහඩුව · පළල 4½" · උස 4¼"');
+    insert into public.products (name, size, colour, price, fixing_price, unit, model, category_id, in_stock, sort, description)
+    values ('12" Gutter — Korean (K)', '12"', 'Korean', 250, 500, 'per ft', 'gutter12', cat, true, 1, 'Korean තහඩුව · 12" · පළල 4½" · උස 4¼"');
   end if;
 
-  -- C
-  if not exists (select 1 from public.products where name = '12" Gutter — C') then
-    insert into public.products (name, size, price, fixing_price, unit, model, category_id, in_stock, sort, description)
-    values ('12" Gutter — C', '12"', 175, 400, 'per ft', 'gutter12', cat, true, 2, '12" තහඩුව · පළල 4½" · උස 4¼"');
+  -- Chinese
+  update public.products
+     set name = '12" Gutter — Chinese (C)', size = '12"', colour = 'Chinese',
+         price = 175, fixing_price = 400, unit = 'per ft', model = 'gutter12',
+         category_id = cat, in_stock = true, sort = 2,
+         description = 'Chinese තහඩුව · 12" · පළල 4½" · උස 4¼"'
+   where name in ('12" Gutter — C', '12" Gutter — Chinese (C)');
+  if not found then
+    insert into public.products (name, size, colour, price, fixing_price, unit, model, category_id, in_stock, sort, description)
+    values ('12" Gutter — Chinese (C)', '12"', 'Chinese', 175, 400, 'per ft', 'gutter12', cat, true, 2, 'Chinese තහඩුව · 12" · පළල 4½" · උස 4¼"');
   end if;
 end $$;
