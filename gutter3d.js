@@ -8,16 +8,20 @@ import { OrbitControls } from 'three/addons/OrbitControls.js';
 const LENGTH = 12;   // length of the piece shown (1 ft)
 const T = 0.07;      // sheet thickness (slightly exaggerated so it reads)
 
-function label(text, color = '#e31e24', w = 0.95){
-  const c = document.createElement('canvas'); c.width = 256; c.height = 128;
+// A measurement number: plain text with a white halo (no box), sized to match the
+// label boxes used for placement in profiles.js (w × h inches).
+function label(text, w, h, color = '#d0161d'){
+  const PX = 160;                                   // canvas pixels per inch
+  const c = document.createElement('canvas'); c.width = Math.ceil(w * PX); c.height = Math.ceil(h * PX);
   const g = c.getContext('2d');
-  g.fillStyle = 'rgba(255,255,255,.96)'; g.strokeStyle = color; g.lineWidth = 8;
-  g.beginPath(); g.roundRect(8, 12, 240, 104, 44); g.fill(); g.stroke();
-  g.fillStyle = color; g.font = 'bold 84px Inter, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText(text, 128, 68);
+  g.font = `800 ${Math.round(h * PX * 0.86)}px Inter, Arial, sans-serif`;
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.lineJoin = 'round'; g.lineWidth = h * PX * 0.26; g.strokeStyle = 'rgba(255,255,255,.95)';
+  g.strokeText(text, c.width / 2, c.height / 2 + 2);
+  g.fillStyle = color; g.fillText(text, c.width / 2, c.height / 2 + 2);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
-  s.scale.set(w, w / 2, 1); s.renderOrder = 10;
+  s.scale.set(w, h, 1); s.renderOrder = 10;
   return s;
 }
 
@@ -25,7 +29,7 @@ export function mountGutter(container, profileKey = 'gutter12', opts = {}){
   const interactive = !!opts.interactive;
   const prof = (window.AD_PROFILES || {})[profileKey];
   if (!prof) throw new Error('No profile ' + profileKey);
-  const P = prof.points, L = prof.labels || [];
+  const P = prof.points, LO = window.profileLayout(profileKey);
   const xs = P.map(p => p[0]), ys = P.map(p => p[1]);
   const minX = Math.min(...xs), maxX = Math.max(...xs), maxY = Math.max(...ys);
   const cx = (minX + maxX) / 2, cy = maxY / 2;
@@ -67,24 +71,22 @@ export function mountGutter(container, profileKey = 'gutter12', opts = {}){
     m.position.set((x1 + x2) / 2 - cx, (y1 + y2) / 2 - cy, 0); m.rotation.z = ang;
     m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), foldMat));   // crisp fold lines
     model.add(m);
-
-    // measurement label for this segment at the front end
-    const flat = Math.abs(y2 - y1) < 1e-6, short = len < 1;
-    const endFold = i === 1 || i === P.length - 1;
-    const k = flat && short && !endFold ? -1 : 1;
-    const nx = k * (y2 - y1) / len, ny = -k * (x2 - x1) / len;
-    const off = flat ? 0.38 : (short ? 0.66 : 0.55);
-    const slide = k < 0 ? 0.2 : 0;                       // inside step labels sit toward the next riser
-    const ux = (x2 - x1) / len * slide, uy = (y2 - y1) / len * slide;
-    const a = new THREE.Vector3(x1 - cx + nx * 0.16, y1 - cy + ny * 0.16, zf), b = new THREE.Vector3(x2 - cx + nx * 0.16, y2 - cy + ny * 0.16, zf);
+  }
+  // measurement lines (beside each part) and numbers, positioned by profiles.js so they never overlap
+  const sideOf = new Map(LO.labels.filter(l => !l.span).map(l => [l.seg, l]));
+  LO.segs.forEach((sg, i) => {
+    const l = sideOf.get(i), nx = l ? l.nx : sg.uy, ny = l ? l.ny : -sg.ux, o = 0.13;
+    const a = new THREE.Vector3(sg.x1 - cx + nx*o, sg.y1 - cy + ny*o, zf), b = new THREE.Vector3(sg.x2 - cx + nx*o, sg.y2 - cy + ny*o, zf);
     dims.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), lineMat));
-    const s = label(L[i-1] || len.toFixed(2));
-    s.position.set((x1 + x2) / 2 - cx + nx * off + ux, (y1 + y2) / 2 - cy + ny * off + uy, zf);
+  });
+  for (const l of LO.labels){
+    const s = label(l.text, l.w, l.h);
+    s.position.set(l.x - cx, l.y - cy, zf + 0.01);
     dims.add(s);
   }
   const yb = -cy - 0.55, xr = maxX - cx + 0.55;
   dims.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(xr, yb, -LENGTH/2), new THREE.Vector3(xr, yb, LENGTH/2)]), lineMat));
-  const ll = label('1 ft', '#0b4ea2', 1.3); ll.position.set(xr + 0.7, yb, -1.5); dims.add(ll);
+  const ll = label('1 ft', 0.62, 0.34, '#0b4ea2'); ll.position.set(xr + 0.45, yb, -1.5); dims.add(ll);
   model.add(dims);
   scene.add(model);
 
@@ -102,7 +104,8 @@ export function mountGutter(container, profileKey = 'gutter12', opts = {}){
   // camera distance that fits the model, whatever the container shape
   const HOME_DIR = new THREE.Vector3(1, 0.55, 1).normalize(), FRONT_DIR = new THREE.Vector3(0, 0.07, 1).normalize();   // straight at the cut end
   const R_ALL = Math.hypot(LENGTH / 2, (maxX - minX) / 2, maxY / 2) * 1.02;
-  const R_END = Math.hypot((maxX - minX) / 2 + 0.9, maxY / 2 + 0.55);
+  const BB = LO.bbox;                                                   // profile + its labels
+  const R_END = Math.hypot(Math.max(cx - BB.minX, BB.maxX - cx), Math.max(cy - BB.minY, BB.maxY - cy));
   const fit = r => {
     const v = THREE.MathUtils.degToRad(camera.fov), h = 2 * Math.atan(Math.tan(v / 2) * camera.aspect);
     return r / Math.sin(Math.min(v, h) / 2);
@@ -113,7 +116,7 @@ export function mountGutter(container, profileKey = 'gutter12', opts = {}){
     HOME.copy(HOME_DIR).multiplyScalar(fit(R_ALL));
     // end-on view: fit the cut end plus its labels (width and height separately) in front of the camera
     const v = THREE.MathUtils.degToRad(camera.fov), th = Math.tan(v / 2), tw = th * camera.aspect;
-    const hw = (maxX - minX) / 2 + 1.6, hh = maxY / 2 + 1.05;
+    const hw = Math.max(cx - BB.minX, BB.maxX - cx, xr + 0.8) + 0.3, hh = Math.max(cy - BB.minY, BB.maxY - cy) + 0.35;
     FRONT.copy(FRONT_DIR).multiplyScalar(Math.max(hw / tw, hh / th) + LENGTH / 2);
     controls.minDistance = fit(R_END) * 0.5; controls.maxDistance = fit(R_ALL) * 2.2;
   };

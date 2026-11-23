@@ -240,7 +240,7 @@
   .prof-svg{display:block;width:100%;height:auto}
   .prof-line{fill:none;stroke:var(--blue);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
   .prof-in{fill:none;stroke:#9b3640;stroke-width:9;stroke-linejoin:round;opacity:.18}
-  .prof-svg text{font:700 13px Inter,sans-serif;fill:var(--red);text-anchor:middle}
+  .prof-svg text{font:800 14px Inter,sans-serif;fill:var(--red);text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:3px}
   .prof-svg .prof-note{font:600 11px "Noto Sans Sinhala",Inter,sans-serif;fill:var(--muted)}
   .prod{cursor:pointer;transition:transform .2s,box-shadow .2s}
   .prod:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(11,78,162,.16)}
@@ -272,6 +272,11 @@
     .iv-media .pimg{flex:none;min-height:0;height:52vh}
     .iv-info{padding:20px 18px 28px}
   }
+  .vsel{display:flex;gap:6px;margin:4px 0 2px}
+  .vsel button{flex:1;font:700 .9rem Inter,"Noto Sans Sinhala",sans-serif;padding:8px 6px;border-radius:10px;border:2px solid #c6d2e2;background:#fff;color:var(--blue);cursor:pointer}
+  .vsel button span{font-weight:600;opacity:.7}
+  .vsel button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .vsel button:focus-visible{outline:3px solid #9cc0ff;outline-offset:2px}
   .pbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .pbtns .order{white-space:nowrap;min-width:120px}
   .pbtns button.order{font-family:inherit;font-weight:700}
@@ -761,12 +766,28 @@
   const bigLabel = n => { const m = String(n).match(/\d+(\.\d+)?\s*("|”|inch|in\b|mm|ft)?/i); return m ? m[0].replace(/\s*(inch|in)\b/i,'"').replace(/\s+/g,'') : String(n).split(/\s+/)[0]; };
   const hasProf = p => !!(p.model && window.AD_PROFILES && AD_PROFILES[p.model]);
   const has = v => v != null && v !== '';
-  const waLink = p => `https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name+(p.size?' ('+p.size+')':''))}`;
-  const priceBoxes = p => `
+  // Korean / Chinese (or other) versions of one item: p.variants = [{name, code, price, fixing_price}]
+  const variantsOf = p => Array.isArray(p.variants) ? p.variants.filter(v => v && v.name) : [];
+  const chosen = new Map();                                    // item id → selected version index
+  const curVar = p => { const vs = variantsOf(p); return vs.length ? vs[Math.min(chosen.get(p.id) || 0, vs.length-1)] : null; };
+  const priceOf = p => { const v = curVar(p); return v ? { price: v.price, fixing_price: v.fixing_price } : p; };
+  const waLink = p => { const v = curVar(p); return `https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name+(p.size?' ('+p.size+')':'')+(v?' — '+v.name:''))}`; };
+  const priceBoxes = p => { const q = priceOf(p); return `
     <div class="pprices">
-      <div><small>විකුණුම් මිල</small><b>${has(p.price)?money(p.price):'අමතන්න'}</b>${has(p.price)&&p.unit?`<em>${esc(p.unit)}</em>`:''}</div>
-      ${has(p.fixing_price)?`<div class="fx"><small>සවි කිරීමේ මිල</small><b>${money(p.fixing_price)}</b>${p.unit?`<em>${esc(p.unit)}</em>`:''}</div>`:''}
-    </div>`;
+      <div><small>විකුණුම් මිල</small><b>${has(q.price)?money(q.price):'අමතන්න'}</b>${has(q.price)&&p.unit?`<em>${esc(p.unit)}</em>`:''}</div>
+      ${has(q.fixing_price)?`<div class="fx"><small>සවි කිරීමේ මිල</small><b>${money(q.fixing_price)}</b>${p.unit?`<em>${esc(p.unit)}</em>`:''}</div>`:''}
+    </div>`; };
+  const variantBtns = p => { const vs = variantsOf(p); if (vs.length < 2) return '';
+    const i = Math.min(chosen.get(p.id) || 0, vs.length-1);
+    return `<div class="vsel" role="group" aria-label="වර්ගය තෝරන්න">${vs.map((v, k) =>
+      `<button type="button" data-var="${k}" aria-pressed="${k===i}" class="${k===i?'on':''}">${esc(v.name)}${v.code?` <span>(${esc(v.code)})</span>`:''}</button>`).join('')}</div>`; };
+  // switch version: update prices + WhatsApp text in place (the 3D model keeps running)
+  function pickVariant(root, p, k){
+    chosen.set(p.id, k);
+    root.querySelectorAll('.vsel button').forEach(b => { const on = +b.dataset.var === k; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    const box = root.querySelector('.pprices'); if (box) box.outerHTML = priceBoxes(p);
+    root.querySelectorAll('a.btn-wa').forEach(a => a.href = waLink(p));
+  }
   const media = (p, cls='') => hasProf(p)
     ? `<div class="pimg p3d ${cls}" data-model="${esc(p.model)}"></div>`
     : `<div class="pimg ${cls}" ${p.image_url?`style="background-image:url('${esc(p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>`;
@@ -778,6 +799,7 @@
         <div class="pb">
           <h3>${esc(p.name)}</h3>
           ${sub?`<span class="psub">${sub}</span>`:''}
+          ${variantBtns(p)}
           ${priceBoxes(p)}
           <div class="pbtns">
             <span class="btn btn-blue order">විස්තර බලන්න</span>
@@ -805,6 +827,7 @@
         <h2>${esc(p.name)}</h2>
         ${sub?`<p class="psub">${sub}</p>`:''}
         ${p.description?`<p class="iv-desc">${esc(p.description)}</p>`:''}
+        ${variantBtns(p)}
         ${priceBoxes(p)}
         ${hasProf(p) ? `<button type="button" class="btn btn-blue block js-dims" aria-expanded="false">📏 මිනුම් පෙන්වන්න</button>
           <div class="prof" hidden>${profileSVG(p.model)}</div>` : ''}
@@ -812,6 +835,7 @@
         <a class="btn btn-red block" href="tel:+${PHONE}">📞 අමතන්න</a>
       </div>`;
     dlg.hidden = false; document.body.classList.add('iv-open');
+    dlg.querySelector('.iv-box').scrollTop = 0;                 // every item opens from the top
     dlg.querySelector('.iv-close').focus({ preventScroll: true });
     if (push) history.pushState({ item: p.id }, '', '#item-' + p.id);
     window.dispatchEvent(new Event('item:open'));
@@ -827,6 +851,9 @@
   dlg.querySelector('.iv-close').onclick = () => closeItem();
   dlg.addEventListener('click', e => {
     if (e.target === dlg) return closeItem();
+    const vb = e.target.closest('[data-var]');
+    if (vb){ const p = PRODUCTS.find(x => x.id == openId); pickVariant(dlg, p, +vb.dataset.var);
+      const card = shopBox.querySelector(`.prod[data-item="${p.id}"]`); if (card) pickVariant(card, p, +vb.dataset.var); return; }
     const d = e.target.closest('.js-dims'); if (!d) return;
     const box = dlg.querySelector('.prof'), show = box.hidden;
     box.hidden = !show; d.setAttribute('aria-expanded', show);
@@ -869,7 +896,10 @@
   shopBox.onclick = e => {
     const b=e.target.closest('[data-sub]'); if (b){ shopSub = b.dataset.sub==='all'?'all':+b.dataset.sub; renderShop(); return; }
     if (e.target.closest('a')) return;                 // WhatsApp link works as normal
-    const card=e.target.closest('.prod'); if (card) openItem(card.dataset.item);
+    const card=e.target.closest('.prod'); if (!card) return;
+    const vb=e.target.closest('[data-var]');          // Korean / Chinese buttons change the prices, not open the item
+    if (vb){ pickVariant(card, PRODUCTS.find(x => x.id == card.dataset.item), +vb.dataset.var); return; }
+    openItem(card.dataset.item);
   };
   shopBox.onkeydown = e => { if ((e.key==='Enter'||e.key===' ') && e.target.matches('.prod')) { e.preventDefault(); openItem(e.target.dataset.item); } };
   async function loadLive(){

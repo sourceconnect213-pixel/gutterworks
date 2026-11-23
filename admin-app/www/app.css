@@ -197,3 +197,8 @@ main{padding:14px 12px}
 .stock-sw em{font-style:normal;font-size:.66rem;font-weight:700;color:var(--muted)}
 .addrow{margin-top:6px}
 .money-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* Korean / Chinese prices */
+.vtag{display:inline-grid;place-items:center;min-width:22px;height:20px;padding:0 5px;border-radius:6px;background:var(--blue);color:#fff;font:800 .72rem Inter,sans-serif;margin-right:4px}
+.vhead{font-weight:800;color:var(--blue);margin:2px 0 6px}
+.irow .prices + .prices{margin-top:0}

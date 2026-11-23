@@ -172,7 +172,13 @@
   // ---------- items: category browser ----------
   // path: [] = all main categories, [mainId] = inside a main category, [mainId, subId] = inside a size / type
   let CATS = [], PRODS = [], path = [], needsStep2 = false;
-  const MODELS = { '': 'නැත · None', gutter12: '12" වැහිපීලි හරස්කඩ (මිනුම් සමඟ)' };
+  // measured cross-sections (profiles.js on the website): 3D model + measurements
+  const MODELS = { '': 'නැත · None',
+    gutter12: '12" Step Gutter', box12: '12" Box Gutter',
+    g18a: '18" Gutter · මෝස්තර 1', g18b: '18" Gutter · මෝස්තර 2', g18c: '18" Gutter · මෝස්තර 3',
+    g18d: '18" Gutter · මෝස්තර 4', g18e: '18" Gutter · මෝස්තර 5' };
+  const VNAMES = [['Korean','K'], ['Chinese','C']];
+  const variantsOf = p => Array.isArray(p.variants) ? p.variants.filter(v => v && v.name) : [];
   const UNITS = ['per ft', 'each', 'per sq.ft', 'per sheet', 'per meter'];
   const catById = id => CATS.find(c => c.id == id);
   const childrenOf = id => CATS.filter(c => (c.parent_id ?? null) == (id ?? null)).sort((a,b) => (a.sort-b.sort) || (a.id-b.id));
@@ -208,7 +214,8 @@
         <div class="info">
           <b>${esc(p.name)}</b>
           ${sub ? `<small>${sub}</small>` : ''}
-          <div class="prices"><span class="pr">${priceTxt(p)}</span>${p.fixing_price != null ? `<span class="fx">සවි කිරීම ${money(p.fixing_price)}</span>` : ''}</div>
+          ${variantsOf(p).length ? variantsOf(p).map(v => `<div class="prices"><span class="vtag">${esc(v.code || v.name)}</span><span class="pr">${v.price != null ? money(v.price) : 'අමතන්න'}</span>${v.fixing_price != null ? `<span class="fx">සවි කිරීම ${money(v.fixing_price)}</span>` : ''}</div>`).join('')
+            : `<div class="prices"><span class="pr">${priceTxt(p)}</span>${p.fixing_price != null ? `<span class="fx">සවි කිරීම ${money(p.fixing_price)}</span>` : ''}</div>`}
         </div>
         <label class="stock-sw" title="තොගයේ ඇත">
           <input type="checkbox" data-stock="${p.id}" ${p.in_stock ? 'checked' : ''}><i></i>
@@ -348,7 +355,16 @@
         ${needsStep2 ? '' : `<label>ප්‍රමාණය · Size<input name="size" value="${esc(p.size)}" placeholder='12"'></label>
         <label>පාට · Colour<input name="colour" value="${esc(p.colour)}" placeholder="Maroon"></label>`}
       </div>
-      <div class="money-row">
+      ${needsStep2 ? '' : `<div class="switch">Korean / Chinese මිල දෙකක් තියෙනවා<input type="checkbox" name="has_kc" id="it-kc" ${variantsOf(p).length ? 'checked' : ''}></div>`}
+      <div id="kc-box" ${variantsOf(p).length ? '' : 'hidden'}>
+        ${VNAMES.map(([n, c], i) => { const v = variantsOf(p)[i] || {}; return `
+        <p class="vhead"><span class="vtag">${c}</span> ${n}</p>
+        <div class="money-row">
+          <label>විකුණුම් මිල (Rs.)<input name="v${i}_price" inputmode="decimal" value="${v.price ?? ''}"></label>
+          <label>සවි කිරීමේ මිල (Rs.)<input name="v${i}_fix" inputmode="decimal" value="${v.fixing_price ?? ''}"></label>
+        </div>`; }).join('')}
+      </div>
+      <div class="money-row" id="single-price" ${variantsOf(p).length ? 'hidden' : ''}>
         <label>විකුණුම් මිල (Rs.)<input name="price" inputmode="decimal" placeholder="හිස් = අමතන්න" value="${p.price ?? ''}"></label>
         ${needsStep2 ? '' : `<label>සවි කිරීමේ මිල (Rs.)<input name="fixing_price" inputmode="decimal" placeholder="නැත්නම් හිස්ව තියන්න" value="${p.fixing_price ?? ''}"></label>`}
       </div>
@@ -367,6 +383,12 @@
           row.category_id = fd.get('category_id') ? +fd.get('category_id') : null;
           row.size = fd.get('size').trim(); row.colour = fd.get('colour').trim();
           row.fixing_price = num(fd.get('fixing_price')); row.model = fd.get('model');
+          if (fd.get('has_kc') === 'on'){
+            row.variants = VNAMES.map(([name, code], i) => ({ name, code, price: num(fd.get(`v${i}_price`)), fixing_price: num(fd.get(`v${i}_fix`)) }))
+                                 .filter(v => v.price != null || v.fixing_price != null);
+            if (!row.variants.length) throw new Error('Korean හෝ Chinese මිලක් දාන්න');
+            row.price = row.variants[0].price; row.fixing_price = row.variants[0].fixing_price;   // first one = default
+          } else row.variants = [];
         }
         const file = fd.get('image');
         if (file && file.size) { const up = await upload(await resize(file, 1000), 'items'); row.image_url = up.url; }
@@ -381,6 +403,8 @@
         await loadItems();
       });
     $('#it-img').onchange = e => { const f=e.target.files[0]; if(f){ const th=$('#it-th'); th.style.backgroundImage=`url('${URL.createObjectURL(f)}')`; th.textContent=''; } };
+    const kc = $('#it-kc');
+    if (kc) kc.onchange = () => { $('#kc-box').hidden = !kc.checked; $('#single-price').hidden = kc.checked; };
   }
   const pathOf = url => { const m = String(url||'').match(/\/object\/public\/photos\/(.+)$/); return m ? decodeURIComponent(m[1]) : null; };
 
