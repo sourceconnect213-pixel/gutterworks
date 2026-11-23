@@ -18,12 +18,14 @@ begin
   select id into c18 from public.categories where name = '18" වැහිපීලි' limit 1;
   if c18 is null then insert into public.categories (parent_id, name, name_en, sort) values (gut, '18" වැහිපීලි', '18" Gutters', 2) returning id into c18; end if;
 
-  -- 12" step gutter: merge the separate Korean / Chinese rows into one item
+  -- 12" step gutter: one item; the old separate Chinese row is hidden
   select id into keep from public.products where model = 'gutter12' order by sort, id limit 1;
   if keep is null then
     insert into public.products (name, model, category_id) values ('12" Step Gutter', 'gutter12', c12) returning id into keep;
   end if;
-  delete from public.products where model = 'gutter12' and id <> keep;
+  -- old separate Chinese row: hide it (not deleted)
+  update public.products set in_stock = false, model = '', name = '(පරණ) ' || name
+   where model = 'gutter12' and id <> keep;
 
   -- upsert by model key
   create temp table _items (model text, name text, cat bigint, size text, v jsonb, sort int) on commit drop;
