@@ -71,7 +71,14 @@ function buildSheet(pts, t, len, m){
   [m.outside, m.inside, m.edge].forEach(x => x.side = THREE.DoubleSide);
   const mesh = new THREE.Mesh(geo, [m.outside, m.inside, m.edge]);
   // fold lines only where the sheet actually bends (and its outline)
-  mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), m.foldMat));
+  // fold lines: outside face lines in the paint shade, inside face lines in a galvalume grey
+  const faceLines = (arr, mat) => {
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
+    const e = new THREE.EdgesGeometry(g, 25); g.dispose();
+    mesh.add(new THREE.LineSegments(e, mat));
+  };
+  faceLines(groups.outside, m.foldMat);
+  faceLines(groups.inside, m.insideLineMat);
   return mesh;
 }
 
@@ -107,6 +114,7 @@ export function mountGutter(container, profileKey = 'gutter12', opts = {}){
   // cut edges of the sheet: same paint colour, a little darker (no white outline)
   const edge    = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.5, metalness: 0.12 });
   const foldMat = new THREE.LineBasicMaterial({ transparent: true });
+  const insideLineMat = new THREE.LineBasicMaterial({ color: 0x8e979f, transparent: true, opacity: 0.6 });   // galvalume grey, never the paint colour
   const setColor = hex => {
     outside.color.set(hex); edge.color.set(hex).multiplyScalar(0.78);
     foldMat.color.set(hex).multiplyScalar(0.5); foldMat.opacity = 0.55;   // fold lines: darker shade of the same colour, never white
@@ -120,7 +128,7 @@ export function mountGutter(container, profileKey = 'gutter12', opts = {}){
 
   // One continuous folded sheet: every part is offset by half the thickness on each side and the
   // folds are mitred, so neighbouring parts meet exactly (no overlaps, gaps or see-through corners).
-  model.add(buildSheet(P.map(([x, y]) => [x - cx, y - cy]), T, LENGTH, { outside, inside, edge, foldMat }));
+  model.add(buildSheet(P.map(([x, y]) => [x - cx, y - cy]), T, LENGTH, { outside, inside, edge, foldMat, insideLineMat }));
   // measurement lines (beside each part) and numbers, positioned by profiles.js so they never overlap
   const sideOf = new Map(LO.labels.filter(l => !l.span).map(l => [l.seg, l]));
   LO.segs.forEach((sg, i) => {
