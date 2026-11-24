@@ -1212,6 +1212,7 @@
     api?.dispose();
     api = lib.mountInstall(stage, ui(), { ...prev, gutter: gSel.value, valance: vSel.value, ...extra });
     window.__instGeo = () => api.geometry();
+    window.__dbgApi = api;
   }
   const io = new IntersectionObserver(async (es, o) => {
     if (!es[0].isIntersecting) return; o.disconnect();

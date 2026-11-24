@@ -21,8 +21,8 @@ const BW = 1.0;                            // bracket strap width
 const AMP = 0.6, PITCH = 3;                // roof sheet corrugation
 const PIPE = 4;                            // 4" × 4" down pipe
 const OUTLET_Z = -LEN + 3;                 // outlet + down pipe at the very end of the gutter, next to the stop end
-const RAFTER_Z = [0, -24, -48, -72];       // front faces of the rafters (24" centres)
-const BRACKET_Z = RAFTER_Z.map(z => z - RAFTER_W / 2);   // one bracket on every rafter (24" ≈ 600 mm apart)
+const RAFTER_Z = [0, -24, -48, -72, -78];  // front faces of the rafters (24" centres) + the end rafter the eave finishes on
+const BRACKET_Z = RAFTER_Z.slice(0, 4).map(z => z - RAFTER_W / 2);   // brackets at 24" (≈600 mm); the outlet sits beyond the last one
 
 const rafterTop = x => -TN * x;
 const sheetUnder = x => -TN * x + PUR / CS;            // underside of the roof sheet (on the purlins)
@@ -56,10 +56,18 @@ const lineDark = new THREE.LineBasicMaterial({ color: 0x5c3b3b, transparent: tru
 const lineGrey = new THREE.LineBasicMaterial({ color: 0x8e979f, transparent: true, opacity: 0.6 });
 const lineSteel = new THREE.LineBasicMaterial({ color: 0x5f666c, transparent: true, opacity: 0.7 });
 
-function prism(points, depth, zFront, cap, side){        // polygon in x-y, extruded back from zFront
+// polygon in x-y, extruded back from zFront. Only the front face (the section cut at z = 0) gets the
+// hatched `cap`; the far end is a real board end, so it is covered in the plain `side` material.
+const plainEnd = new Map();
+function prism(points, depth, zFront, cap, side){
   const s = new THREE.Shape(points.map(([x, y]) => new THREE.Vector2(x, y)));
   const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false });
-  const m = new THREE.Mesh(g, [cap, side]); m.position.z = zFront - depth; return m;
+  const m = new THREE.Mesh(g, [cap, side]); m.position.z = zFront - depth;
+  if (cap !== side){
+    if (!plainEnd.has(side)) plainEnd.set(side, side.clone()), plainEnd.get(side).side = THREE.DoubleSide;
+    const back = new THREE.Mesh(new THREE.ShapeGeometry(s), plainEnd.get(side)); back.position.z = -0.01; m.add(back);
+  }
+  return m;
 }
 function box(sx, sy, sz, mat){ return new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat); }
 
@@ -529,6 +537,7 @@ export function mountInstall(stage, ui, opts = {}){
     setLabels(on){ labelsOn = on; },
     setArrows(on){ arrowsOn = on; },
     state(){ return { t, playing, view, labels: labelsOn, arrows: arrowsOn }; },
+    _debugCam(px, py, pz, tx, ty, tz){ userCam = true; camera.position.set(px, py, pz); controls.target.set(tx, ty, tz); },
     geometry(){ return { gutter: GKEY, valance: VKEY, FAS_BOT, VAL_FACE, gx, gy, backTop, BL, BR, FRONT_X, SHEET_EDGE_X, sheetY: sheetUnder(SHEET_EDGE_X), bpath, vpts, gpts }; },
     get playing(){ return playing; },
     dispose(){
