@@ -11,14 +11,13 @@ const SLOPE = 22 * DEG, TN = Math.tan(SLOPE), CS = Math.cos(SLOPE), SN = Math.si
 const RAFTER_D = 4, RAFTER_W = 2;          // 2" × 4" rafter
 const RD = RAFTER_D / CS;                  // vertical depth of the rafter at its plumb-cut end
 const PUR = 2;                             // 2" × 2" purlin (reeper)
-const FAS_T = 1, FAS_TOP = 0, FAS_BOT = -8;      // 1" × 8" fascia board on the rafter ends, top level with the rafter tops
+const FAS_T = 1, FAS_TOP = 0;                     // 1" thick fascia board on the rafter ends, top level with the rafter tops (height set by the valance board)
 const LEN = 76;                            // length of eave shown
 const WALL_X = -24, WALL_T = 9;            // 24" eave overhang, 9" brick wall
 const GROUND = -84;
 const T = (window.AD_SHEET_MM || 0.47) / 25.4;     // 0.47 mm gutter / pipe sheet
 const BT = 0.08;                           // bracket strap thickness (≈2 mm)
 const BW = 1.0;                            // bracket strap width
-const SHEET_EDGE_X = 3.2;                  // roof sheet edge (≈1¾" past the fascia face, into the gutter)
 const AMP = 0.6, PITCH = 3;                // roof sheet corrugation
 const OUTLET_Z = -60, PIPE = 4;            // 4" × 4" down pipe
 const RAFTER_Z = [0, -24, -48, -72];       // front faces of the rafters (24" centres)
@@ -90,7 +89,14 @@ function arrowMesh(a, b){
 }
 
 // =====================================================================
-export function mountInstall(stage, ui){
+// gutter profiles that can be shown, and which side of each goes against the fascia
+export const GUTTERS = ['gutter12', 'box12', 'g18a', 'g18b', 'g18c', 'g18d', 'g18e'];
+export const VALANCES = ['val12d', 'val12a', 'val12b', 'val12c', 'val9a', 'val9b'];
+const BACK_ON_LEFT = { box12: true };      // box gutter: its taller (kinked) left wall is the back wall; others: plain right wall to the fascia
+
+export function mountInstall(stage, ui, opts = {}){
+  const GKEY = GUTTERS.includes(opts.gutter) ? opts.gutter : 'gutter12';
+  const VKEY = VALANCES.includes(opts.valance) ? opts.valance : (opts.valance === 'none' ? null : 'val12d');
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -124,29 +130,45 @@ export function mountInstall(stage, ui){
     return add(r, 0, 0.15 + i * 0.12, new THREE.Vector3(0, 26, 0));
   });
 
-  // ---------- 2. fascia board ----------
+  // ---------- 2. fascia board + metal valance board (sizes taken from the chosen items) ----------
+  // valance: painted face outward, ribs rest on the timber, bottom return + lip wrap under the fascia,
+  // top hem over the fascia top. The timber fascia height is set so the valance fits it exactly.
+  let FAS_BOT = -8, VAL_FACE = FAS_T;
+  let vpts = null;
+  if (VKEY){
+    const VP = window.AD_PROFILES[VKEY].points, vMaxX = Math.max(...VP.map(p => p[0]));
+    const mid = VP.slice(3, -1), vRib = mid.length ? vMaxX - Math.min(...mid.map(p => p[0])) : 0;
+    const lip = VP[0][1] - VP[1][1], faceTop = VP[VP.length - 2][1] - VP[1][1];
+    FAS_BOT = -(faceTop - lip);                             // fascia bottom sits on the lip, top level with the face top
+    const VAL_X = FAS_T + vRib + T / 2;
+    const VAL_Y0 = FAS_BOT - lip - T / 2;
+    vpts = VP.map(([x, y]) => [x - vMaxX + VAL_X, y - VP[1][1] + VAL_Y0]);
+    VAL_FACE = VAL_X + T / 2;
+  }
   const fascia = prism([[0, FAS_BOT], [FAS_T, FAS_BOT], [FAS_T, FAS_TOP], [0, FAS_TOP]], LEN, 0, M.timberCut, M.timber);
   add(fascia, 1, 0, new THREE.Vector3(18, 0, 0));
+  if (vpts){
+    const valance = buildSheet(vpts, T, LEN, { outside: M.paint, inside: M.galv, edge: M.paintEdge, foldMat: lineDark, insideLineMat: lineGrey });
+    valance.position.z = -LEN / 2;
+    add(valance, 1, 0.45, new THREE.Vector3(14, 0, 0), 0.6);
+  }
 
-  // ---------- gutter geometry (12" step gutter from the measured profile) ----------
-  const prof = window.AD_PROFILES.gutter12.points;
-  const maxX = Math.max(...prof.map(p => p[0]));
-  // ---------- 2b. metal valance board (12" Waddimbu Valance Board · design 4) over the timber fascia ----------
-  // painted face outward; its ribs rest on the timber; bottom return + lip wrap under the fascia; top hem over the fascia top
-  const VP = window.AD_PROFILES.val12d.points, vMaxX = Math.max(...VP.map(p => p[0])), vRib = vMaxX - Math.min(...VP.slice(3).map(p => p[0]));
-  const VAL_X = FAS_T + vRib + T / 2;                     // face centre line (ribs touch the timber)
-  const VAL_Y0 = FAS_BOT - 0.75 - T / 2;                  // bottom return just below the fascia, lip up to the fascia bottom
-  const vpts = VP.map(([x, y]) => [x - vMaxX + VAL_X, y + VAL_Y0]);
-  const valance = buildSheet(vpts, T, LEN, { outside: M.paint, inside: M.galv, edge: M.paintEdge, foldMat: lineDark, insideLineMat: lineGrey });
-  valance.position.z = -LEN / 2;
-  add(valance, 1, 0.45, new THREE.Vector3(14, 0, 0), 0.6);
-  const VAL_FACE = VAL_X + T / 2;                         // outer face of the valance board
-
-  const gx = VAL_FACE + T / 2, gy = -2.85;              // gutter back wall straight against the valance board
-  const gpts = prof.map(([x, y]) => [maxX - x, y]).reverse().map(([x, y]) => [x + gx, y + gy]);   // plain wall to the fascia
+  // ---------- gutter geometry: the chosen item's measured profile ----------
+  const prof = window.AD_PROFILES[GKEY].points;
+  const pMaxX = Math.max(...prof.map(p => p[0]));
+  // order the points so the walk starts at the back (fascia side) top fold and the outside stays on the right
+  const oriented = BACK_ON_LEFT[GKEY] ? prof.map(p => p.slice()) : prof.map(([x, y]) => [pMaxX - x, y]).reverse();
+  const oMinX = Math.min(...oriented.map(p => p[0])), oMinY = Math.min(...oriented.map(p => p[1]));
+  const backTop0 = oriented[1][1];                          // top of the back wall
+  const gx = VAL_FACE + T / 2;                             // back wall straight against the valance board (or fascia)
+  const gy = -0.1 - (backTop0 - oMinY);                     // back top just below the fascia top; gy = gutter bottom
+  const gpts = oriented.map(([x, y]) => [x - oMinX + gx, y - oMinY + gy]);
   const bottomXs = gpts.filter(p => Math.abs(p[1] - gy) < 1e-6).map(p => p[0]);
-  const OX = (Math.min(...bottomXs) + Math.max(...bottomXs)) / 2;          // outlet centre (middle of the gutter bottom)
+  const BL = Math.min(...bottomXs), BR = Math.max(...bottomXs), BW_ = BR - BL;
+  const OX = (BL + BR) / 2;                                // outlet centre (middle of the flat bottom)
   const FRONT_X = Math.max(...gpts.map(p => p[0]));
+  const backTop = gpts[1][1];
+  const SHEET_EDGE_X = gx + 1.75;                          // roof sheet edge ≈1¾" into the gutter
 
   // ---------- 3. gutter (against the fascia) + stop end + outlet opening ----------
   const gutterMats = { outside: M.paint, inside: M.galv, edge: M.paintEdge, foldMat: lineDark, insideLineMat: lineGrey };
@@ -165,10 +187,10 @@ export function mountInstall(stage, ui){
   const n = gpts.length;
   const tx = gx + T / 2 + IBT / 2, fy = gy + T / 2 + IBT / 2;
   const bpath = [
-    [tx, gy + 2.3],                                        // top of the tab (below the back wall's top fold)
-    [tx, gy + 1.35],                                       // bottom of the tab
-    [gx + 1.85, fy],                                       // slanted leg down to the bottom
-    [gx + 2.75, fy],                                       // foot on the gutter bottom
+    [tx, backTop - 0.45],                                  // top of the tab (below the back wall's top fold)
+    [tx, backTop - 1.4],                                   // bottom of the tab
+    [BL + BW_ * 0.62, fy],                                 // slanted leg down to the bottom
+    [BL + BW_ * 0.92, fy],                                 // foot on the gutter bottom
   ];
   const steelMats = { outside: M.steel, inside: M.steel, edge: M.steel, foldMat: lineSteel, insideLineMat: lineSteel };
   const UP = new THREE.Vector3(0, 1, 0);
@@ -184,8 +206,8 @@ export function mountInstall(stage, ui){
     const b = buildSheet(bpath, IBT, IBW, steelMats); b.position.z = zc;
     add(b, 3, i * 0.1, new THREE.Vector3(0, 9, 0));
     const spots = [
-      { p: [tx + IBT / 2, gy + 1.85], axis: new THREE.Vector3(1, 0, 0), len: 1.3 },   // through the tab + gutter wall into the fascia
-      { p: [gx + 2.35, fy + IBT / 2], axis: UP, len: 0.16 },                          // rivet through the foot + gutter bottom
+      { p: [tx + IBT / 2, backTop - 0.9], axis: new THREE.Vector3(1, 0, 0), len: 1.3 },   // through the tab + gutter wall into the fascia
+      { p: [BL + BW_ * 0.78, fy + IBT / 2], axis: UP, len: 0.16 },                          // rivet through the foot + gutter bottom
     ];
     spots.forEach(({ p, axis, len }, j) => {
       const s = makeScrew(len); s.position.set(p[0], p[1], zc); s.quaternion.setFromUnitVectors(UP, axis);
@@ -283,7 +305,7 @@ export function mountInstall(stage, ui){
   drops.instanceMatrix.setUsage(THREE.DynamicDrawUsage); water.add(drops);
   const paths = [];
   for (let i = 0; i < DROPS; i++){
-    const x0 = -50 + Math.random() * 44, z = -2 - Math.random() * 70, lx = FAS_T + 1.2 + Math.random() * 1.4;
+    const x0 = -50 + Math.random() * 44, z = -2 - Math.random() * 70, lx = SHEET_EDGE_X + 0.3 + Math.random() * 1.0;
     const pts = [onRoof(x0, z, AMP + 0.25), onRoof(SHEET_EDGE_X, z, AMP + 0.25),
       new THREE.Vector3(SHEET_EDGE_X + 0.4, gy + 1.6, z), new THREE.Vector3(lx, gy + 0.3, z),
       new THREE.Vector3(OX, gy + 0.3, OUTLET_Z), P1.clone(), P2, P3, P4, P5, new THREE.Vector3(P5.x + 6, GROUND - 1.4, OUTLET_Z)];
@@ -302,7 +324,7 @@ export function mountInstall(stage, ui){
     { k: 'purlin', views: {section:'L'},  si: 'රීප්ප', en: 'Purlin', step: 4, at: new THREE.Vector3(-28 * CS - 1, 28 * SN + 1.2, 0) },
     { k: 'rafter', views: {section:'L'},  si: 'පරාලය', en: 'Rafter', step: 0, at: new THREE.Vector3(-12, rafterTop(-12) - RD / 2, 0) },
     { k: 'wall', views: {section:'L',full:'L'},    si: 'බිත්තිය', en: 'Wall', step: 0, at: new THREE.Vector3(WALL_X - WALL_T / 2, -4, 0) },
-    { k: 'valance', views: {section:'R',full:'L'}, si: 'වඩිම්බු ආවරණය', en: 'Valance board', step: 1.3, at: new THREE.Vector3(VAL_FACE, -6.6, -0.5) },
+    { k: 'valance', views: VKEY ? {section:'R',full:'L'} : {}, si: 'වඩිම්බු ආවරණය', en: 'Valance board', step: 1.3, at: new THREE.Vector3(VAL_FACE, -6.6, -0.5) },
     { k: 'fascia', views: {section:'R',full:'L'},  si: 'වඩිම්බුව', en: 'Fascia board', step: 1, at: new THREE.Vector3(FAS_T / 2, -4.5, 0) },
     { k: 'screw', views: {section:'R'},   si: 'සවි කිරීමේ ඉස්කුරුප්පු', en: 'Fixing screws', step: 3, at: screwAt[0] },
     { k: 'bracket', views: {section:'R'}, si: 'වැහිපීලි ආධාරකය', en: 'Gutter bracket', step: 3, at: new THREE.Vector3((bpath[1][0] + bpath[2][0]) / 2 + 0.1, (bpath[1][1] + bpath[2][1]) / 2, BRACKET_Z[0] + 0.5) },
@@ -323,7 +345,9 @@ export function mountInstall(stage, ui){
 
   // ---------- timeline ----------
   const STEP = 2.4, NSTEPS = 7;
-  let t = 0, playing = true, stopAt = NSTEPS * STEP, lastNow = performance.now();
+  const END = NSTEPS * STEP;
+  let t = Math.min(END, Math.max(0, opts.t ?? 0)), playing = opts.playing ?? true, stopAt = END, lastNow = performance.now();
+  let labelsOn = opts.labels ?? true, arrowsOn = opts.arrows ?? true;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce){ t = stopAt; playing = false; }
   const ease = p => p < 0 ? 0 : p > 1 ? 1 : 1 - Math.pow(1 - p, 3);
@@ -336,6 +360,8 @@ export function mountInstall(stage, ui){
       if (a.spin && a.obj.userData.inner) a.obj.userData.inner.rotation.y = (1 - e) * a.spin;   // screw turning in
     }
     water.visible = t >= 6 * STEP;
+    arrows.forEach(a => a.visible = arrowsOn);
+    ui.onTime && ui.onTime(t / END, playing);
     const cur = Math.min(NSTEPS - 1, Math.floor(t / STEP + 1e-6));
     ui.onStep && ui.onStep(cur, playing);
     return cur;
@@ -376,6 +402,8 @@ export function mountInstall(stage, ui){
   const v3 = new THREE.Vector3();
   function layoutLabels(cur){
     const W = stage.clientWidth, H = stage.clientHeight, wide = W >= 720;
+    labelBox.style.display = svg.style.display = labelsOn ? '' : 'none';
+    if (!labelsOn){ for (const L of LABELS){ L.li = L.li || ui.legend.querySelector(`[data-k="${L.k}"]`); L.li.classList.toggle('off', t < (L.step + 0.55) * STEP || !L.views[view]); } return; }
     stage.classList.toggle('inst-wide', wide);
     const items = [];
     for (const L of LABELS){
@@ -475,13 +503,25 @@ export function mountInstall(stage, ui){
     stage.dataset.view = view;                       // current view (also used by the page / tests)
   });
 
+  if (opts.view) setView(opts.view, true);
   return {
-    play(){ if (t >= stopAt - 1e-3) t = 0; stopAt = NSTEPS * STEP; playing = true; ui.locked = false; },
+    play(){ if (t >= END - 1e-3) t = 0; stopAt = END; playing = true; ui.locked = false; },
     pause(){ playing = false; },
-    replay(){ t = 0; stopAt = NSTEPS * STEP; playing = true; userCam = false; ui.locked = false; },
+    replay(){ t = 0; stopAt = END; playing = true; userCam = false; ui.locked = false; },
     toggle(){ playing ? this.pause() : this.play(); return playing; },
     goStep(k){ t = k * STEP; stopAt = (k + 1) * STEP; playing = true; userCam = false; ui.locked = false; },
+    seek(f){ t = Math.min(END, Math.max(0, f * END)); playing = false; stopAt = END; },   // scrub like a video
     setView(name){ ui.locked = true; setView(name); },
-    get playing(){ return playing; }
+    setLabels(on){ labelsOn = on; },
+    setArrows(on){ arrowsOn = on; },
+    state(){ return { t, playing, view, labels: labelsOn, arrows: arrowsOn }; },
+    geometry(){ return { gutter: GKEY, valance: VKEY, FAS_BOT, VAL_FACE, gx, gy, backTop, BL, BR, FRONT_X, SHEET_EDGE_X, sheetY: sheetUnder(SHEET_EDGE_X), bpath, vpts, gpts }; },
+    get playing(){ return playing; },
+    dispose(){
+      renderer.setAnimationLoop(null); ro.disconnect(); controls.dispose();
+      scene.traverse(o => { o.geometry?.dispose?.(); (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m && !Object.values(M).includes(m) && m.dispose?.()); });
+      renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();
+      labelBox.innerHTML = ''; svg.innerHTML = ''; ui.legend.innerHTML = '';
+    }
   };
 }

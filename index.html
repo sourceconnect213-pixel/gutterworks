@@ -348,6 +348,14 @@
   .inst-seg button{border:0;border-radius:0;box-shadow:none}
   .inst-seg button.on{background:var(--blue);color:#fff}
   .inst-load{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-weight:600}
+  .inst-bar{margin-top:12px;display:grid;gap:10px}
+  #inst-seek{width:100%;height:44px;accent-color:var(--blue);cursor:pointer}
+  .inst-opts{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .inst-opts .tg{font:700 .9rem "Noto Sans Sinhala",Inter,sans-serif;min-height:44px;padding:0 16px;border-radius:24px;border:1.5px solid #c9d3e0;background:#fff;color:var(--muted);cursor:pointer}
+  .inst-opts .tg span{font:600 .75rem Inter,sans-serif;opacity:.75;margin-left:3px}
+  .inst-opts .tg.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .inst-opts .pick{display:flex;flex-direction:column;gap:3px;font:700 .8rem "Noto Sans Sinhala",sans-serif;color:var(--muted);flex:1 1 220px;margin:0}
+  .inst-opts select{min-height:44px;border:1.5px solid #c9d3e0;border-radius:12px;padding:0 10px;font:600 .9rem "Noto Sans Sinhala",Inter,sans-serif;color:var(--ink);background:#fff}
   .inst-key{display:none;list-style:none;margin:12px 0 0;padding:0;grid-template-columns:1fr 1fr;gap:6px 14px}
   .inst-key li{display:flex;align-items:center;gap:8px;font-size:.88rem;transition:opacity .3s}
   .inst-key li.off{opacity:.35}
@@ -695,6 +703,15 @@
           <span class="inst-seg"><button type="button" data-view="section" class="on">හරස්කඩ</button><button type="button" data-view="full">3D</button></span>
         </div>
         <div class="inst-load" id="inst-load">3D diagram loading…</div>
+      </div>
+      <div class="inst-bar">
+        <input type="range" id="inst-seek" min="0" max="1000" value="0" step="1" aria-label="කාල රේඛාව · Timeline">
+        <div class="inst-opts">
+          <button type="button" id="inst-lbl" class="tg on" aria-pressed="true">අංක <span>Labels</span></button>
+          <button type="button" id="inst-arr" class="tg on" aria-pressed="true">ඊතල <span>Arrows</span></button>
+          <label class="pick">වැහිපීල්ල<select id="inst-gutter"></select></label>
+          <label class="pick">වඩිම්බු ආවරණය<select id="inst-val"></select></label>
+        </div>
       </div>
       <ol class="inst-key" id="inst-key" aria-label="Labels"></ol>
       <ol class="inst-steps" id="inst-steps">
@@ -1171,30 +1188,53 @@
   const stage = document.getElementById('inst-stage'), steps = [...document.querySelectorAll('#inst-steps li')];
   const playBtn = document.getElementById('inst-play'), cap = document.getElementById('inst-cap');
   const segBtns = [...document.querySelectorAll('.inst-seg button')];
-  let api = null;
+  const seek = document.getElementById('inst-seek'), lblBtn = document.getElementById('inst-lbl'), arrBtn = document.getElementById('inst-arr');
+  const gSel = document.getElementById('inst-gutter'), vSel = document.getElementById('inst-val');
+  let api = null, lib = null, locked = false, scrubbing = false;
+  const ui = () => ({
+    labels: document.getElementById('inst-labels'), lines: document.getElementById('inst-lines'), legend: document.getElementById('inst-key'),
+    locked,
+    onStep(k, playing){
+      if (this._k !== k){ this._k = k;
+        steps.forEach((li, i) => { li.classList.toggle('on', i === k); li.classList.toggle('done', i < k); });
+        const b = steps[k].querySelector('b').textContent, e = steps[k].querySelector('em').textContent;
+        cap.innerHTML = `<span>${k + 1}. ${b}<small>${e}</small></span>`; }
+      const lbl = playing ? '❚❚' : '▶'; if (playBtn.textContent !== lbl) playBtn.textContent = lbl;
+    },
+    onTime(f){ if (!scrubbing) seek.value = Math.round(f * 1000); },
+    onView(name){ segBtns.forEach(b => b.classList.toggle('on', b.dataset.view === name)); }
+  });
+  function mount(extra = {}){
+    const prev = api ? api.state() : {};
+    api?.dispose();
+    api = lib.mountInstall(stage, ui(), { ...prev, gutter: gSel.value, valance: vSel.value, ...extra });
+    window.__instGeo = () => api.geometry();
+  }
   const io = new IntersectionObserver(async (es, o) => {
     if (!es[0].isIntersecting) return; o.disconnect();
     try {
-      const { mountInstall } = await import('./install3d.js');
-      api = mountInstall(stage, {
-        labels: document.getElementById('inst-labels'), lines: document.getElementById('inst-lines'), legend: document.getElementById('inst-key'),
-        onStep(k, playing){
-          if (this._k !== k){ this._k = k;
-            steps.forEach((li, i) => { li.classList.toggle('on', i === k); li.classList.toggle('done', i < k); });
-            const b = steps[k].querySelector('b').textContent, e = steps[k].querySelector('em').textContent;
-            cap.innerHTML = `<span>${k + 1}. ${b}<small>${e}</small></span>`; }
-          const lbl = playing ? '❚❚' : '▶'; if (playBtn.textContent !== lbl) playBtn.textContent = lbl;
-        },
-        onView(name){ segBtns.forEach(b => b.classList.toggle('on', b.dataset.view === name)); }
-      });
+      lib = await import('./install3d.js');
+      const P = window.AD_PROFILES;
+      gSel.innerHTML = lib.GUTTERS.map(k => `<option value="${k}">${P[k].title}</option>`).join('');
+      vSel.innerHTML = lib.VALANCES.map(k => `<option value="${k}">${P[k].title}</option>`).join('') + '<option value="none">නැත · Timber fascia only</option>';
+      mount();
       document.getElementById('inst-load').remove();
     } catch (err) { document.getElementById('inst-load').textContent = '3D not supported on this device'; console.warn(err); }
   }, { rootMargin: '300px' });
   io.observe(stage);
   playBtn.onclick = () => api && api.toggle();
   document.getElementById('inst-replay').onclick = () => api && api.replay();
-  segBtns.forEach(b => b.onclick = () => api && api.setView(b.dataset.view));
-  steps.forEach((li, i) => li.querySelector('button').onclick = () => api && api.goStep(i));
+  segBtns.forEach(b => b.onclick = () => { locked = true; api && api.setView(b.dataset.view); });
+  steps.forEach((li, i) => li.querySelector('button').onclick = () => { locked = false; api && api.goStep(i); });
+  // timeline: drag to move back and forth (pauses, like a video)
+  seek.addEventListener('pointerdown', () => scrubbing = true);
+  addEventListener('pointerup', () => scrubbing = false);
+  seek.addEventListener('input', () => api && api.seek(seek.value / 1000));
+  seek.addEventListener('change', () => scrubbing = false);
+  const toggle = (btn, fn) => btn.onclick = () => { const on = !btn.classList.contains('on'); btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', on); api && api[fn](on); };
+  toggle(lblBtn, 'setLabels'); toggle(arrBtn, 'setArrows');
+  // show any gutter / valance board from the items, installed
+  gSel.onchange = vSel.onchange = () => { if (!lib) return; locked = true; mount({ t: 7 * 2.4, playing: false, view: 'section' }); };   // show the chosen items fully installed
 </script>
 </body>
 </html>
