@@ -376,12 +376,15 @@
     .inst-stage{height:70vh;min-height:380px;border-radius:14px}
     .inst-cap span{font-size:.9rem;padding:5px 10px}
     .inst-ctrl{flex-wrap:nowrap;gap:6px}
+    .inst-ctrl button{white-space:nowrap}
     .inst-ctrl button{font-size:.82rem;padding:0 12px}
     .inst-key{grid-template-columns:1fr}
   }
 
   /* ================= Phones & tablets ================= */
   .mbar{display:none}
+  .brand-text{white-space:nowrap}
+  @media (max-width:360px){ .brand{min-height:44px} .brand img{height:34px} .brand-text{font-size:1.1rem} .inst-ctrl button{padding:0 10px;font-size:.76rem;min-width:44px} #inst-play{width:44px} }
   .c-card,.c-row > div,form,.contact-grid > *{min-width:0}
   .c-row a,.c-row div{overflow-wrap:anywhere}
   .sizes button small{font-size:.75rem}

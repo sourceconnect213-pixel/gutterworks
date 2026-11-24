@@ -12,14 +12,15 @@ const RAFTER_D = 4, RAFTER_W = 2;          // 2" × 4" rafter
 const RD = RAFTER_D / CS;                  // vertical depth of the rafter at its plumb-cut end
 const PUR = 2;                             // 2" × 2" purlin (reeper)
 const FAS_T = 1, FAS_TOP = 0;                     // 1" thick fascia board on the rafter ends, top level with the rafter tops (height set by the valance board)
-const LEN = 76;                            // length of eave shown
+const LEN = 80;                            // length of eave shown
 const WALL_X = -24, WALL_T = 9;            // 24" eave overhang, 9" brick wall
 const GROUND = -84;
 const T = (window.AD_SHEET_MM || 0.47) / 25.4;     // 0.47 mm gutter / pipe sheet
 const BT = 0.08;                           // bracket strap thickness (≈2 mm)
 const BW = 1.0;                            // bracket strap width
 const AMP = 0.6, PITCH = 3;                // roof sheet corrugation
-const OUTLET_Z = -60, PIPE = 4;            // 4" × 4" down pipe
+const PIPE = 4;                            // 4" × 4" down pipe
+const OUTLET_Z = -LEN + 3;                 // outlet + down pipe at the very end of the gutter, next to the stop end
 const RAFTER_Z = [0, -24, -48, -72];       // front faces of the rafters (24" centres)
 const BRACKET_Z = RAFTER_Z.map(z => z - RAFTER_W / 2);   // one bracket on every rafter (24" ≈ 600 mm apart)
 
@@ -256,15 +257,29 @@ export function mountInstall(stage, ui, opts = {}){
     const w = box(dx ? 0.05 : 3.5, 3, dz ? 0.05 : 3.5, M.paint); w.position.set(OX + dx, gy - 1.5, OUTLET_Z + dz); outlet.add(w);
   });
   add(outlet, 5, 0, new THREE.Vector3(0, -8, 0), 0.6);
-  const pipeSeg = (a, b, i) => {
-    const dir = b.clone().sub(a), len = dir.length() + 0.8;
-    const m = box(PIPE, len, PIPE, M.paint); m.position.copy(a).add(b).multiplyScalar(0.5);
-    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
-    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), lineDark));
-    add(m, 5, 0.12 + i * 0.12, new THREE.Vector3(0, -14, 0), 0.6);
-  };
-  [[P1, P2], [P2, P3], [P3, P4], [P4, P5]].forEach(([a, b], i) => pipeSeg(a, b, i));
-  [P2, P3, P4].forEach((p, i) => { const j = box(PIPE + 0.1, PIPE + 0.1, PIPE + 0.1, M.paint); j.position.copy(p); add(j, 5, 0.2 + i * 0.12, new THREE.Vector3(0, -14, 0), 0.6); });
+  // one continuous square pipe with mitred bends (all bends lie in the x-y plane)
+  {
+    const path = [P1, P2, P3, P4, P5].map(v => [v.x, v.y]), w = PIPE / 2, z0 = OUTLET_Z - w, z1 = OUTLET_Z + w;
+    const N = []; for (let i = 1; i < path.length; i++){ const dx = path[i][0] - path[i-1][0], dy = path[i][1] - path[i-1][1], l = Math.hypot(dx, dy); N.push([dy / l, -dx / l]); }
+    const off = path.map((p, i) => {
+      const a = N[Math.min(i, N.length - 1)], b = N[Math.max(i - 1, 0)];
+      let mx = a[0] + b[0], my = a[1] + b[1]; const ml = Math.hypot(mx, my); mx /= ml; my /= ml;
+      const k = w / (mx * a[0] + my * a[1]);
+      return { R: [p[0] + mx * k, p[1] + my * k], L: [p[0] - mx * k, p[1] - my * k] };
+    });
+    const pos = [], q = (A, B, C, D) => pos.push(...A, ...B, ...C, ...A, ...C, ...D);
+    for (let i = 0; i < path.length - 1; i++){
+      const a = off[i], b = off[i + 1];
+      q([...a.R, z0], [...b.R, z0], [...b.R, z1], [...a.R, z1]);      // outer side
+      q([...a.L, z1], [...b.L, z1], [...b.L, z0], [...a.L, z0]);      // inner side
+      q([...a.R, z1], [...b.R, z1], [...b.L, z1], [...a.L, z1]);      // front
+      q([...a.L, z0], [...b.L, z0], [...b.R, z0], [...a.R, z0]);      // back
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.computeVertexNormals();
+    const tube = new THREE.Mesh(g, M.paint);
+    tube.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 20), lineDark));   // pipe corners + the mitre seams at each bend
+    add(tube, 5, 0.12, new THREE.Vector3(0, -14, 0), 0.7);
+  }
   const clipYs = [-34, -64], clipAt = [];
   clipYs.forEach((y, i) => {
     const c = new THREE.Group(), s = PIPE / 2 + BT;
@@ -292,8 +307,7 @@ export function mountInstall(stage, ui, opts = {}){
   const zA = -6;
   [[-34, -24], [-20, -10], [-6, 1.2]].forEach(([x1, x2]) => A(onRoof(x1, zA, AMP + 1.4), onRoof(x2, zA, AMP + 1.4)));
   A(new THREE.Vector3(SHEET_EDGE_X + 0.4, sheetUnder(SHEET_EDGE_X) + 0.9, zA), new THREE.Vector3(OX + 0.3, gy + 1.0, zA));
-  [[-10, -24], [-28, -42], [-44, -55]].forEach(([z1, z2]) => A(new THREE.Vector3(OX, gy + 0.9, z1), new THREE.Vector3(OX, gy + 0.9, z2)));
-  A(new THREE.Vector3(OX, gy + 0.9, -74), new THREE.Vector3(OX, gy + 0.9, -65));
+  [[-8, -22], [-28, -42], [-48, -62]].forEach(([z1, z2]) => A(new THREE.Vector3(OX, gy + 0.9, z1), new THREE.Vector3(OX, gy + 0.9, z2)));   // along the gutter to the outlet at the end
   const pz = OUTLET_Z + PIPE / 2 + 1.6;
   A(new THREE.Vector3(OX + 3, gy - 1, pz), new THREE.Vector3(OX + 3, P2.y - 1, pz));
   A(new THREE.Vector3(P2.x - 3, P2.y - 3.5, pz), new THREE.Vector3(P3.x + 5, P3.y + 1.5, pz));
