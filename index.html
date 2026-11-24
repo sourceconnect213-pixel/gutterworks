@@ -320,6 +320,58 @@
   .form-msg{font-size:.9rem;font-weight:600;color:#16803c}
 
 
+
+  /* ================= Installation diagram ================= */
+  .install{background:#fff}
+  .inst-stage{position:relative;height:min(640px,78vh);min-height:420px;background:#fff;border:1.5px solid #dfe5ee;border-radius:18px;overflow:hidden}
+  .inst-stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;cursor:grab}
+  .inst-lines,.inst-labels{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .inst-lines path{fill:none;stroke:#334155;stroke-width:1.3}
+  .inst-lines circle{fill:#e31e24;stroke:#fff;stroke-width:1.5}
+  .il{position:absolute;display:flex;align-items:center;gap:7px;background:#fff;border:1.5px solid #c9d3e0;border-radius:10px;padding:5px 9px;box-shadow:0 4px 12px rgba(15,35,70,.1);max-width:190px;animation:fadeUp .35s both}
+  .il i{flex:none;width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;font:700 .72rem Inter,sans-serif;display:grid;place-items:center;font-style:normal}
+  .il b{display:block;font:800 .86rem/1.25 "Noto Sans Sinhala",sans-serif;color:var(--ink)}
+  .il em{display:block;font:600 .74rem/1.2 Inter,sans-serif;color:var(--muted);font-style:normal}
+  .il[hidden]{display:none!important}
+  .il-flow{border-color:#90caf9}.il-flow i{background:#1565c0}
+  .il-dot{padding:0;border:2px solid #fff;border-radius:50%;width:26px;height:26px;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);background:var(--blue)}
+  .il-dot i{width:22px;height:22px}
+  .il-dot span{display:none}
+  .inst-cap{position:absolute;left:14px;top:12px;right:14px;pointer-events:none;display:flex;justify-content:center}
+  .inst-cap span{background:rgba(255,255,255,.92);border:1.5px solid #dfe5ee;border-radius:12px;padding:6px 14px;font:800 1rem "Noto Sans Sinhala",sans-serif;color:var(--blue)}
+  .inst-cap small{font:600 .78rem Inter,sans-serif;color:var(--muted);margin-left:6px}
+  .inst-ctrl{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;pointer-events:none}
+  .inst-ctrl > *{pointer-events:auto}
+  .inst-ctrl button{font:700 .9rem "Noto Sans Sinhala",Inter,sans-serif;min-height:42px;padding:0 16px;border-radius:24px;border:1.5px solid #c9d3e0;background:#fff;color:var(--blue);cursor:pointer;box-shadow:0 3px 10px rgba(15,35,70,.08)}
+  #inst-play{width:46px;padding:0}
+  .inst-seg{display:inline-flex;border:1.5px solid #c9d3e0;border-radius:24px;overflow:hidden;background:#fff}
+  .inst-seg button{border:0;border-radius:0;box-shadow:none}
+  .inst-seg button.on{background:var(--blue);color:#fff}
+  .inst-load{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-weight:600}
+  .inst-key{display:none;list-style:none;margin:12px 0 0;padding:0;grid-template-columns:1fr 1fr;gap:6px 14px}
+  .inst-key li{display:flex;align-items:center;gap:8px;font-size:.88rem;transition:opacity .3s}
+  .inst-key li.off{opacity:.35}
+  .inst-key i{flex:none;width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font:700 .72rem Inter,sans-serif;display:grid;place-items:center;font-style:normal}
+  .inst-key b{font-family:"Noto Sans Sinhala";font-weight:800}
+  .inst-key em{font-style:normal;color:var(--muted);font-size:.78rem}
+  .inst-stage:not(.inst-wide) ~ .inst-key{display:grid}
+  .inst-steps{list-style:none;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .inst-steps li{background:var(--bg);border:1.5px solid transparent;border-radius:14px;padding:12px 14px;transition:border-color .25s,background .25s}
+  .inst-steps li.on{background:#eaf2ff;border-color:var(--blue)}
+  .inst-steps li.done .sn{background:#16803c}
+  .inst-steps button{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;cursor:pointer;text-align:left;width:100%;min-height:44px;font:inherit}
+  .inst-steps .sn{flex:none;width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font:700 .9rem Inter,sans-serif}
+  .inst-steps b{display:block;font:800 1rem "Noto Sans Sinhala",sans-serif;color:var(--ink)}
+  .inst-steps em{display:block;font:600 .78rem Inter,sans-serif;color:var(--muted);font-style:normal}
+  .inst-steps p{font-size:.9rem;color:#3b4552;margin-top:6px;line-height:1.6}
+  @media (max-width:600px){
+    .inst-stage{height:70vh;min-height:380px;border-radius:14px}
+    .inst-cap span{font-size:.9rem;padding:5px 10px}
+    .inst-ctrl{flex-wrap:nowrap;gap:6px}
+    .inst-ctrl button{font-size:.82rem;padding:0 12px}
+    .inst-key{grid-template-columns:1fr}
+  }
+
   /* ================= Phones & tablets ================= */
   .mbar{display:none}
   .c-card,.c-row > div,form,.contact-grid > *{min-width:0}
@@ -450,6 +502,7 @@
         <li><a href="#owner">අයිතිකරු</a></li>
         <li id="nav-shop" hidden><a href="#shop">භාණ්ඩ</a></li>
         <li id="nav-prices" hidden><a href="#prices">මිල ගණන්</a></li>
+        <li><a href="#install">සවිවන ආකාරය</a></li>
         <li><a href="#projects">අපේ වැඩ</a></li>
         <li><a href="#contact">අමතන්න</a></li>
         <li><a href="tel:+94755350030" class="call">📞 Call Now</a></li>
@@ -620,6 +673,40 @@
       <div class="bar"></div>
     </div>
     <div class="price-list reveal" id="price-list"></div>
+  </div>
+</section>
+
+<section id="install" class="install">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="kicker">Installation · හරස්කඩ</span>
+      <h2>සවිවන ආකාරය</h2>
+      <p class="si">වැහිපීල්ල සහ ඩවුන් පයිප්ප වහලේ කෙළවරට සවි කරන හැටි, පියවරෙන් පියවර. ඇඟිල්ලෙන් කරකවලා බලන්න.</p>
+      <div class="bar"></div>
+    </div>
+    <div class="inst">
+      <div class="inst-stage" id="inst-stage">
+        <svg class="inst-lines" id="inst-lines" aria-hidden="true"></svg>
+        <div class="inst-labels" id="inst-labels"></div>
+        <div class="inst-cap" id="inst-cap" aria-live="polite"></div>
+        <div class="inst-ctrl">
+          <button type="button" id="inst-play" aria-label="Play / pause">❚❚</button>
+          <button type="button" id="inst-replay">↺ නැවත</button>
+          <span class="inst-seg"><button type="button" data-view="section" class="on">හරස්කඩ</button><button type="button" data-view="full">3D</button></span>
+        </div>
+        <div class="inst-load" id="inst-load">3D diagram loading…</div>
+      </div>
+      <ol class="inst-key" id="inst-key" aria-label="Labels"></ol>
+      <ol class="inst-steps" id="inst-steps">
+        <li><button type="button" data-step="0"><span class="sn">1</span><span class="st"><b>පරාල සහ බිත්තිය</b><em>Rafters</em></span></button><p>පරාල (2" × 4") බිත්තියෙන් අඩියක් හමාරකට වඩා පිටතට නෙරා ඇත (eave overhang). පරාල කෙළවර සිරස්ව කපා ඇත (plumb cut).</p></li>
+        <li><button type="button" data-step="1"><span class="sn">2</span><span class="st"><b>වඩිම්බුව</b><em>Fascia board</em></span></button><p>1" × 8" වඩිම්බු ලෑල්ල පරාල කෙළවරවලට ඇණ / ඉස්කුරුප්පු මගින් සවි කෙරේ. ඉහළ දාරය වහල තහඩුවට පහළින් පවතී.</p></li>
+        <li><button type="button" data-step="2"><span class="sn">3</span><span class="st"><b>ආධාරක සහ ඉස්කුරුප්පු</b><em>Brackets & fixing screws</em></span></button><p>වැහිපීලි ආධාරක අඩි 2කට (≈600mm) වරක් වඩිම්බුවට සවි කිරීමේ ඉස්කුරුප්පු 2 බැගින් සවි කෙරේ. Outlet දෙසට සුළු බෑවුමක් (fall) ලැබෙන සේ පෙළගස්වයි.</p></li>
+        <li><button type="button" data-step="3"><span class="sn">4</span><span class="st"><b>වැහිපීල්ල</b><em>Rain gutter</em></span></button><p>වැහිපීල්ල ආධාරක තුළට තබයි. සමතල පිටුපස බිත්තිය වඩිම්බුව පැත්තට, පඩි සහිත මුහුණත පිටතට. කෙළවර stop end එකෙන් වසා ඇත.</p></li>
+        <li><button type="button" data-step="4"><span class="sn">5</span><span class="st"><b>රීප්ප සහ වහල ආවරණය</b><em>Purlins & roof covering</em></span></button><p>රීප්ප මත වහල තහඩු සවි කෙරේ. තහඩු දාරය වැහිපීල්ල තුළට අඟල් 1¾ක් (≈45mm) පමණ නෙරා ඇති නිසා ජලය කෙලින්ම වැහිපීල්ලට වැටේ.</p></li>
+        <li><button type="button" data-step="5"><span class="sn">6</span><span class="st"><b>ඩවුන් පයිප්ප</b><em>Outlet & down pipe</em></span></button><p>Outlet එකට 4" × 4" ඩවුන් පයිප්ප සම්බන්ධ කර, 45° bends මගින් බිත්තිය දක්වා ගෙන, පයිප්ප ක්ලිප් මගින් බිත්තියට සවි කෙරේ. පහළින් ජලය කාණුවට.</p></li>
+        <li><button type="button" data-step="6"><span class="sn">7</span><span class="st"><b>වැසි ජලය ගලන හැටි</b><em>Rainwater flow</em></span></button><p>වහල → වැහිපීල්ල → outlet → ඩවුන් පයිප්ප → කාණුව. නිල් ඊතල මගින් ජලය ගලන දිශාව පෙන්වයි.</p></li>
+      </ol>
+    </div>
   </div>
 </section>
 
@@ -1078,6 +1165,36 @@
   window.addEventListener('item:close', () => { big?.dispose(); big = null; });
   scan();
   if (document.querySelector('#item-view:not([hidden]) .iv-3d')) openBig();   // opened from a shared link before this loaded
+</script>
+<script type="module">
+  // "සවිවන ආකාරය" 3D installation diagram (loads when the section comes near the screen)
+  const stage = document.getElementById('inst-stage'), steps = [...document.querySelectorAll('#inst-steps li')];
+  const playBtn = document.getElementById('inst-play'), cap = document.getElementById('inst-cap');
+  const segBtns = [...document.querySelectorAll('.inst-seg button')];
+  let api = null;
+  const io = new IntersectionObserver(async (es, o) => {
+    if (!es[0].isIntersecting) return; o.disconnect();
+    try {
+      const { mountInstall } = await import('./install3d.js');
+      api = mountInstall(stage, {
+        labels: document.getElementById('inst-labels'), lines: document.getElementById('inst-lines'), legend: document.getElementById('inst-key'),
+        onStep(k, playing){
+          if (this._k !== k){ this._k = k;
+            steps.forEach((li, i) => { li.classList.toggle('on', i === k); li.classList.toggle('done', i < k); });
+            const b = steps[k].querySelector('b').textContent, e = steps[k].querySelector('em').textContent;
+            cap.innerHTML = `<span>${k + 1}. ${b}<small>${e}</small></span>`; }
+          const lbl = playing ? '❚❚' : '▶'; if (playBtn.textContent !== lbl) playBtn.textContent = lbl;
+        },
+        onView(name){ segBtns.forEach(b => b.classList.toggle('on', b.dataset.view === name)); }
+      });
+      document.getElementById('inst-load').remove();
+    } catch (err) { document.getElementById('inst-load').textContent = '3D not supported on this device'; console.warn(err); }
+  }, { rootMargin: '300px' });
+  io.observe(stage);
+  playBtn.onclick = () => api && api.toggle();
+  document.getElementById('inst-replay').onclick = () => api && api.replay();
+  segBtns.forEach(b => b.onclick = () => api && api.setView(b.dataset.view));
+  steps.forEach((li, i) => li.querySelector('button').onclick = () => api && api.goStep(i));
 </script>
 </body>
 </html>

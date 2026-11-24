@@ -28,7 +28,7 @@ function label(text, w, h, color = '#d0161d'){
 
 // Build the folded sheet as one mesh with three materials (outside paint, inside, cut edges).
 // pts: centre line of the sheet; the outside face is on the right of the walking direction.
-function buildSheet(pts, t, len, m){
+export function buildSheet(pts, t, len, m){
   const n = pts.length, h = t / 2, z0 = -len / 2, z1 = len / 2;
   const segN = [];                                     // outside normal of each part
   for (let i = 1; i < n; i++){
