@@ -71,6 +71,18 @@ const PROFILES = {
     ['L','4'], ['D','4'], ['R','4'], ['U','4'], [[-1,-0.06],'2'] ],
     side: { 4: -1 } }),                                     // collar number inside the pipe
 
+  // 12" wall flashings — walked from the bottom of the slanted drip, along the top, up the wall leg, to the top fold
+  wall12a: build({ title: '12" Wall Flashing · මෝස්තර 1', sheet: 12, moves: [
+    [[-0.5,1],'2½'], ['L','7'], ['U','2'], ['L','½'] ] }),
+  wall12b: build({ title: '12" Wall Flashing · මෝස්තර 2', sheet: 12, moves: [
+    [[-1,1],'½'], ['L','7½'], ['U','3½'], ['L','½'] ] }),
+
+  // 18" ridge caps — walked from the bottom of the right leg, over the ridge, down the left leg (painted face up)
+  ridge18a: build({ title: '18" Ridge Cap · මෝස්තර 1', sheet: 18, moves: [
+    ['U','2½'], [[-0.906,0.423],'5'], ['U','1'], [[-1,1],'½'], [[-1,-1],'½'], ['D','1'], [[-0.906,-0.423],'5'], ['D','2½'] ] }),
+  ridge18b: build({ title: '18" Ridge Cap · මෝස්තර 2', sheet: 18, moves: [
+    ['U','2½'], [[-0.866,0.5],'6½'], [[-0.866,-0.5],'6½'], ['D','2½'] ] }),
+
   // 12" Waddimbu valance boards (from the bottom lip up the face to the top hem)
   val12a: build({ title: '12" Waddimbu Valance Board · මෝස්තර 1', sheet: 12, moves: [
     ['D','1'], ['R','1'], ['U','9'], [[-0.35,1],'1'] ] }),
