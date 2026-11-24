@@ -22,6 +22,9 @@ function build(def){
   return { ...def, points: pts.map(([a, b]) => [a - minX, b - minY]), labels };
 }
 
+// a small V kink in a wall: two equal slanted pieces, bump toward -x, ending back on the same line
+function kink(l){ return [[[-1,0.7], l], [[1,0.7], l]]; }
+
 const PROFILES = {
   gutter12: build({ title: '12" Step Gutter', sheet: 12, moves: [
     ['L','¼'], ['D','¾'], ['R','½'], ['D','1½'], ['R','½'], ['D','1½'], ['R','½'], ['D','½'],
@@ -54,7 +57,7 @@ const PROFILES = {
   flash18b: build({ title: '18" Badge Flashing · මෝස්තර 2', sheet: 18, moves: [
     ['U','¾'], ['R','¼'], ['U','2¼'], ['R','1'], ['U','¾'], ['R','½'], ['U','2½'], ['R','1'], ['U','1'], ['L','7½'], [[-1,-1],'½'] ] }),
   flash18c: build({ title: '18" Badge Flashing · මෝස්තර 3', sheet: 18, moves: [
-    ['U','1'], [[0.6,0.8],'1'], ['U','6'], ['R','¾'], ['U','1'], ['L','8'], [[-1,-1],'¼'] ] }),
+    ['U','1'], [[0.6,0.8],'1'], ['U','2'], [[-1,0.7],'½'], [[1,0.7],'½'], ['U','3'], ['R','¾'], ['U','1'], ['L','8'], [[-1,-1],'¼'] ] }),
 
   // Valance boards — walked from the bottom lip, along the bottom, up the face to the top hem
   // (coloured face points toward the viewer)
@@ -62,6 +65,15 @@ const PROFILES = {
     ['D','¼'], ['R','1'], ['U','7'], [[-0.35,1],'¾'] ] }),
   val9b: build({ title: '9" Valance Board · මෝස්තර 2', sheet: 9, moves: [
     ['D','¼'], ['R','1'], ['U','1'], [[-1,0.7],'½'], [[1,0.7],'½'], ['U','5'], [[-0.35,1],'¾'] ] }),
+  // 12" Waddimbu valance boards (from the bottom lip up the face to the top hem)
+  val12a: build({ title: '12" Waddimbu Valance Board · මෝස්තර 1', sheet: 12, moves: [
+    ['D','1'], ['R','1'], ['U','9'], [[-0.35,1],'1'] ] }),
+  val12b: build({ title: '12" Waddimbu Valance Board · මෝස්තර 2', sheet: 12, moves: [
+    ['D','1'], ['R','1'], ['U','1½'], ...kink('½'), ['U','6½'], [[-0.35,1],'1'] ] }),
+  val12c: build({ title: '12" Waddimbu Valance Board · මෝස්තර 3', sheet: 12, moves: [
+    ['D','1'], ['R','1'], ['U','1½'], ...kink('¼'), ['U','1'], ...kink('¼'), ['U','5½'], [[-0.35,1],'1'] ] }),
+  val12d: build({ title: '12" Waddimbu Valance Board · මෝස්තර 4', sheet: 12, moves: [
+    ['D','¾'], ['R','1'], ['U','1'], ...kink('¼'), ['U','¾'], ...kink('¼'), ['U','½'], ...kink('½'), ['U','5½'], [[-0.35,1],'½'] ] }),
 };
 
 const fmt = n => {
@@ -74,7 +86,7 @@ const fmt = n => {
 // Label box size in inches. Each label sits beside its own part, on the outside of
 // the gutter; short flat steps are labelled on the inside. Then labels are pushed
 // out step by step until none touches the sheet or another label.
-const LH0 = 0.34, CW0 = 0.2, PADW0 = 0.1, GAP = 0.1;
+const LH0 = 0.38, CW0 = 0.2, PADW0 = 0.1, GAP = 0.1;
 // bigger gutters get bigger numbers, so they read the same size on screen
 const scaleOf = P => { const xs = P.points.map(p => p[0]), ys = P.points.map(p => p[1]);
   return Math.max(1, Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) / 4.5); };

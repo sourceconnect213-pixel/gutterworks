@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
 
 const LENGTH = 12;   // length of the piece shown (1 ft)
-const T = 0.07;      // sheet thickness (slightly exaggerated so it reads)
+const T = 0.05;      // sheet thickness
 
 // A measurement number: plain text with a white halo (no box), sized to match the
 // label boxes used for placement in profiles.js (w × h inches).
@@ -54,13 +54,12 @@ export function mountGutter(container, profileKey = 'gutter12', opts = {}){
   // coloured outside (lighter maroon so the shape reads), galvalume inside
   const outside = new THREE.MeshStandardMaterial({ color: opts.color || '#b5482e', roughness: 0.5, metalness: 0.12 });
   const inside  = new THREE.MeshStandardMaterial({ color: 0xe2e7ec, roughness: 0.42, metalness: 0.25 });
-  const edge    = new THREE.MeshStandardMaterial({ color: 0xcfd5db, roughness: 0.45, metalness: 0.25 });
+  // cut edges of the sheet: same paint colour, a little darker (no white outline)
+  const edge    = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.5, metalness: 0.12 });
   const foldMat = new THREE.LineBasicMaterial({ transparent: true });
-  // fold lines: dark on light colours, light on dark colours, so the shape always reads
   const setColor = hex => {
-    outside.color.set(hex);
-    const c = outside.color, lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;   // linear luminance
-    foldMat.color.set(lum < 0.12 ? 0xffffff : 0x3a2a2a); foldMat.opacity = lum < 0.12 ? 0.45 : 0.5;
+    outside.color.set(hex); edge.color.set(hex).multiplyScalar(0.78);
+    foldMat.color.set(hex).multiplyScalar(0.5); foldMat.opacity = 0.55;   // fold lines: darker shade of the same colour, never white
   };
   setColor(opts.color || '#b5482e');
 
