@@ -280,6 +280,16 @@
   .cname{font:600 .78rem Inter,sans-serif;color:var(--muted)}
   .iv-info .csw button{width:34px;height:34px}
   .iv-info .cname{font-size:.9rem;color:var(--ink)}
+  .pfacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:8px}
+  .pfacts span{display:inline-flex;align-items:baseline;gap:5px;padding:7px 12px;border-radius:10px;font:600 .85rem Inter,"Noto Sans Sinhala",sans-serif}
+  .pf-k{background:#e8eef7;color:var(--blue)}
+  .pf-k b{font:700 1.05rem Oswald,Inter,sans-serif}
+  .pf-w{background:#fde5e6;color:var(--red-d)}
+  .pf-w b{font:700 1.2rem Oswald,Inter,sans-serif}
+  .pf-w small{font-weight:600;color:#a33}
+  .iv-info .pfacts span{font-size:.95rem;padding:9px 14px}
+  .pfacts span{white-space:nowrap}
+  .prod .pf-w small{display:none}
   .vsel{display:flex;gap:6px;margin:4px 0 2px}
   .vsel button{flex:1;font:700 .9rem Inter,"Noto Sans Sinhala",sans-serif;padding:8px 6px;border-radius:10px;border:2px solid #c6d2e2;background:#fff;color:var(--blue);cursor:pointer}
   .vsel button span{font-weight:600;opacity:.7}
@@ -779,8 +789,9 @@
   const chosen = new Map();                                    // item id → selected version index
   // sheet colours (outside face). Default = 02 Terracotta Red
   const COLORS = [
-    ['01','Dark Chocolate Brown','#4a2c20'], ['02','Terracotta Red','#b5482e'], ['03','Off White','#ece8dc'],
-    ['04','Forest Green','#2e5a3a'], ['05','Beige','#d6c19a'], ['06','Royal Blue','#2b4fa3'], ['07','Black','#1d1d1f'] ];
+    // 01–05 measured from the owner's sheet samples (corrected for photo lighting)
+    ['01','Dark Chocolate Brown','#4a3c38'], ['02','Terracotta Red','#a9504f'], ['03','Off White','#e4ddcf'],
+    ['04','Forest Green','#1f4a2d'], ['05','Beige','#a69c88'], ['06','Royal Blue','#2b4fa3'], ['07','Black','#1d1d1f'] ];
   const DEFAULT_COLOR = 1;
   const colorPick = new Map();                                 // item id → colour index
   const colOf = p => COLORS[colorPick.has(p.id) ? colorPick.get(p.id) : DEFAULT_COLOR];
@@ -798,16 +809,14 @@
   }
   const curVar = p => { const vs = variantsOf(p); return vs.length ? vs[Math.min(chosen.get(p.id) || 0, vs.length-1)] : null; };
   const priceOf = p => { const v = curVar(p); return v ? { price: v.price, fixing_price: v.fixing_price } : p; };
-  const waLink = p => { const v = curVar(p), c = hasProf(p) ? colOf(p) : null; return `https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name+(p.size?' ('+p.size+')':'')+(v?' — '+v.name:'')+(c?' — colour '+c[0]+' '+c[1]:''))}`; };
-  const priceBoxes = p => { const q = priceOf(p); return `
-    <div class="pprices">
-      <div><small>විකුණුම් මිල</small><b>${has(q.price)?money(q.price):'අමතන්න'}</b>${has(q.price)&&p.unit?`<em>${esc(p.unit)}</em>`:''}</div>
-      ${has(q.fixing_price)?`<div class="fx"><small>සවි කිරීමේ මිල</small><b>${money(q.fixing_price)}</b>${p.unit?`<em>${esc(p.unit)}</em>`:''}</div>`:''}
-    </div>`; };
-  const variantBtns = p => { const vs = variantsOf(p); if (vs.length < 2) return '';
-    const i = Math.min(chosen.get(p.id) || 0, vs.length-1);
-    return `<div class="vsel" role="group" aria-label="වර්ගය තෝරන්න">${vs.map((v, k) =>
-      `<button type="button" data-var="${k}" aria-pressed="${k===i}" class="${k===i?'on':''}">${esc(v.name)}${v.code?` <span>(${esc(v.code)})</span>`:''}</button>`).join('')}</div>`; };
+  // No prices on the website: customers ask on WhatsApp / phone. Every item is Korean sheet with a 10 year warranty.
+  const waLink = p => { const c = hasProf(p) ? colOf(p) : null; return `https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I would like to know more about: '+p.name+(p.size?' ('+p.size+')':'')+' — Korean'+(c?' — colour '+c[0]+' '+c[1]:''))}`; };
+  const priceBoxes = p => `
+    <div class="pfacts">
+      <span class="pf-k"><b>Korean</b> තහඩු</span>
+      <span class="pf-w"><b>10</b> Year Warranty <small>· අවුරුදු 10 වගකීම</small></span>
+    </div>`;
+  const variantBtns = () => '';
   // switch version: update prices + WhatsApp text in place (the 3D model keeps running)
   function pickVariant(root, p, k){
     chosen.set(p.id, k);
@@ -831,7 +840,7 @@
           ${priceBoxes(p)}
           <div class="pbtns">
             <span class="btn btn-blue order">විස්තර බලන්න</span>
-            <a class="btn btn-wa order" target="_blank" rel="noopener" href="${waLink(p)}">WhatsApp ඇණවුම</a>
+            <a class="btn btn-wa order" target="_blank" rel="noopener" href="${waLink(p)}">WhatsApp විමසන්න</a>
           </div>
         </div>
       </article>`;
@@ -860,7 +869,7 @@
         ${priceBoxes(p)}
         ${hasProf(p) ? `<button type="button" class="btn btn-blue block js-dims" aria-expanded="false">📏 මිනුම් පෙන්වන්න</button>
           <div class="prof" hidden>${profileSVG(p.model)}</div>` : ''}
-        <a class="btn btn-wa block" target="_blank" rel="noopener" href="${waLink(p)}">WhatsApp ඇණවුම</a>
+        <a class="btn btn-wa block" target="_blank" rel="noopener" href="${waLink(p)}">WhatsApp විමසන්න</a>
         <a class="btn btn-red block" href="tel:+${PHONE}">📞 අමතන්න</a>
       </div>`;
     dlg.hidden = false; document.body.classList.add('iv-open');
@@ -963,7 +972,7 @@
         document.getElementById('shop').hidden=false; document.getElementById('nav-shop').hidden=false;
         { const m = location.hash.match(/^#item-(\d+)$/); if (m) openItem(m[1], false); }
       }
-      if (pl.length){
+      if (false && pl.length){            // price list is not shown on the website
         document.getElementById('price-list').innerHTML = pl.map(x=>`
           <div class="pl-row"><div><b>${esc(x.title)}</b>${x.detail?`<span>${esc(x.detail)}</span>`:''}</div>
           <div class="pv">${esc(x.price)}${x.unit?`<small>${esc(x.unit)}</small>`:''}</div></div>`).join('');
