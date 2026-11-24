@@ -146,47 +146,46 @@ export function mountInstall(stage, ui){
   const hole = box(3.1, 0.02, 3.1, M.dark); hole.position.set(OX, gy + 0.03, OUTLET_Z); gutter.add(hole);
   add(gutter, 2, 0, new THREE.Vector3(0, 22, 0), 0.9);
 
-  // ---------- 4. internal brackets (hangers) + fixing screws ----------
-  // A flat steel strap inside the gutter: hooks over the front lip, runs across the top of the gutter,
-  // over the back edge and the fascia top (1 screw into the fascia), then along the rafter top (2 screws into the rafter).
-  const NX = SN, NY = CS;                                  // normal to the rafter top
-  const n = gpts.length, frontTopY = gpts[n - 2][1], backTopY = gpts[1][1];
-  const sx = FRONT_X + T / 2 + BT / 2, h = T / 2 + BT / 2;
-  const TAIL_X = -6.2;                                     // strap end on the rafter
+  // ---------- 4. internal brackets + fixing screws ----------
+  // Flat galvanised steel bar (as in the owner's photo), hidden inside the gutter:
+  // top tab against the gutter's back wall, screwed through it into the fascia;
+  // slanted leg down to the gutter bottom; foot riveted to the gutter bottom.
+  const IBT = 0.12, IBW = 1.0;                             // ≈3 mm × 25 mm flat bar
+  const n = gpts.length;
+  const tx = gx + T / 2 + IBT / 2, fy = gy + T / 2 + IBT / 2;
   const bpath = [
-    [sx, frontTopY - 0.45], [sx, frontTopY + h],           // hook down the outside of the front lip
-    [gpts[0][0] + 0.15, backTopY + h],                     // across the gutter to the back edge
-    [FAS_T, FAS_TOP + BT / 2],                             // over the back edge onto the fascia top
-    [0, FAS_TOP + BT / 2],                                 // across the fascia top
-    [TAIL_X, -TN * TAIL_X + BT / 2 / CS],                  // along the top of the rafter
+    [tx, gy + 2.3],                                        // top of the tab (below the back wall's top fold)
+    [tx, gy + 1.35],                                       // bottom of the tab
+    [gx + 1.85, fy],                                       // slanted leg down to the bottom
+    [gx + 2.75, fy],                                       // foot on the gutter bottom
   ];
   const steelMats = { outside: M.steel, inside: M.steel, edge: M.steel, foldMat: lineSteel, insideLineMat: lineSteel };
   const UP = new THREE.Vector3(0, 1, 0);
-  function makeScrew(){                                    // hex washer-head screw, head at +y, shank toward -y
+  function makeScrew(len){                                 // hex washer-head screw (or a short rivet), head at +y
     const s = new THREE.Group(), inner = new THREE.Group(); s.add(inner);
-    const shank = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.05, 1.4, 10), M.screw); shank.position.y = -0.7;
+    const shank = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.05, len, 10), M.screw); shank.position.y = -len / 2;
     const washer = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.05, 20), M.screw); washer.position.y = 0.025;
     const hex = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 6), M.screw); hex.position.y = 0.12;
     inner.add(shank, washer, hex); s.userData.inner = inner; return s;
   }
   const screwAt = [];
   BRACKET_Z.forEach((zc, i) => {
-    const b = buildSheet(bpath, BT, BW, steelMats); b.position.z = zc;
+    const b = buildSheet(bpath, IBT, IBW, steelMats); b.position.z = zc;
     add(b, 3, i * 0.1, new THREE.Vector3(0, 9, 0));
     const spots = [
-      { p: [FAS_T / 2, FAS_TOP + BT], axis: UP },                                            // into the fascia top
-      ...[-3.9, -5.4].map(x => ({ p: [x + NX * BT, -TN * x + NY * BT], axis: new THREE.Vector3(NX, NY, 0) }))   // into the rafter
+      { p: [tx + IBT / 2, gy + 1.85], axis: new THREE.Vector3(1, 0, 0), len: 1.3 },   // through the tab + gutter wall into the fascia
+      { p: [gx + 2.35, fy + IBT / 2], axis: UP, len: 0.16 },                          // rivet through the foot + gutter bottom
     ];
-    spots.forEach(({ p, axis }, j) => {
-      const s = makeScrew(); s.position.set(p[0], p[1], zc); s.quaternion.setFromUnitVectors(UP, axis);
-      add(s, 3, 0.45 + i * 0.08 + j * 0.06, axis.clone().multiplyScalar(1.6), 0.55, 6 * Math.PI);
-      if (i === 0) screwAt.push(new THREE.Vector3(p[0], p[1] + 0.2, zc));
+    spots.forEach(({ p, axis, len }, j) => {
+      const s = makeScrew(len); s.position.set(p[0], p[1], zc); s.quaternion.setFromUnitVectors(UP, axis);
+      add(s, 3, 0.45 + i * 0.08 + j * 0.08, axis.clone().multiplyScalar(1.6), 0.55, 6 * Math.PI);
+      if (i === 0) screwAt.push(new THREE.Vector3(p[0] + 0.15, p[1], zc));
     });
   });
 
   // ---------- 5. purlins + roof covering ----------
   const u = [-CS, SN], nrm = [SN, CS];
-  [7, 28, 50].forEach((s, i) => {
+  [1.2, 24, 48].forEach((s, i) => {
     const B = [-s * CS, s * SN];
     const pts = [B, [B[0] + u[0] * PUR, B[1] + u[1] * PUR], [B[0] + u[0] * PUR + nrm[0] * PUR, B[1] + u[1] * PUR + nrm[1] * PUR], [B[0] + nrm[0] * PUR, B[1] + nrm[1] * PUR]];
     add(prism(pts, LEN, 0, M.timberCut, M.timber), 4, i * 0.1, new THREE.Vector3(0, 14, 0), 0.6);
@@ -293,8 +292,8 @@ export function mountInstall(stage, ui){
     { k: 'rafter', views: {section:'L'},  si: 'පරාලය', en: 'Rafter', step: 0, at: new THREE.Vector3(-12, rafterTop(-12) - RD / 2, 0) },
     { k: 'wall', views: {section:'L',full:'L'},    si: 'බිත්තිය', en: 'Wall', step: 0, at: new THREE.Vector3(WALL_X - WALL_T / 2, -4, 0) },
     { k: 'fascia', views: {section:'R',full:'L'},  si: 'වඩිම්බුව', en: 'Fascia board', step: 1, at: new THREE.Vector3(FAS_T / 2, -4.5, 0) },
-    { k: 'screw', views: {section:'R'},   si: 'සවි කිරීමේ ඉස්කුරුප්පු', en: 'Fixing screws', step: 3, at: screwAt[1] },
-    { k: 'bracket', views: {section:'R'}, si: 'වැහිපීලි ආධාරකය', en: 'Gutter bracket', step: 3, at: new THREE.Vector3((bpath[1][0] + bpath[2][0]) / 2, (bpath[1][1] + bpath[2][1]) / 2 + 0.1, BRACKET_Z[0] + 0.5) },
+    { k: 'screw', views: {section:'R'},   si: 'සවි කිරීමේ ඉස්කුරුප්පු', en: 'Fixing screws', step: 3, at: screwAt[0] },
+    { k: 'bracket', views: {section:'R'}, si: 'වැහිපීලි ආධාරකය', en: 'Gutter bracket', step: 3, at: new THREE.Vector3((bpath[1][0] + bpath[2][0]) / 2 + 0.1, (bpath[1][1] + bpath[2][1]) / 2, BRACKET_Z[0] + 0.5) },
     { k: 'gutter', views: {section:'R',full:'L'},  si: 'වැහිපීල්ල', en: 'Rain gutter', step: 2, at: new THREE.Vector3(FRONT_X - 0.6, gy + 2.2, -4) },
     { k: 'outlet', views: {full:'R'},  si: 'පිටවුම', en: 'Outlet', step: 5, at: new THREE.Vector3(OX + 1.75, gy - 2, OUTLET_Z + 1.75) },
     { k: 'pipe', views: {full:'R'},    si: 'ඩවුන් පයිප්ප', en: 'Down pipe', step: 5, at: new THREE.Vector3(XW + PIPE / 2, -48, OUTLET_Z + PIPE / 2) },
@@ -421,13 +420,17 @@ export function mountInstall(stage, ui){
 
   // ---------- loop ----------
   let visible = true;
-  const io = new IntersectionObserver(es => visible = es[0].isIntersecting); io.observe(stage);
+  // on screen? measured directly (an observer can miss the change when the page jumps)
+  let visCheck = 0;
+  const onScreen = () => { const r = stage.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth; };
+  const io = { disconnect(){} };
   const m4 = new THREE.Matrix4(), pv = new THREE.Vector3();
   setView('section', true);
   renderer.setAnimationLoop(() => {
     const now = performance.now();
     const dt = Math.min(0.05, Math.max(0, (now - lastNow) / 1000)); lastNow = now;
-    if (!visible) return;
+    if (visCheck++ % 10 === 0) visible = onScreen();
+    if (!visible){ lastNow = performance.now(); return; }
     if (playing){ t = Math.min(stopAt, t + dt); if (t >= stopAt) playing = false; }
     const cur = applyTimeline();
     if (!userCam){
