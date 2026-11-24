@@ -25,6 +25,55 @@ function label(text, w, h, color = '#d0161d'){
   return s;
 }
 
+// Build the folded sheet as one mesh with three materials (outside paint, inside, cut edges).
+// pts: centre line of the sheet; the outside face is on the right of the walking direction.
+function buildSheet(pts, t, len, m){
+  const n = pts.length, h = t / 2, z0 = -len / 2, z1 = len / 2;
+  const segN = [];                                     // outside normal of each part
+  for (let i = 1; i < n; i++){
+    const dx = pts[i][0] - pts[i-1][0], dy = pts[i][1] - pts[i-1][1], l = Math.hypot(dx, dy);
+    segN.push([dy / l, -dx / l]);
+  }
+  // offset of each part's two ends: mitred at folds; for a fold that turns back on itself (a hem)
+  // the miter would explode, so that joint uses the part's own normal instead
+  const offAt = (i, end) => {                          // i = part index, end 0 = start, 1 = end
+    const v = end ? i + 1 : i, a = segN[i];
+    const other = end ? segN[i + 1] : segN[i - 1];
+    if (!other) return [a[0] * h, a[1] * h];
+    let mx = a[0] + other[0], my = a[1] + other[1]; const ml = Math.hypot(mx, my);
+    if (ml < 1e-6) return [a[0] * h, a[1] * h];
+    mx /= ml; my /= ml;
+    const d = mx * a[0] + my * a[1];
+    if (d < 0.35) return [a[0] * h, a[1] * h];          // very sharp fold: keep it simple
+    return [mx * h / d, my * h / d];
+  };
+  const groups = { outside: [], inside: [], edge: [] };
+  const quad = (arr, A, B, C, D) => arr.push(...A, ...B, ...C, ...A, ...C, ...D);
+  for (let i = 0; i < n - 1; i++){
+    const [ax, ay] = pts[i], [bx, by] = pts[i + 1];
+    const oa = offAt(i, 0), ob = offAt(i, 1);
+    const Oa = [ax + oa[0], ay + oa[1]], Ob = [bx + ob[0], by + ob[1]];
+    const Ia = [ax - oa[0], ay - oa[1]], Ib = [bx - ob[0], by - ob[1]];
+    quad(groups.outside, [...Oa, z0], [...Ob, z0], [...Ob, z1], [...Oa, z1]);
+    quad(groups.inside,  [...Ia, z1], [...Ib, z1], [...Ib, z0], [...Ia, z0]);
+    quad(groups.edge,    [...Oa, z1], [...Ob, z1], [...Ib, z1], [...Ia, z1]);   // cut end (front)
+    quad(groups.edge,    [...Ia, z0], [...Ib, z0], [...Ob, z0], [...Oa, z0]);   // cut end (back)
+    if (i === 0)     quad(groups.edge, [...Ia, z0], [...Oa, z0], [...Oa, z1], [...Ia, z1]);   // sheet edge at the start
+    if (i === n - 2) quad(groups.edge, [...Ob, z0], [...Ib, z0], [...Ib, z1], [...Ob, z1]);   // sheet edge at the end
+  }
+  const geo = new THREE.BufferGeometry();
+  const pos = [...groups.outside, ...groups.inside, ...groups.edge];
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  const c1 = groups.outside.length / 3, c2 = groups.inside.length / 3, c3 = groups.edge.length / 3;
+  geo.addGroup(0, c1, 0); geo.addGroup(c1, c2, 1); geo.addGroup(c1 + c2, c3, 2);
+  geo.computeVertexNormals();
+  [m.outside, m.inside, m.edge].forEach(x => x.side = THREE.DoubleSide);
+  const mesh = new THREE.Mesh(geo, [m.outside, m.inside, m.edge]);
+  // fold lines only where the sheet actually bends (and its outline)
+  mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), m.foldMat));
+  return mesh;
+}
+
 export function mountGutter(container, profileKey = 'gutter12', opts = {}){
   const interactive = !!opts.interactive;
   const prof = (window.AD_PROFILES || {})[profileKey];
@@ -68,16 +117,9 @@ export function mountGutter(container, profileKey = 'gutter12', opts = {}){
   const zf = LENGTH / 2 + 0.05;
   const lineMat = new THREE.LineBasicMaterial({ color: 0xe31e24, depthTest: false, transparent: true, opacity: .9 });
 
-  for (let i = 1; i < P.length; i++){
-    const [x1, y1] = P[i-1], [x2, y2] = P[i];
-    const len = Math.hypot(x2 - x1, y2 - y1), ang = Math.atan2(y2 - y1, x2 - x1);
-    // BoxGeometry faces: +x, -x, +y, -y, +z, -z ; local +y = left of travel = inside
-    const geo = new THREE.BoxGeometry(len + T * 0.7, T, LENGTH);
-    const m = new THREE.Mesh(geo, [edge, edge, inside, outside, edge, edge]);
-    m.position.set((x1 + x2) / 2 - cx, (y1 + y2) / 2 - cy, 0); m.rotation.z = ang;
-    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), foldMat));   // crisp fold lines
-    model.add(m);
-  }
+  // One continuous folded sheet: every part is offset by half the thickness on each side and the
+  // folds are mitred, so neighbouring parts meet exactly (no overlaps, gaps or see-through corners).
+  model.add(buildSheet(P.map(([x, y]) => [x - cx, y - cy]), T, LENGTH, { outside, inside, edge, foldMat }));
   // measurement lines (beside each part) and numbers, positioned by profiles.js so they never overlap
   const sideOf = new Map(LO.labels.filter(l => !l.span).map(l => [l.seg, l]));
   LO.segs.forEach((sg, i) => {
