@@ -45,6 +45,23 @@ const PROFILES = {
   g18e: build({ title: '18" Gutter · මෝස්තර 5', sheet: 18, moves: [
     ['L','¼'], ['D','½'], ['R','½'], ['D','½'], ['R','½'], ['D','1¾'], [[-0.38,-0.92],'½'], ['D','2¼'], [[1,-1],'1½'],
     ['R','4½'], ['U','4'], ['L','¾'] ] }),
+
+  // Badge flashings — walked from the bottom end up the stepped side, then along the top to the drip
+  flash12: build({ title: '12" Badge Flashing', sheet: 12, moves: [
+    ['U','¾'], ['R','¾'], ['U','1½'], ['R','¼'], ['U','1½'], ['R','½'], ['U','1'], ['L','5'], [[-1,-1],'¾'] ] }),
+  flash18a: build({ title: '18" Badge Flashing · උළු වහලය සඳහා', sheet: 18, moves: [
+    ['U','¾'], ['R','½'], ['U','1½'], ['R','½'], ['U','½'], ['R','½'], ['U','1½'], ['R','½'], ['U','1'], ['L','10'], [[-1,-1],'¾'] ] }),
+  flash18b: build({ title: '18" Badge Flashing · මෝස්තර 2', sheet: 18, moves: [
+    ['U','¾'], ['R','¼'], ['U','2¼'], ['R','1'], ['U','¾'], ['R','½'], ['U','2½'], ['R','1'], ['U','1'], ['L','7½'], [[-1,-1],'½'] ] }),
+  flash18c: build({ title: '18" Badge Flashing · මෝස්තර 3', sheet: 18, moves: [
+    ['U','1'], [[0.6,0.8],'1'], ['U','6'], ['R','¾'], ['U','1'], ['L','8'], [[-1,-1],'¼'] ] }),
+
+  // Valance boards — walked from the bottom lip, along the bottom, up the face to the top hem
+  // (coloured face points toward the viewer)
+  val9a: build({ title: '9" Valance Board · මෝස්තර 1', sheet: 9, moves: [
+    ['D','¼'], ['R','1'], ['U','7'], [[-0.35,1],'¾'] ] }),
+  val9b: build({ title: '9" Valance Board · මෝස්තර 2', sheet: 9, moves: [
+    ['D','¼'], ['R','1'], ['U','1'], [[-1,0.7],'½'], [[1,0.7],'½'], ['U','5'], [[-0.35,1],'¾'] ] }),
 };
 
 const fmt = n => {

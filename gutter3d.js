@@ -52,10 +52,17 @@ export function mountGutter(container, profileKey = 'gutter12', opts = {}){
   const top = new THREE.DirectionalLight(0xffffff, 0.9); top.position.set(4, 20, 8); scene.add(top);
 
   // coloured outside (lighter maroon so the shape reads), galvalume inside
-  const outside = new THREE.MeshStandardMaterial({ color: 0xc4505b, roughness: 0.5, metalness: 0.12 });
+  const outside = new THREE.MeshStandardMaterial({ color: opts.color || '#b5482e', roughness: 0.5, metalness: 0.12 });
   const inside  = new THREE.MeshStandardMaterial({ color: 0xe2e7ec, roughness: 0.42, metalness: 0.25 });
   const edge    = new THREE.MeshStandardMaterial({ color: 0xcfd5db, roughness: 0.45, metalness: 0.25 });
-  const foldMat = new THREE.LineBasicMaterial({ color: 0x5a1a20, transparent: true, opacity: 0.55 });
+  const foldMat = new THREE.LineBasicMaterial({ transparent: true });
+  // fold lines: dark on light colours, light on dark colours, so the shape always reads
+  const setColor = hex => {
+    outside.color.set(hex);
+    const c = outside.color, lum = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;   // linear luminance
+    foldMat.color.set(lum < 0.12 ? 0xffffff : 0x3a2a2a); foldMat.opacity = lum < 0.12 ? 0.45 : 0.5;
+  };
+  setColor(opts.color || '#b5482e');
 
   const model = new THREE.Group();
   const dims = new THREE.Group(); dims.visible = false;
@@ -149,6 +156,7 @@ export function mountGutter(container, profileKey = 'gutter12', opts = {}){
   });
 
   return {
+    setColor,
     setDims(on){ showing = on; dims.visible = on; controls.autoRotate = !on; flyTo(on ? FRONT : HOME); },
     reset(){ showing = false; dims.visible = false; controls.autoRotate = true; flyTo(HOME); },
     dispose(){

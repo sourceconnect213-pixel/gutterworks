@@ -176,7 +176,10 @@
   const MODELS = { '': 'නැත · None',
     gutter12: '12" Step Gutter', box12: '12" Box Gutter',
     g18a: '18" Gutter · මෝස්තර 1', g18b: '18" Gutter · මෝස්තර 2', g18c: '18" Gutter · මෝස්තර 3',
-    g18d: '18" Gutter · මෝස්තර 4', g18e: '18" Gutter · මෝස්තර 5' };
+    g18d: '18" Gutter · මෝස්තර 4', g18e: '18" Gutter · මෝස්තර 5',
+    flash12: '12" Badge Flashing', flash18a: '18" Badge Flashing · උළු වහලය සඳහා',
+    flash18b: '18" Badge Flashing · මෝස්තර 2', flash18c: '18" Badge Flashing · මෝස්තර 3',
+    val9a: '9" Valance Board · මෝස්තර 1', val9b: '9" Valance Board · මෝස්තර 2' };
   const VNAMES = [['Korean','K'], ['Chinese','C']];
   const variantsOf = p => Array.isArray(p.variants) ? p.variants.filter(v => v && v.name) : [];
   const UNITS = ['per ft', 'each', 'per sq.ft', 'per sheet', 'per meter'];

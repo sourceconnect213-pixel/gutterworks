@@ -272,6 +272,14 @@
     .iv-media .pimg{flex:none;min-height:0;height:52vh}
     .iv-info{padding:20px 18px 28px}
   }
+  .csel{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0}
+  .csw{display:flex;gap:6px;flex-wrap:wrap}
+  .csw button{width:26px;height:26px;border-radius:50%;background:var(--c);border:2px solid #fff;box-shadow:0 0 0 1.5px #b8c4d6;cursor:pointer;padding:0}
+  .csw button.on{box-shadow:0 0 0 2.5px var(--blue);transform:scale(1.12)}
+  .csw button:focus-visible{outline:3px solid #9cc0ff;outline-offset:2px}
+  .cname{font:600 .78rem Inter,sans-serif;color:var(--muted)}
+  .iv-info .csw button{width:34px;height:34px}
+  .iv-info .cname{font-size:.9rem;color:var(--ink)}
   .vsel{display:flex;gap:6px;margin:4px 0 2px}
   .vsel button{flex:1;font:700 .9rem Inter,"Noto Sans Sinhala",sans-serif;padding:8px 6px;border-radius:10px;border:2px solid #c6d2e2;background:#fff;color:var(--blue);cursor:pointer}
   .vsel button span{font-weight:600;opacity:.7}
@@ -769,9 +777,28 @@
   // Korean / Chinese (or other) versions of one item: p.variants = [{name, code, price, fixing_price}]
   const variantsOf = p => Array.isArray(p.variants) ? p.variants.filter(v => v && v.name) : [];
   const chosen = new Map();                                    // item id → selected version index
+  // sheet colours (outside face). Default = 02 Terracotta Red
+  const COLORS = [
+    ['01','Dark Chocolate Brown','#4a2c20'], ['02','Terracotta Red','#b5482e'], ['03','Off White','#ece8dc'],
+    ['04','Forest Green','#2e5a3a'], ['05','Beige','#d6c19a'], ['06','Royal Blue','#2b4fa3'], ['07','Black','#1d1d1f'] ];
+  const DEFAULT_COLOR = 1;
+  const colorPick = new Map();                                 // item id → colour index
+  const colOf = p => COLORS[colorPick.has(p.id) ? colorPick.get(p.id) : DEFAULT_COLOR];
+  const colorBtns = p => { if (!hasProf(p)) return ''; const ci = colorPick.has(p.id) ? colorPick.get(p.id) : DEFAULT_COLOR;
+    return `<div class="csel" role="group" aria-label="පාට තෝරන්න">
+      <div class="csw">${COLORS.map(([n, name, hex], k) =>
+        `<button type="button" data-col="${k}" class="${k===ci?'on':''}" aria-pressed="${k===ci}" title="${n} ${name}" aria-label="${n} ${name}" style="--c:${hex}"></button>`).join('')}</div>
+      <span class="cname">${COLORS[ci][0]} · ${COLORS[ci][1]}</span></div>`; };
+  function pickColor(root, p, k){
+    colorPick.set(p.id, k);
+    root.querySelectorAll('.csw button').forEach(b => { const on = +b.dataset.col === k; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    const nm = root.querySelector('.cname'); if (nm) nm.textContent = COLORS[k][0] + ' · ' + COLORS[k][1];
+    root.querySelectorAll('a.btn-wa').forEach(a => a.href = waLink(p));
+    const v = root.querySelector('.p3d'); if (v){ v.dataset.color = COLORS[k][2]; v.dispatchEvent(new CustomEvent('color', { detail: COLORS[k][2] })); }
+  }
   const curVar = p => { const vs = variantsOf(p); return vs.length ? vs[Math.min(chosen.get(p.id) || 0, vs.length-1)] : null; };
   const priceOf = p => { const v = curVar(p); return v ? { price: v.price, fixing_price: v.fixing_price } : p; };
-  const waLink = p => { const v = curVar(p); return `https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name+(p.size?' ('+p.size+')':'')+(v?' — '+v.name:''))}`; };
+  const waLink = p => { const v = curVar(p), c = hasProf(p) ? colOf(p) : null; return `https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I want to order: '+p.name+(p.size?' ('+p.size+')':'')+(v?' — '+v.name:'')+(c?' — colour '+c[0]+' '+c[1]:''))}`; };
   const priceBoxes = p => { const q = priceOf(p); return `
     <div class="pprices">
       <div><small>විකුණුම් මිල</small><b>${has(q.price)?money(q.price):'අමතන්න'}</b>${has(q.price)&&p.unit?`<em>${esc(p.unit)}</em>`:''}</div>
@@ -789,7 +816,7 @@
     root.querySelectorAll('a.btn-wa').forEach(a => a.href = waLink(p));
   }
   const media = (p, cls='') => hasProf(p)
-    ? `<div class="pimg p3d ${cls}" data-model="${esc(p.model)}"></div>`
+    ? `<div class="pimg p3d ${cls}" data-model="${esc(p.model)}" data-color="${colOf(p)[2]}"></div>`
     : `<div class="pimg ${cls}" ${p.image_url?`style="background-image:url('${esc(p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>`;
   function prodCard(p){
     const sub = [p.size, p.colour].filter(Boolean).map(esc).join(' · ');
@@ -800,6 +827,7 @@
           <h3>${esc(p.name)}</h3>
           ${sub?`<span class="psub">${sub}</span>`:''}
           ${variantBtns(p)}
+          ${colorBtns(p)}
           ${priceBoxes(p)}
           <div class="pbtns">
             <span class="btn btn-blue order">විස්තර බලන්න</span>
@@ -828,6 +856,7 @@
         ${sub?`<p class="psub">${sub}</p>`:''}
         ${p.description?`<p class="iv-desc">${esc(p.description)}</p>`:''}
         ${variantBtns(p)}
+        ${colorBtns(p)}
         ${priceBoxes(p)}
         ${hasProf(p) ? `<button type="button" class="btn btn-blue block js-dims" aria-expanded="false">📏 මිනුම් පෙන්වන්න</button>
           <div class="prof" hidden>${profileSVG(p.model)}</div>` : ''}
@@ -851,6 +880,9 @@
   dlg.querySelector('.iv-close').onclick = () => closeItem();
   dlg.addEventListener('click', e => {
     if (e.target === dlg) return closeItem();
+    const cb = e.target.closest('[data-col]');
+    if (cb){ const p = PRODUCTS.find(x => x.id == openId); pickColor(dlg, p, +cb.dataset.col);
+      const card = shopBox.querySelector(`.prod[data-item="${p.id}"]`); if (card) pickColor(card, p, +cb.dataset.col); return; }
     const vb = e.target.closest('[data-var]');
     if (vb){ const p = PRODUCTS.find(x => x.id == openId); pickVariant(dlg, p, +vb.dataset.var);
       const card = shopBox.querySelector(`.prod[data-item="${p.id}"]`); if (card) pickVariant(card, p, +vb.dataset.var); return; }
@@ -897,6 +929,9 @@
     const b=e.target.closest('[data-sub]'); if (b){ shopSub = b.dataset.sub==='all'?'all':+b.dataset.sub; renderShop(); return; }
     if (e.target.closest('a')) return;                 // WhatsApp link works as normal
     const card=e.target.closest('.prod'); if (!card) return;
+    const cb=e.target.closest('[data-col]');          // colour buttons recolour the model, not open the item
+    if (cb){ pickColor(card, PRODUCTS.find(x => x.id == card.dataset.item), +cb.dataset.col); return; }
+    if (e.target.closest('.csel')) return;
     const vb=e.target.closest('[data-var]');          // Korean / Chinese buttons change the prices, not open the item
     if (vb){ pickVariant(card, PRODUCTS.find(x => x.id == card.dataset.item), +vb.dataset.var); return; }
     openItem(card.dataset.item);
@@ -957,7 +992,9 @@
     try {
       const { mountGutter } = await getLib();
       if (!e.target.isConnected) return;
-      cards.set(e.target, mountGutter(e.target, e.target.dataset.model));
+      const g = mountGutter(e.target, e.target.dataset.model, { color: e.target.dataset.color });
+      cards.set(e.target, g);
+      e.target.addEventListener('color', ev => g.setColor(ev.detail));
       e.target.classList.add('ready');
     } catch (err) { console.warn('3D not available', err); e.target.classList.add('no3d'); }
   }), { rootMargin: '200px' });
@@ -971,7 +1008,8 @@
       const { mountGutter } = await getLib();
       if (!el.isConnected) return;
       big?.dispose();
-      big = mountGutter(el, el.dataset.model, { interactive: true });
+      big = mountGutter(el, el.dataset.model, { interactive: true, color: el.dataset.color });
+      el.addEventListener('color', ev => big?.setColor(ev.detail));
       el.addEventListener('dims', ev => big?.setDims(ev.detail));
       el.classList.add('ready');
     } catch (err) { console.warn('3D not available', err); el.classList.add('no3d'); }
