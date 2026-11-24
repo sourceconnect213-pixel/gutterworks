@@ -813,7 +813,7 @@
   const waLink = p => { const c = hasProf(p) ? colOf(p) : null; return `https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I would like to know more about: '+p.name+(p.size?' ('+p.size+')':'')+' — Korean'+(c?' — colour '+c[0]+' '+c[1]:''))}`; };
   const priceBoxes = p => `
     <div class="pfacts">
-      <span class="pf-k"><b>Korean</b> තහඩු</span>
+      <span class="pf-k"><b>Korean</b> තහඩු · <b>${window.AD_SHEET_MM || 0.47}mm</b></span>
       <span class="pf-w"><b>10</b> Year Warranty <small>· අවුරුදු 10 වගකීම</small></span>
     </div>`;
   const variantBtns = () => '';

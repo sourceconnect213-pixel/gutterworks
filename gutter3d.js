@@ -6,7 +6,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
 
 const LENGTH = 12;   // length of the piece shown (1 ft)
-const T = 0.05;      // sheet thickness
+// sheet thickness: 0.47 mm for every item (from profiles.js), converted to inches (model units)
+const T = (window.AD_SHEET_MM || 0.47) / 25.4;
 
 // A measurement number: plain text with a white halo (no box), sized to match the
 // label boxes used for placement in profiles.js (w × h inches).

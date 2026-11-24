@@ -160,10 +160,15 @@ function layout(key){
 
 function profileSVG(key){
   const P = PROFILES[key], Lo = layout(key); if (!Lo) return '';
-  const S = 46, pad = 10, note = 26 * Lo.scale;
+  const S = 46, pad = 10;
+  const nf = 12 * Lo.scale;                                   // note font size
+  const line1 = `තහඩුව ${fmt(Lo.girth)}" · ඝනකම ${SHEET_MM}mm`;
+  const line2 = `පළල ${fmt(Lo.width)}" · උස ${fmt(Lo.height)}" (අඟල්)`;
+  const noteW = Math.max(line1.length, line2.length) * nf * 0.7 + pad * 2;   // generous estimate
   const { minX, maxX, minY, maxY } = Lo.bbox;
-  const W = (maxX - minX) * S + pad*2, H = (maxY - minY) * S + pad*2 + note;
-  const X = x => (x - minX) * S + pad, Y = y => (maxY - y) * S + pad;
+  const W0 = (maxX - minX) * S + pad * 2, W = Math.max(W0, noteW), dx = (W - W0) / 2;   // keep the drawing centred
+  const note = nf * 3.4 + 8, H = (maxY - minY) * S + pad * 2 + note;
+  const X = x => (x - minX) * S + pad + dx, Y = y => (maxY - y) * S + pad;
   const path = Lo.pts.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
   const fs = 14 * Lo.scale;
   const labs = Lo.labels.map(l => `<text x="${X(l.x).toFixed(1)}" y="${(Y(l.y) + fs * 0.36).toFixed(1)}" style="font-size:${fs.toFixed(1)}px">${l.text}</text>`).join('');
@@ -172,9 +177,13 @@ function profileSVG(key){
     <path d="${path}" class="prof-in"/>
     <path d="${path}" class="prof-line"/>
     ${labs}
-    <text class="prof-note" style="font-size:${(11 * Lo.scale).toFixed(1)}px" x="${(W/2).toFixed(0)}" y="${(H - 8).toFixed(0)}">තහඩුව ${fmt(Lo.girth)}" · පළල ${fmt(Lo.width)}" · උස ${fmt(Lo.height)}" (අඟල්)</text>
+    <text class="prof-note" style="font-size:${nf.toFixed(1)}px" x="${(W/2).toFixed(0)}" y="${(H - nf * 2.1 - 6).toFixed(0)}">${line1}</text>
+    <text class="prof-note" style="font-size:${nf.toFixed(1)}px" x="${(W/2).toFixed(0)}" y="${(H - nf * 0.7 - 4).toFixed(0)}">${line2}</text>
   </svg>`;
 }
 
+// sheet thickness used for every item (Korean sheet), in millimetres
+const SHEET_MM = 0.47;
+window.AD_SHEET_MM = SHEET_MM;
 window.AD_PROFILES = PROFILES; window.profileSVG = profileSVG; window.profileLayout = layout; window.fmtInch = fmt;
 })();
