@@ -18,7 +18,7 @@ const GROUND = -84;
 const T = (window.AD_SHEET_MM || 0.47) / 25.4;     // 0.47 mm gutter / pipe sheet
 const BT = 0.08;                           // bracket strap thickness (≈2 mm)
 const BW = 1.0;                            // bracket strap width
-const SHEET_EDGE_X = 2.75;                 // roof sheet edge (≈1¾" past the fascia face, into the gutter)
+const SHEET_EDGE_X = 3.2;                  // roof sheet edge (≈1¾" past the fascia face, into the gutter)
 const AMP = 0.6, PITCH = 3;                // roof sheet corrugation
 const OUTLET_Z = -60, PIPE = 4;            // 4" × 4" down pipe
 const RAFTER_Z = [0, -24, -48, -72];       // front faces of the rafters (24" centres)
@@ -131,7 +131,18 @@ export function mountInstall(stage, ui){
   // ---------- gutter geometry (12" step gutter from the measured profile) ----------
   const prof = window.AD_PROFILES.gutter12.points;
   const maxX = Math.max(...prof.map(p => p[0]));
-  const gx = FAS_T + T / 2, gy = -2.85;                // back wall straight against the fascia, back top just below the fascia top
+  // ---------- 2b. metal valance board (12" Waddimbu Valance Board · design 4) over the timber fascia ----------
+  // painted face outward; its ribs rest on the timber; bottom return + lip wrap under the fascia; top hem over the fascia top
+  const VP = window.AD_PROFILES.val12d.points, vMaxX = Math.max(...VP.map(p => p[0])), vRib = vMaxX - Math.min(...VP.slice(3).map(p => p[0]));
+  const VAL_X = FAS_T + vRib + T / 2;                     // face centre line (ribs touch the timber)
+  const VAL_Y0 = FAS_BOT - 0.75 - T / 2;                  // bottom return just below the fascia, lip up to the fascia bottom
+  const vpts = VP.map(([x, y]) => [x - vMaxX + VAL_X, y + VAL_Y0]);
+  const valance = buildSheet(vpts, T, LEN, { outside: M.paint, inside: M.galv, edge: M.paintEdge, foldMat: lineDark, insideLineMat: lineGrey });
+  valance.position.z = -LEN / 2;
+  add(valance, 1, 0.45, new THREE.Vector3(14, 0, 0), 0.6);
+  const VAL_FACE = VAL_X + T / 2;                         // outer face of the valance board
+
+  const gx = VAL_FACE + T / 2, gy = -2.85;              // gutter back wall straight against the valance board
   const gpts = prof.map(([x, y]) => [maxX - x, y]).reverse().map(([x, y]) => [x + gx, y + gy]);   // plain wall to the fascia
   const bottomXs = gpts.filter(p => Math.abs(p[1] - gy) < 1e-6).map(p => p[0]);
   const OX = (Math.min(...bottomXs) + Math.max(...bottomXs)) / 2;          // outlet centre (middle of the gutter bottom)
@@ -291,6 +302,7 @@ export function mountInstall(stage, ui){
     { k: 'purlin', views: {section:'L'},  si: 'රීප්ප', en: 'Purlin', step: 4, at: new THREE.Vector3(-28 * CS - 1, 28 * SN + 1.2, 0) },
     { k: 'rafter', views: {section:'L'},  si: 'පරාලය', en: 'Rafter', step: 0, at: new THREE.Vector3(-12, rafterTop(-12) - RD / 2, 0) },
     { k: 'wall', views: {section:'L',full:'L'},    si: 'බිත්තිය', en: 'Wall', step: 0, at: new THREE.Vector3(WALL_X - WALL_T / 2, -4, 0) },
+    { k: 'valance', views: {section:'R',full:'L'}, si: 'වඩිම්බු ආවරණය', en: 'Valance board', step: 1.3, at: new THREE.Vector3(VAL_FACE, -6.6, -0.5) },
     { k: 'fascia', views: {section:'R',full:'L'},  si: 'වඩිම්බුව', en: 'Fascia board', step: 1, at: new THREE.Vector3(FAS_T / 2, -4.5, 0) },
     { k: 'screw', views: {section:'R'},   si: 'සවි කිරීමේ ඉස්කුරුප්පු', en: 'Fixing screws', step: 3, at: screwAt[0] },
     { k: 'bracket', views: {section:'R'}, si: 'වැහිපීලි ආධාරකය', en: 'Gutter bracket', step: 3, at: new THREE.Vector3((bpath[1][0] + bpath[2][0]) / 2 + 0.1, (bpath[1][1] + bpath[2][1]) / 2, BRACKET_Z[0] + 0.5) },
