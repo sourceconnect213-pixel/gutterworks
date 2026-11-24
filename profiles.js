@@ -80,6 +80,18 @@ const PROFILES = {
     ['D','1'], ['R','1'], ['U','1½'], ...kink('¼'), ['U','1'], ...kink('¼'), ['U','5½'], [[-0.35,1],'1'] ] }),
   val12d: build({ title: '12" Waddimbu Valance Board · මෝස්තර 4', sheet: 12, moves: [
     ['D','¾'], ['R','1'], ['U','1'], ...kink('¼'), ['U','¾'], ...kink('¼'), ['U','½'], ...kink('½'), ['U','5½'], [[-0.35,1],'½'] ] }),
+
+  // 18" ridge caps — walked from the bottom of the left leg, over the ridge, down to the right leg
+  ridge18a: build({ title: '18" Ridge Cap · මෝස්තර 1', sheet: 18, moves: [
+    ['U','2½'], [[1,0.42],'5'], ['U','1'], [[1,1],'½'], [[1,-1],'½'], ['D','1'], [[1,-0.42],'5'], ['D','2½'] ] }),
+  ridge18b: build({ title: '18" Ridge Cap · මෝස්තර 2', sheet: 18, moves: [
+    ['U','2½'], [[1,0.55],'6½'], [[1,-0.55],'6½'], ['D','2½'] ] }),
+
+  // 12" wall flashings — from the top lip, down the wall side, along the top, to the slanted drip
+  wall12a: build({ title: '12" Wall Flashing · මෝස්තර 1', sheet: 12, moves: [
+    ['R','½'], ['D','2'], ['R','7'], [[0.45,-1],'2½'] ] }),
+  wall12b: build({ title: '12" Wall Flashing · මෝස්තර 2', sheet: 12, moves: [
+    ['R','½'], ['D','3½'], ['R','7½'], [[1,-1],'½'] ] }),
 };
 
 const fmt = n => {
