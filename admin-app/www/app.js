@@ -181,7 +181,8 @@
     flash18b: '18" Badge Flashing · මෝස්තර 2', flash18c: '18" Badge Flashing · මෝස්තර 3',
     val9a: '9" Valance Board · මෝස්තර 1', val9b: '9" Valance Board · මෝස්තර 2',
     val12a: '12" Waddimbu Valance Board · මෝස්තර 1', val12b: '12" Waddimbu Valance Board · මෝස්තර 2',
-    val12c: '12" Waddimbu Valance Board · මෝස්තර 3', val12d: '12" Waddimbu Valance Board · මෝස්තර 4' };
+    val12c: '12" Waddimbu Valance Board · මෝස්තර 3', val12d: '12" Waddimbu Valance Board · මෝස්තර 4',
+    pipe18: '18" Down Pipe (4" × 4", 2" collar)' };
   const VNAMES = [['Korean','K'], ['Chinese','C']];
   const variantsOf = p => Array.isArray(p.variants) ? p.variants.filter(v => v && v.name) : [];
   const UNITS = ['per ft', 'each', 'per sq.ft', 'per sheet', 'per meter'];

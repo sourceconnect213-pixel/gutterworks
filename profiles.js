@@ -65,6 +65,12 @@ const PROFILES = {
     ['D','¼'], ['R','1'], ['U','7'], [[-0.35,1],'¾'] ] }),
   val9b: build({ title: '9" Valance Board · මෝස්තර 2', sheet: 9, moves: [
     ['D','¼'], ['R','1'], ['U','1'], [[-1,0.7],'½'], [[1,0.7],'½'], ['U','5'], [[-0.35,1],'¾'] ] }),
+  // 18" down pipe: 4" × 4" square, walked round from the top-right corner (outside face out),
+  // then the 2" collar folded inward, lying just under the top wall
+  pipe18: build({ title: '18" Down Pipe', sheet: 18, moves: [
+    ['L','4'], ['D','4'], ['R','4'], ['U','4'], [[-1,-0.06],'2'] ],
+    side: { 4: -1 } }),                                     // collar number inside the pipe
+
   // 12" Waddimbu valance boards (from the bottom lip up the face to the top hem)
   val12a: build({ title: '12" Waddimbu Valance Board · මෝස්තර 1', sheet: 12, moves: [
     ['D','1'], ['R','1'], ['U','9'], [[-0.35,1],'1'] ] }),
@@ -103,8 +109,8 @@ function layout(key){
   segs.forEach((s, i) => {
     const text = P.labels[i]; if (!text) return;
     const flat = Math.abs(s.uy) < 1e-6, endFold = i === 0 || i === segs.length - 1;
-    const k = flat && s.len < 1 && !endFold ? -1 : 1;
-    items.push({ text, mx: (s.x1+s.x2)/2, my: (s.y1+s.y2)/2, nx: k*s.uy, ny: -k*s.ux, ux: s.ux, uy: s.uy, seg: i });
+    const k = (P.side && P.side[i]) || (flat && s.len < 1 && !endFold ? -1 : 1);   // P.side: force a side for a part
+    items.push({ text, mx: (s.x1+s.x2)/2, my: (s.y1+s.y2)/2, nx: k*s.uy, ny: -k*s.ux, ux: s.ux, uy: s.uy, seg: i, forced: !!(P.side && P.side[i]) });
   });
   (P.spans || []).forEach(sp => {
     const a = pts[sp.from], b = pts[sp.to + 1], s = segs[sp.from];
@@ -132,7 +138,7 @@ function layout(key){
       const base = Math.abs(nx) * w/2 + Math.abs(ny) * h/2 + GAP;
       for (let extra = 0; extra <= 1.6; extra += 0.05)
         for (const sl of [0, 0.12, -0.12, 0.25, -0.25])
-          cands.push({ cost: extra + Math.abs(sl) * 0.6 + (side < 0 ? 0.18 : 0) + (it.span && side < 0 ? 9 : 0),
+          cands.push({ cost: extra + Math.abs(sl) * 0.6 + (side < 0 ? 0.18 : 0) + ((it.span || it.forced) && side < 0 ? 9 : 0),
                        x: it.mx + nx*(base+extra) + it.ux*sl*k0, y: it.my + ny*(base+extra) + it.uy*sl*k0, nx, ny });
     }
     cands.sort((p, q) => p.cost - q.cost);
