@@ -277,6 +277,7 @@
   .csw button{width:26px;height:26px;border-radius:50%;background:var(--c);border:2px solid #fff;box-shadow:0 0 0 1.5px #b8c4d6;cursor:pointer;padding:0}
   .csw button.on{box-shadow:0 0 0 2.5px var(--blue);transform:scale(1.12)}
   .csw button:focus-visible{outline:3px solid #9cc0ff;outline-offset:2px}
+  .fsw button{background-size:cover;background-position:center}
   .cname{font:600 .78rem Inter,sans-serif;color:var(--muted)}
   .iv-info .csw button{width:34px;height:34px}
   .iv-info .cname{font-size:.9rem;color:var(--ink)}
@@ -966,11 +967,29 @@
     root.querySelectorAll('a.btn-wa').forEach(a => a.href = waLink(p));
     const v = root.querySelector('.p3d'); if (v){ v.dataset.color = COLORS[k][2]; v.dispatchEvent(new CustomEvent('color', { detail: COLORS[k][2] })); }
   }
+  // photo finishes (e.g. ceiling panel colours): [{name, si, img, sw}]
+  const finsOf = p => Array.isArray(p.finishes) ? p.finishes.filter(f => f && f.img) : [];
+  const finPick = new Map();
+  const finOf = p => { const fs = finsOf(p); return fs.length ? fs[Math.min(finPick.get(p.id) || 0, fs.length - 1)] : null; };
+  const finBtns = p => { const fs = finsOf(p); if (fs.length < 2) return ''; const fi = Math.min(finPick.get(p.id) || 0, fs.length - 1);
+    return `<div class="csel" role="group" aria-label="වර්ණය තෝරන්න">
+      <div class="csw fsw">${fs.map((f, k) =>
+        `<button type="button" data-fin="${k}" class="${k===fi?'on':''}" aria-pressed="${k===fi}" title="${esc(f.name)}" aria-label="${esc(f.name)}" style="background-image:url('${esc(f.sw || f.img)}')"></button>`).join('')}</div>
+      <span class="cname">${esc(fs[fi].si || '')}${fs[fi].si ? ' · ' : ''}${esc(fs[fi].name)}</span></div>`; };
+  function pickFinish(root, p, k){
+    finPick.set(p.id, k); const f = finsOf(p)[k];
+    root.querySelectorAll('[data-fin]').forEach(b => { const on = +b.dataset.fin === k; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    const nm = root.querySelector('.cname'); if (nm) nm.textContent = (f.si ? f.si + ' · ' : '') + f.name;
+    const im = root.querySelector('.pimg'); if (im) im.style.backgroundImage = `url('${f.img}')`;
+    root.querySelectorAll('a.btn-wa').forEach(a => a.href = waLink(p));
+  }
   const curVar = p => { const vs = variantsOf(p); return vs.length ? vs[Math.min(chosen.get(p.id) || 0, vs.length-1)] : null; };
   const priceOf = p => { const v = curVar(p); return v ? { price: v.price, fixing_price: v.fixing_price } : p; };
   // No prices on the website: customers ask on WhatsApp / phone. Every item is Korean sheet with a 10 year warranty.
-  const waLink = p => { const c = hasProf(p) ? colOf(p) : null; return `https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I would like to know more about: '+p.name+(p.size?' ('+p.size+')':'')+' — Korean'+(c?' — colour '+c[0]+' '+c[1]:''))}`; };
-  const priceBoxes = p => `
+  const waLink = p => { const c = hasProf(p) ? colOf(p) : null, f = finOf(p);
+    return `https://wa.me/${PHONE}?text=${encodeURIComponent('Hello A.D. Engineering, I would like to know more about: '+p.name+(p.size?' ('+p.size+')':'')+(hasProf(p)?' — Korean':'')+(c?' — colour '+c[0]+' '+c[1]:'')+(f?' — colour '+f.name:''))}`; };
+  // Korean sheet / 0.47 mm / 10 year warranty apply to the sheet-metal items only (not PVC ceiling items)
+  const priceBoxes = p => !hasProf(p) ? '' : `
     <div class="pfacts">
       <span class="pf-k"><b>Korean</b> තහඩු · <b>${window.AD_SHEET_MM || 0.47}mm</b></span>
       <span class="pf-w"><b>10</b> Year Warranty <small>· අවුරුදු 10 වගකීම</small></span>
@@ -985,7 +1004,7 @@
   }
   const media = (p, cls='') => hasProf(p)
     ? `<div class="pimg p3d ${cls}" data-model="${esc(p.model)}" data-color="${colOf(p)[2]}"></div>`
-    : `<div class="pimg ${cls}" ${p.image_url?`style="background-image:url('${esc(p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>`;
+    : `<div class="pimg ${cls}" ${(finOf(p)?.img || p.image_url)?`style="background-image:url('${esc(finOf(p)?.img || p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>`;
   function prodCard(p){
     const sub = [p.size, p.colour].filter(Boolean).map(esc).join(' · ');
     return `
@@ -995,7 +1014,7 @@
           <h3>${esc(p.name)}</h3>
           ${sub?`<span class="psub">${sub}</span>`:''}
           ${variantBtns(p)}
-          ${colorBtns(p)}
+          ${colorBtns(p)}${finBtns(p)}
           ${priceBoxes(p)}
           <div class="pbtns">
             <span class="btn btn-blue order">විස්තර බලන්න</span>
@@ -1024,7 +1043,7 @@
         ${sub?`<p class="psub">${sub}</p>`:''}
         ${p.description?`<p class="iv-desc">${esc(p.description)}</p>`:''}
         ${variantBtns(p)}
-        ${colorBtns(p)}
+        ${colorBtns(p)}${finBtns(p)}
         ${priceBoxes(p)}
         ${hasProf(p) ? `<button type="button" class="btn btn-blue block js-dims" aria-expanded="false">📏 මිනුම් පෙන්වන්න</button>
           <div class="prof" hidden>${profileSVG(p.model)}</div>` : ''}
@@ -1048,6 +1067,9 @@
   dlg.querySelector('.iv-close').onclick = () => closeItem();
   dlg.addEventListener('click', e => {
     if (e.target === dlg) return closeItem();
+    const fb = e.target.closest('[data-fin]');
+    if (fb){ const p = PRODUCTS.find(x => x.id == openId); pickFinish(dlg, p, +fb.dataset.fin);
+      const card = shopBox.querySelector(`.prod[data-item="${p.id}"]`); if (card) pickFinish(card, p, +fb.dataset.fin); return; }
     const cb = e.target.closest('[data-col]');
     if (cb){ const p = PRODUCTS.find(x => x.id == openId); pickColor(dlg, p, +cb.dataset.col);
       const card = shopBox.querySelector(`.prod[data-item="${p.id}"]`); if (card) pickColor(card, p, +cb.dataset.col); return; }
@@ -1097,6 +1119,8 @@
     const b=e.target.closest('[data-sub]'); if (b){ shopSub = b.dataset.sub==='all'?'all':+b.dataset.sub; renderShop(); return; }
     if (e.target.closest('a')) return;                 // WhatsApp link works as normal
     const card=e.target.closest('.prod'); if (!card) return;
+    const fb=e.target.closest('[data-fin]');          // finish swatches change the photo, not open the item
+    if (fb){ pickFinish(card, PRODUCTS.find(x => x.id == card.dataset.item), +fb.dataset.fin); return; }
     const cb=e.target.closest('[data-col]');          // colour buttons recolour the model, not open the item
     if (cb){ pickColor(card, PRODUCTS.find(x => x.id == card.dataset.item), +cb.dataset.col); return; }
     if (e.target.closest('.csel')) return;
