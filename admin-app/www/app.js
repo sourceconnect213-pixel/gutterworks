@@ -187,7 +187,11 @@
     val12c: '12" Waddimbu Valance Board · මෝස්තර 3', val12d: '12" Waddimbu Valance Board · මෝස්තර 4',
     pipe18: '18" Down Pipe (4" × 4", 2" collar)',
     wall12a: '12" Wall Flashing · මෝස්තර 1', wall12b: '12" Wall Flashing · මෝස්තර 2',
-    ridge18a: '18" Ridge Cap · මෝස්තර 1', ridge18b: '18" Ridge Cap · මෝස්තර 2' };
+    ridge18a: '18" Ridge Cap · මෝස්තර 1', ridge18b: '18" Ridge Cap · මෝස්තර 2',
+    // ceiling items (3D from ceil3d.js on the website)
+    'ceil-panel': 'සිවිලිම් · PVC i-Panel', 'ceil-wall-angle': 'සිවිලිම් · Wall Angle', 'ceil-h-joiner': 'සිවිලිම් · H Joiner',
+    'ceil-u-trim': 'සිවිලිම් · U Trim', 'ceil-edge-trim': 'සිවිලිම් · Edge Trim', 'ceil-cove': 'සිවිලිම් · Cove',
+    'ceil-gi-channel': 'සිවිලිම් · GI Channel', 'ceil-gi-angle': 'සිවිලිම් · GI Angle' };
   const VNAMES = [['Korean','K'], ['Chinese','C']];
   const variantsOf = p => Array.isArray(p.variants) ? p.variants.filter(v => v && v.name) : [];
   const UNITS = ['per ft', 'each', 'per sq.ft', 'per sheet', 'per meter'];
@@ -381,7 +385,7 @@
       </div>
       <label>ඒකකය · Unit<input name="unit" list="unit-list" value="${esc(p.unit || (isNew ? 'per ft' : ''))}"><datalist id="unit-list">${unitOpts}</datalist></label>
       <label>විස්තරය · Description<textarea name="description" rows="2">${esc(p.description)}</textarea></label>
-      ${needsStep2 ? '' : `<label>මිනුම් රූපය · Measurements drawing<select name="model">${Object.entries(MODELS).map(([k,v]) => `<option value="${k}" ${(p.model||'')===k?'selected':''}>${v}</option>`).join('')}${p.model && !(p.model in MODELS) ? `<option value="${esc(p.model)}" selected>${esc(p.model)} · (photo item)</option>` : ''}</select></label>`}
+      ${needsStep2 ? '' : `<label>මිනුම් රූපය · Measurements drawing<select name="model">${Object.entries(MODELS).map(([k,v]) => `<option value="${k}" ${(p.model||'')===k?'selected':''}>${v}</option>`).join('')}${p.model && !(p.model in MODELS) ? `<option value="${esc(p.model)}" selected>${esc(p.model)} </option>` : ''}</select></label>`}
       <label>පිළිවෙල (අඩු අංකය මුලින්)<input name="sort" inputmode="numeric" value="${p.sort ?? 0}"></label>
       <div class="switch">තොගයේ ඇත · Website එකේ පෙන්වන්න<input type="checkbox" name="in_stock" ${p.in_stock!==false?'checked':''}></div>`,
       async fd => {

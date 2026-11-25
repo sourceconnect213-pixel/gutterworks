@@ -28,7 +28,7 @@ begin
       'images/ceiling/angle-wood.jpg',
       '[{"name":"Golden Oak","si":"ලී පාට","img":"images/ceiling/angle-wood.jpg","sw":"images/ceiling/sw-oak.jpg"},
         {"name":"White Wood","si":"සුදු ලී","img":"images/ceiling/angle-whitewood.jpg","sw":"images/ceiling/sw-whitewood.jpg"},
-        {"name":"White","si":"සුදු","img":"images/ceiling/angle-white.jpg","sw":"images/ceiling/sw-white.jpg"}]'),
+        {"name":"White","si":"සුදු","img":"images/ceiling/angle-white.jpg","sw":"images/ceiling/sw-pvcwhite.jpg"}]'),
     ('ceil-h-joiner', 'H Joiner', ca, 2, 'පැනල් දෙකක් එකට යා කරන H පටිය', 'images/ceiling/h-joiner.jpg', '[]'),
     ('ceil-u-trim', 'U Trim (End Cap)', ca, 3, 'පැනල් කෙළවර වසන U පටිය', 'images/ceiling/trim-u.jpg', '[]'),
     ('ceil-edge-trim', 'Edge Trim', ca, 4, 'සිවිලිම් දාර සඳහා trim පටිය', 'images/ceiling/trim-round.jpg', '[]'),
