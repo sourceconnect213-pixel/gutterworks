@@ -1,6 +1,7 @@
-// 3D models of the ceiling accessories: H Corner, L Corner, Top Molding, U Corner.
-// Shapes from the supplier's sheet (10 ft lengths; wall thickness 1.33 / 1.25 / 1.21 / 1.06 mm). Widths worked out from the
-// sheet's weight per length (rigid PVC ≈ 1.6 g/cm³) and an 8.5 mm slot for the 8 mm panel sheet.
+// 3D models of the ceiling items: H Corner, L Corner, U Corner, Top Molding (PVC, in the Panel Sheet colours),
+// GI Channel, GI L Angle (galvanised steel) and Main Tee (2x2 ceiling grid).
+// PVC shapes from the supplier's sheet (10 ft lengths; wall thickness 1.33 / 1.25 / 1.06 / 1.21 mm). Widths worked out
+// from the sheet's weight per length (rigid PVC ≈ 1.6 g/cm³) and an 8.5 mm slot for the 8 mm panel sheet.
 // Units: mm. Each item is its end profile (centre line of each wall + wall thickness) pushed out along its length.
 //   mountCeil(el, key, { fin })                      → card preview: turns slowly by itself
 //   mountCeil(el, key, { fin, interactive: true })   → big view: drag any direction, pinch / wheel to zoom
@@ -8,45 +9,67 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
 
 const BASE = new URL('./images/ceiling/', import.meta.url).href;
-// finish name (as in the shop) → texture cut from the photos. null = plain PVC white.
-const FIN_TEX = { 'Teak Wood': 'angle-teak', 'White Wood': 'angle-whitewood', 'White': null };
+// Panel Sheet colour name (as in the shop) → texture cut from the owner's colour photos
+const FIN_TEX = { 'PE+ Teak': 'pe-teak', 'PE+ Brum Teak': 'pe-brum-teak', 'PE+ Kithul': 'pe-kithul', 'PE+ Mahogani': 'pe-mahogani',
+                  'PE+ Pine Wood': 'pe-pine', 'Brush White': 'brush-white', 'Fabric White': 'fabric-white' };
 const PVC = '#ecedea';
 const SLOT = 8.5;                                               // opening that takes the 8 mm panel sheet
+const PE = { texW: 25, texL: 160 };                             // one colour photo strip = 25 mm × 160 mm
 
-// shallow curve from A to B, bulging by s towards side (nx, ny) (quadratic curve, n parts)
+// shallow curve from A to B, bulging by s to the left of A→B (quadratic curve, n parts)
 const bow = ([ax, ay], [bx, by], s, n = 12) => {
-  const l = Math.hypot(bx - ax, by - ay), nx = -(by - ay) / l, ny = (bx - ax) / l;   // left of A→B
+  const l = Math.hypot(bx - ax, by - ay), nx = -(by - ay) / l, ny = (bx - ax) / l;
   const cx = (ax + bx) / 2 + nx * 2 * s, cy = (ay + by) / 2 + ny * 2 * s;
   return Array.from({ length: n + 1 }, (_, i) => { const t = i / n, u = 1 - t;
     return [u*u*ax + 2*u*t*cx + t*t*bx, u*u*ay + 2*u*t*cy + t*t*by]; });
 };
 
-// The outside face of a wall is on the right of the walking direction. deco: parts that carry the printed film.
-// back: a wall that meets another one from behind (pushed back in depth, no outline, buried ends not drawn).
+// The outside face of a wall is on the right of the walking direction. deco: parts that carry the colour film.
+// back: a wall that meets another one from behind (pushed back in depth, no outline); buried: end(s) inside another wall.
+// mat: 'gi' galvanised steel, 'white' / 'black' painted steel; default = PVC in the chosen colour.
 function hCorner(){
-  const t = 1.33, yTop = t / 2 + SLOT + t / 2;                  // top flange centre line
+  const t = 1.33, yTop = t / 2 + SLOT + t / 2;
   return { parts: [
     { pts: [[-20, 0], [20, 0]], t, deco: () => true },                                  // 40 mm face flange
-    { pts: [[0, 0], [0, yTop]], t, back: true, buried: 'both' },                                        // web
-    { pts: [[-9.5, yTop - 0.7], [-5, yTop - 0.1], [0, yTop], [5, yTop - 0.1], [9.5, yTop - 0.7]], t },  // rounded back flange
-  ], len: 110, rot: Math.PI, texW: 25, texL: 220 };
+    { pts: [[0, 0], [0, yTop]], t, back: true, buried: 'both' },                        // web
+    { pts: [[-9.5, yTop - 0.7], [-5, yTop - 0.1], [0, yTop], [5, yTop - 0.1], [9.5, yTop - 0.7]], t, deco: () => true },
+  ], len: 110, rot: Math.PI, ...PE };
 }
 function lCorner(){
-  const t = 1.25, L = 25.4;                                     // 1" legs, film on both outer faces
-  return { parts: [{ pts: [[L, 0], [L, L], [0, L]], t, deco: () => true }], len: 110, rot: 0, texW: 25, texL: 220 };
+  const t = 1.25, L = 25.4;                                     // 1" legs, colour on both outer faces
+  return { parts: [{ pts: [[L, 0], [L, L], [0, L]], t, deco: () => true }], len: 110, rot: 0, ...PE };
 }
 function uCorner(){
-  const t = 1.06, y = t / 2 + SLOT + t / 2;
-  return { parts: [{ pts: [[0, 0], [32, 0], [32, y], [18, y], [18, y - 1.4]], t, deco: i => i === 0 }],   // face flange + channel
-    len: 110, rot: Math.PI, texW: 25, texL: 220 };
+  const t = 1.06, y = t / 2 + SLOT + t / 2;                     // face flange + channel (straight lip, no hook)
+  return { parts: [{ pts: [[0, 0], [32, 0], [32, y], [18, y]], t, deco: () => true }], len: 110, rot: Math.PI, ...PE };
 }
 function topMolding(){
-  const t = 1.21, S = 22, y = S + t / 2 + SLOT + t / 2;         // wall on the left (x = 0), ceiling panel sits in the slot on top
-  const face = bow([0, 0], [S, S], 4.5);                        // printed face, curved in towards the corner
+  // wall on the left (x = 0). The top lip reaches out further than the curved face, then turns down over the panel.
+  const t = 1.21, S = 22, y = S + t / 2 + SLOT + t / 2, L = 30, D = 4;
+  const face = bow([0, 0], [S, S], 4.5);
   return { parts: [
-    { pts: [[9, y], [0, y], [0, 0], ...face.slice(1)], t, deco: i => i >= 2 },        // lip, wall leg, face
-    { pts: [[S, S], [0, S]], t, back: true, buried: 'end' },                            // ceiling leg (floor of the slot)
-  ], len: 110, rot: Math.PI / 2, texW: 25, texL: 220 };
+    { pts: [[L, y - D], [L, y], [0, y], [0, 0], ...face.slice(1)], t, deco: () => true },   // lip + turn, wall leg, face
+    { pts: [[S, S], [0, S]], t, back: true, buried: 'end' },                                // ceiling leg (floor of the slot)
+  ], len: 110, rot: Math.PI / 2, ...PE };
+}
+function giChannel(){
+  const t = 0.5;                                                // U channel as in the photo: wide base, low walls
+  return { parts: [{ pts: [[0, 20], [0, 0], [50, 0], [50, 20]], t, mat: 'gi' }], len: 160, rot: 0, texW: 20, texL: 160 };
+}
+function giAngle(){
+  const t = 0.5, L = 25;
+  return { parts: [{ pts: [[L, 0], [L, L], [0, L]], t, mat: 'gi' }], len: 160, rot: 0, texW: 20, texL: 160 };
+}
+function mainTee(){
+  // 24 mm white face with the black centre groove, galvanised web with slots and holes, rolled bulb on top
+  const t = 0.6, g = 1.5, gd = 1.8, wTop = 26, bH = 32, bW = 1.9;
+  return { parts: [
+    { pts: [[-12, 0], [-g, 0]], t, mat: 'white' },
+    { pts: [[g, 0], [12, 0]], t, mat: 'white' },
+    { pts: [[-g, 0], [-g, gd], [g, gd], [g, 0]], t, mat: 'black' },                     // centre groove
+    { pts: [[0, gd], [0, wTop]], t: 0.9, mat: 'web', back: true, buried: 'both', texW: wTop - gd, texL: 100 },
+    { pts: [[-bW, wTop], [bW, wTop], [bW, bH], [-bW, bH], [-bW, wTop]], t, mat: 'gi', closed: true },   // bulb
+  ], len: 170, rot: Math.PI * 0.85, texW: 20, texL: 160 };
 }
 
 export const CEIL = {
@@ -54,6 +77,9 @@ export const CEIL = {
   'ceil-wall-angle': lCorner(),
   'ceil-u-trim': uCorner(),
   'ceil-cove': topMolding(),
+  'ceil-gi-channel': giChannel(),
+  'ceil-gi-angle': giAngle(),
+  'ceil-main-tee': mainTee(),
 };
 export const hasCeil = key => !!CEIL[key];
 
@@ -143,7 +169,6 @@ export function mountCeil(container, key, opts = {}){
   const body = new THREE.MeshStandardMaterial({ color: PVC, roughness: 0.6, metalness: 0 });
   const inside = new THREE.MeshStandardMaterial({ color: 0xdfe0dc, roughness: 0.7, metalness: 0 });
   const edge = new THREE.MeshStandardMaterial({ color: 0xd3d4cf, roughness: 0.7, metalness: 0 });
-  [deco, body, inside, edge].forEach(m => m.side = THREE.DoubleSide);
   const texCache = {};
   const setFinish = name => {
     const k = FIN_TEX[name];
@@ -151,17 +176,37 @@ export function mountCeil(container, key, opts = {}){
     deco.color.set(k ? 0xffffff : PVC); deco.needsUpdate = true;
   };
   setFinish(opts.fin || '');
+  // steel: galvanised (photo texture), painted white, black groove
+  const used = new Set(def.parts.map(p => p.mat || 'pvc'));
+  const sets = { pvc: [deco, body, inside, edge] };
+  if (used.has('gi') || used.has('web')){
+    const gi = new THREE.MeshStandardMaterial({ map: loadTex('tex-gi.jpg'), color: 0xffffff, roughness: 0.45, metalness: 0.12 });
+    const giEdge = new THREE.MeshStandardMaterial({ color: 0x9aa3ab, roughness: 0.4, metalness: 0.6 });
+    sets.gi = [gi, gi, gi, giEdge];
+    if (used.has('web')){                                       // web: same steel with its row of slots and round holes
+      const c = document.createElement('canvas'); c.width = 64; c.height = 256;
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 64, 256); g.fillStyle = '#000';
+      for (let k = 0; k < 4; k++) g.fillRect(40, k * 64 + 18, 9, 28);                     // slots near the top
+      g.beginPath(); g.arc(22, 128, 7, 0, Math.PI * 2); g.fill();                         // round hole
+      const alpha = new THREE.CanvasTexture(c); alpha.wrapS = alpha.wrapT = THREE.RepeatWrapping;
+      const wm = gi.clone(); wm.map = loadTex('tex-gi.jpg'); wm.map.repeat.set(1.2, 0.6); wm.alphaMap = alpha; wm.alphaTest = 0.5;
+      sets.web = [wm, wm, wm, giEdge];
+    }
+  }
+  if (used.has('white')){ const w = new THREE.MeshStandardMaterial({ color: 0xf6f7f5, roughness: 0.35, metalness: 0.1 }); sets.white = [w, w, w, w]; }
+  if (used.has('black')){ const k = new THREE.MeshStandardMaterial({ color: 0x18191b, roughness: 0.5, metalness: 0.1 }); sets.black = [k, k, k, k]; }
+  Object.values(sets).flat().forEach(m => m.side = THREE.DoubleSide);
 
   const model = new THREE.Group();
   const lineMat = new THREE.LineBasicMaterial({ color: 0x8d8f8a, transparent: true, opacity: 0.45 });
   // walls that meet another wall from behind: pushed slightly back in depth, so the wall in front always covers
   // them on any phone GPU (no show-through lines)
   const pushBack = m => { const c = m.clone(); c.polygonOffset = true; c.polygonOffsetFactor = 4; c.polygonOffsetUnits = 16; return c; };
-  const backMats = [deco, body, inside, edge].map(pushBack);
   for (const part of def.parts){
-    const geo = buildWall(part, len, texW, def.texL || texW * 4, ox, oy);
-    const mesh = new THREE.Mesh(geo, part.back ? backMats : [deco, body, inside, edge]);
-    if (!part.back) mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), lineMat));
+    const geo = buildWall(part, len, part.texW || texW, part.texL || def.texL || texW * 4, ox, oy);
+    const set = sets[part.mat || 'pvc'];
+    const mesh = new THREE.Mesh(geo, part.back ? set.map(pushBack) : set);
+    if (!part.back && part.mat !== 'black') mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), lineMat));
     model.add(mesh);
   }
   model.rotation.z = def.rot || 0;                              // printed face towards the viewer
@@ -212,7 +257,7 @@ export function mountCeil(container, key, opts = {}){
     dispose(){
       renderer.setAnimationLoop(null); ro.disconnect(); io.disconnect(); controls.dispose();
       Object.values(texCache).forEach(t => t.dispose());
-      scene.traverse(o => { o.geometry?.dispose?.(); (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => { m?.map?.dispose?.(); m?.dispose?.(); }); });
+      scene.traverse(o => { o.geometry?.dispose?.(); (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => { m?.map?.dispose?.(); m?.alphaMap?.dispose?.(); m?.dispose?.(); }); });
       renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();
     }
   };

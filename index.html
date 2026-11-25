@@ -943,8 +943,8 @@
   const kids = id => CATS.filter(c => (c.parent_id ?? null) == (id ?? null)).sort((a,b)=>(a.sort-b.sort)||(a.id-b.id));
   const bigLabel = n => { const m = String(n).match(/\d+(\.\d+)?\s*("|”|inch|in\b|mm|ft)?/i); return m ? m[0].replace(/\s*(inch|in)\b/i,'"').replace(/\s+/g,'') : String(n).split(/\s+/)[0]; };
   const hasProf = p => !!(p.model && window.AD_PROFILES && AD_PROFILES[p.model]);
-  // ceiling accessories with a 3D model in ceil3d.js: H Corner, L Corner, U Corner, Top Molding
-  const CEIL_3D = ['ceil-h-joiner','ceil-wall-angle','ceil-u-trim','ceil-cove'];
+  // ceiling items with a 3D model in ceil3d.js: H / L / U Corner, Top Molding, GI Channel, GI L Angle, Main Tee
+  const CEIL_3D = ['ceil-h-joiner','ceil-wall-angle','ceil-u-trim','ceil-cove','ceil-gi-channel','ceil-gi-angle','ceil-main-tee'];
   const hasCeil = p => CEIL_3D.includes(p.model);
   const has = v => v != null && v !== '';
   // Korean / Chinese (or other) versions of one item: p.variants = [{name, code, price, fixing_price}]
