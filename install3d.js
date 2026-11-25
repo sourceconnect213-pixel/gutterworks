@@ -191,17 +191,40 @@ export function mountInstall(stage, ui, opts = {}){
   add(gutter, 2, 0, new THREE.Vector3(0, 22, 0), 0.9);
 
   // ---------- 4. internal brackets + fixing screws ----------
-  // Flat galvanised steel bar (as in the owner's photo), hidden inside the gutter:
-  // top tab against the gutter's back wall, screwed through it into the fascia;
-  // slanted leg down to the gutter bottom; foot riveted to the gutter bottom.
+  // Flat galvanised steel bar (as in the owner's photo), hidden inside the gutter, across its top:
+  // tab down the back wall, screwed through it into the fascia; bar straight across the gutter;
+  // foot down the inside of the front wall, riveted to it. Water flows freely underneath.
   const IBT = 0.12, IBW = 1.0;                             // ≈3 mm × 25 mm flat bar
   const n = gpts.length;
-  const tx = gx + T / 2 + IBT / 2, fy = gy + T / 2 + IBT / 2;
+  const tx = gx + T / 2 + IBT / 2;                       // tab line on the back wall
+  const frontTop = Math.max(...gpts.filter(p => p[0] > OX).map(p => p[1]));
+  let yb = Math.min(backTop, frontTop) - 0.45;            // bar height: below the top folds of both walls
+  // the front wall where the bar meets it: the non-flat segment on the front side that crosses height yb
+  let fseg = null;
+  for (let tries = 0; tries < 8; tries++){
+    fseg = null;
+    for (let i = 1; i < n; i++){
+      const [x1, y1] = gpts[i - 1], [x2, y2] = gpts[i];
+      if (Math.min(x1, x2) <= OX || Math.abs(y2 - y1) < 1e-6) continue;
+      if (Math.min(y1, y2) <= yb && Math.max(y1, y2) >= yb){ fseg = { x1, y1, x2, y2 }; break; }
+    }
+    const lo = fseg ? Math.min(fseg.y1, fseg.y2) : yb;
+    if (fseg && yb - lo >= 0.7) break;                    // room for the foot below the bar
+    yb = lo - 0.05;                                        // otherwise move the bar down to the next part of the front wall
+  }
+  const fl = Math.hypot(fseg.x2 - fseg.x1, fseg.y2 - fseg.y1);
+  const fu = [(fseg.x2 - fseg.x1) / fl, (fseg.y2 - fseg.y1) / fl];            // along the front wall
+  const fin = [-fu[1], fu[0]];                                                 // toward the inside of the gutter
+  const fk = (yb - fseg.y1) / (fseg.y2 - fseg.y1), off = T / 2 + IBT / 2;
+  const fTop = [fseg.x1 + (fseg.x2 - fseg.x1) * fk + fin[0] * off, yb];
+  const down = fu[1] > 0 ? [-fu[0], -fu[1]] : fu;                               // down along the front wall
+  const footLen = Math.min(0.9, (yb - Math.min(fseg.y1, fseg.y2)) / Math.abs(down[1]) - 0.05);
+  const fBot = [fTop[0] + down[0] * footLen, fTop[1] + down[1] * footLen];
   const bpath = [
-    [tx, backTop - 0.45],                                  // top of the tab (below the back wall's top fold)
-    [tx, backTop - 1.4],                                   // bottom of the tab
-    [BL + BW_ * 0.62, fy],                                 // slanted leg down to the bottom
-    [BL + BW_ * 0.92, fy],                                 // foot on the gutter bottom
+    [tx, yb - 0.95],                                       // bottom of the tab (on the back wall)
+    [tx, yb],                                              // top of the tab
+    fTop,                                                  // bar across the top of the gutter
+    fBot,                                                  // foot down the front wall
   ];
   const steelMats = { outside: M.steel, inside: M.steel, edge: M.steel, foldMat: lineSteel, insideLineMat: lineSteel };
   const UP = new THREE.Vector3(0, 1, 0);
@@ -217,8 +240,8 @@ export function mountInstall(stage, ui, opts = {}){
     const b = buildSheet(bpath, IBT, IBW, steelMats); b.position.z = zc;
     add(b, 3, i * 0.1, new THREE.Vector3(0, 9, 0));
     const spots = [
-      { p: [tx + IBT / 2, backTop - 0.9], axis: new THREE.Vector3(1, 0, 0), len: 1.3 },   // through the tab + gutter wall into the fascia
-      { p: [BL + BW_ * 0.78, fy + IBT / 2], axis: UP, len: 0.16 },                          // rivet through the foot + gutter bottom
+      { p: [tx + IBT / 2, yb - 0.5], axis: new THREE.Vector3(1, 0, 0), len: 1.3 },   // through the tab + gutter wall into the fascia
+      { p: [(fTop[0] + fBot[0]) / 2 + fin[0] * IBT / 2, (fTop[1] + fBot[1]) / 2 + fin[1] * IBT / 2], axis: new THREE.Vector3(fin[0], fin[1], 0), len: 0.16 },   // rivet through the foot + front wall
     ];
     spots.forEach(({ p, axis, len }, j) => {
       const s = makeScrew(len); s.position.set(p[0], p[1], zc); s.quaternion.setFromUnitVectors(UP, axis);
@@ -264,7 +287,7 @@ export function mountInstall(stage, ui, opts = {}){
   const FACE_BOTTOM = vpts ? Math.min(...vpts.map(p => p[1])) - T / 2 : FAS_BOT;
   const PX = Math.max(OX, VAL_FACE + PIPE / 2 + 0.15);       // pipe centre line
   const P2Y = Math.min(gy - 6, FACE_BOTTOM - 1.6);           // bend: inner corner ≥ 0.75" below the face bottom
-  const P1 = new THREE.Vector3(PX, gy - 0.9, OUTLET_Z), P2 = new THREE.Vector3(PX, P2Y, OUTLET_Z);
+  const P1 = new THREE.Vector3(PX, gy - T / 2 - 0.02, OUTLET_Z), P2 = new THREE.Vector3(PX, P2Y, OUTLET_Z);
   const P3 = new THREE.Vector3(XW, P2.y - (PX - XW), OUTLET_Z), P4 = new THREE.Vector3(XW, GROUND + 8, OUTLET_Z);
   const P5 = new THREE.Vector3(XW + 4.5, GROUND + 3.5, OUTLET_Z);
   const outlet = new THREE.Group();
@@ -399,7 +422,7 @@ export function mountInstall(stage, ui, opts = {}){
 
   // ---------- camera ----------
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false;
+  controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = true; controls.screenSpacePanning = true;   // slide the view sideways along the eave
   controls.minDistance = 20; controls.maxDistance = 400;
   controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
   renderer.domElement.style.touchAction = 'pan-y';
@@ -546,7 +569,7 @@ export function mountInstall(stage, ui, opts = {}){
     setArrows(on){ arrowsOn = on; },
     state(){ return { t, playing, view, labels: labelsOn, arrows: arrowsOn }; },
     _debugCam(px, py, pz, tx, ty, tz){ userCam = true; camera.position.set(px, py, pz); controls.target.set(tx, ty, tz); },
-    geometry(){ return { PX, P2Y, FACE_BOTTOM, NOZ, OX,  gutter: GKEY, valance: VKEY, FAS_BOT, VAL_FACE, gx, gy, backTop, BL, BR, FRONT_X, SHEET_EDGE_X, sheetY: sheetUnder(SHEET_EDGE_X), bpath, vpts, gpts }; },
+    geometry(){ return { P1Y: P1.y, yb, fTop, fBot, PX, P2Y, FACE_BOTTOM, NOZ, OX,  gutter: GKEY, valance: VKEY, FAS_BOT, VAL_FACE, gx, gy, backTop, BL, BR, FRONT_X, SHEET_EDGE_X, sheetY: sheetUnder(SHEET_EDGE_X), bpath, vpts, gpts }; },
     get playing(){ return playing; },
     dispose(){
       renderer.setAnimationLoop(null); ro.disconnect(); controls.dispose();
