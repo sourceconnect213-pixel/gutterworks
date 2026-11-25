@@ -32,8 +32,9 @@ function panelParts(){
 
 export const CEIL = {
   'ceil-panel': panelParts(),
-  // L angle, printed outside
-  'ceil-wall-angle': { parts: [{ pts: [[22, 0], [22, 22], [0, 22]], t: 1.0, deco: () => true }], len: 110, texW: 200 },
+  // L angle: the wood / colour film is on the room-side leg only, the other leg is plain white PVC (as in the photos)
+  'ceil-wall-angle': { parts: [{ pts: [[22, 0], [22, 22], [0, 22]], t: 1.0, deco: i => i === 1 }], len: 110, texW: 22, texL: 220,
+    fins: { 'Teak Wood': 'angle-teak', 'Golden Oak': 'angle-teak', 'White Wood': 'angle-whitewood', 'White': null } },
   // H joiner: wide face flange, web, narrower back flange
   'ceil-h-joiner': { parts: [
       { pts: [[35, 0.3], [-35, 0.3]], t: 0.9 },
@@ -48,13 +49,13 @@ export const CEIL = {
       { pts: [[0, 0], [26, 24], [38, 22], [55, -6], [20, 0]], t: 0.9 },
       { pts: [[20, 0], [38, 22]], t: 0.9 } ], len: 110 },
   // galvanised steel frame parts
-  'ceil-gi-channel': { parts: [{ pts: [[0, 19], [0, 0], [40, 0], [40, 19]], t: 0.5 }], len: 140, gi: true, texW: 60 },
+  'ceil-gi-channel': { parts: [{ pts: [[0, 19], [0, 0], [40, 0], [40, 19]], t: 0.5 }], len: 140, gi: true, texW: 80 },
   'ceil-gi-angle':   { parts: [{ pts: [[25, 0], [25, 25], [0, 25]], t: 0.5 }], len: 110, gi: true, texW: 60 },
 };
 export const hasCeil = key => !!CEIL[key];
 
 // One wall (open or closed loop) as a mesh: groups 0 printed outside, 1 plain outside, 2 inside, 3 cut edges.
-function buildWall(part, len, texW, ox, oy){
+function buildWall(part, len, texW, texL, ox, oy){
   const pts = part.pts.map(([x, y]) => [x - ox, y - oy]), closed = !!part.closed;
   if (closed) pts.pop();                                        // last point repeats the first
   const n = pts.length, S = closed ? n : n - 1, h = part.t / 2, z0 = -len / 2, z1 = len / 2;
@@ -77,7 +78,7 @@ function buildWall(part, len, texW, ox, oy){
   const G = [[], [], [], []], U = [[], [], [], []];
   const quad = (g, A, B, C, D, ua = 0, ub = 0) => {           // uv: u across the profile, v along the length
     G[g].push(...A, ...B, ...C, ...A, ...C, ...D);
-    const v = z => (z + len / 2) / (texW * 4);
+    const v = z => (z + len / 2) / texL;                     // texL: length of photo the texture covers (no repeat seam)
     const uv = (p, u) => [u, v(p[2])];
     const us = [ua, ub, ub, ua];
     [[A, us[0]], [B, us[1]], [C, us[2]], [A, us[0]], [C, us[2]], [D, us[3]]].forEach(([p, u]) => U[g].push(...uv(p, u)));
@@ -117,8 +118,8 @@ export function mountCeil(container, key, opts = {}){
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMapping = THREE.NeutralToneMapping;          // keeps the photo colours true (wood, black, grey)
+  renderer.toneMappingExposure = 0.95;
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
@@ -150,7 +151,7 @@ export function mountCeil(container, key, opts = {}){
   const texCache = {};
   const setFinish = name => {
     if (def.gi) return;
-    const k = FIN_TEX[name];
+    const k = (def.fins && name in def.fins) ? def.fins[name] : FIN_TEX[name];
     deco.map = k ? (texCache[k] ||= loadTex('tex-' + k + '.jpg')) : null;
     deco.color.set(k ? 0xffffff : PVC); deco.needsUpdate = true;
   };
@@ -158,9 +159,12 @@ export function mountCeil(container, key, opts = {}){
 
   const model = new THREE.Group();
   const lineMat = new THREE.LineBasicMaterial({ color: def.gi ? 0x5c656d : 0x8d8f8a, transparent: true, opacity: 0.45 });
+  // inside ribs: pushed slightly back in depth, so the face in front always covers them on any phone GPU
+  const pushBack = m => { const c = m.clone(); c.polygonOffset = true; c.polygonOffsetFactor = 4; c.polygonOffsetUnits = 16; return c; };
+  const ribMats = def.parts.some(p => p.hidden) ? [deco, body, inside, edge].map(pushBack) : null;
   for (const part of def.parts){
-    const geo = buildWall(part, len, texW, ox, oy);
-    const mesh = new THREE.Mesh(geo, [deco, body, inside, edge]);
+    const geo = buildWall(part, len, texW, def.texL || texW * 4, ox, oy);
+    const mesh = new THREE.Mesh(geo, part.hidden ? ribMats : [deco, body, inside, edge]);
     if (!part.hidden) mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), lineMat));
     model.add(mesh);
   }
