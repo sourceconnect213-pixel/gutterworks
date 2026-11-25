@@ -121,6 +121,7 @@
   .filters{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:26px}
   .filters button{font:inherit;font-family:"Noto Sans Sinhala";font-weight:700;border:2px solid var(--blue);background:#fff;color:var(--blue);padding:9px 18px;border-radius:40px;cursor:pointer}
   .filters button span{font-family:Inter;font-weight:500;font-size:.78rem;opacity:.75;margin-left:4px}
+  .filters button i.cn{font-style:normal}
   .filters button.on,.filters button:hover{background:var(--blue);color:#fff}
   .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
   .g{position:relative;border-radius:12px;overflow:hidden;background:#dde4ef;aspect-ratio:1/1;cursor:zoom-in;border:0;padding:0}
@@ -846,7 +847,7 @@
   const EDIT = new URLSearchParams(location.search).has('edit');
   const AD_ED = (() => {
     const ROOTS = 'header, .phones, section[id], footer, nav.mbar';
-    const SKIP = '#products, #shop-filters, #gallery, #item-view, #inst-labels, #inst-lines, #inst-cap, #inst-key, #inst-steps, #inst-play, #inst-load, #lb, #yr, script, style, select, option, textarea, input, svg, .wa-float';
+    const SKIP = '#products, #shop-filters, #gallery, #item-view, #inst-labels, #inst-lines, #inst-cap, #inst-key, #inst-steps, #inst-play, #inst-load, #lb, #yr, .menu-btn, script, style, select, option, textarea, input, svg, .wa-float';
     const SET_ID = { 'c-email':'email', 'c-main':'shop_main', 'c-branch':'shop_branch', 'c-hours':'hours', 'c-closed':'closed_note',
                      'st-years':'years', 'st-projects':'projects', 'st-warranty':'warranty' };
     const SET_TEL = { 'tel:+94764493749':'phone_orders', 'tel:+94755350030':'phone_owner' };
@@ -889,7 +890,7 @@
             w.dataset.ek = keyOf(w, hash(norm(w.innerHTML))); orig.set(w, w.innerHTML); });
           continue;
         }
-        if ([...el.children].every(isFmt)){ el.dataset.ek = keyOf(el, hash(norm(el.innerHTML))); orig.set(el, el.innerHTML); }
+        if ([...el.children].every(isFmt) && !(el.children.length && el.matches('a, button'))){ el.dataset.ek = keyOf(el, hash(norm(el.innerHTML))); orig.set(el, el.innerHTML); }
         else texts.forEach(t => { const w = document.createElement('span'); w.className = 'ek-w'; t.replaceWith(w); w.append(t);
           w.dataset.ek = keyOf(w, hash(norm(w.innerHTML))); orig.set(w, w.innerHTML); });
       }
@@ -898,8 +899,14 @@
       if (el.tagName === 'IMG'){ el.src = url; el.removeAttribute('srcset'); }
       else el.style.backgroundImage = url ? `url('${url.replace(/'/g, '%27')}')` : orig.get(el);
     }
+    // texts made by the page's scripts (buttons, tips, labels): tx('key', 'default html') → <span data-tk>
+    const UI = new Map(), DEF = new Map();
+    const ui = (k, d) => { DEF.set(k, d); return UI.has(k) ? clean(UI.get(k)) : d; };
+    const tx = (k, d) => `<span data-tk="${k}">${ui(k, d)}</span>`;
     function apply(rows){
       const m = new Map((rows || []).map(r => [r.key, r.value]));
+      m.forEach((v, k) => { if (k.startsWith('ui:')) UI.set(k.slice(3), v); });
+      document.querySelectorAll('[data-tk]').forEach(el => { const k = el.dataset.tk; if (UI.has(k)) el.innerHTML = clean(UI.get(k)); });
       document.querySelectorAll('[data-ek]').forEach(el => { if (m.has(el.dataset.ek)) { el.innerHTML = clean(m.get(el.dataset.ek)); syncCount(el); } });
       document.querySelectorAll('[data-ei]').forEach(el => { const u = m.get(el.dataset.ei); if (u && /^https:\/\//.test(u)) setImg(el, u); });
     }
@@ -907,9 +914,13 @@
     const syncCount = el => { if (el.dataset.count == null) return; const n = parseInt(el.textContent.replace(/\D/g, ''), 10); if (!isNaN(n)) el.dataset.count = n; };
     const reset = el => { if (el.dataset.ei) { if (el.tagName === 'IMG') el.src = orig.get(el); else el.style.backgroundImage = orig.get(el); } else el.innerHTML = orig.get(el); };
     scan();
-    return { clean, apply, reset, setImg, syncCount, original: el => orig.get(el) };
+    const setUI = (k, v) => { if (v == null) UI.delete(k); else UI.set(k, v);
+      document.querySelectorAll(`[data-tk="${CSS.escape(k)}"]`).forEach(el => el.innerHTML = v == null ? DEF.get(k) ?? el.innerHTML : clean(v)); };
+    return { clean, apply, reset, setImg, syncCount, ui, tx, setUI, uiDefault: k => DEF.get(k), original: el => orig.get(el) };
   })();
   window.AD_ED = AD_ED;
+  const tx = AD_ED.tx;
+  window.AD_TX = AD_ED.ui;                                    // used by the installation diagram's labels
   if (EDIT){ const sc = document.createElement('script'); sc.src = 'editor/edit.js?v=' + Date.now(); document.body.appendChild(sc); }
 
   document.getElementById('yr').textContent = new Date().getFullYear();
@@ -1035,11 +1046,11 @@
     return `<div class="csel" role="group" aria-label="පාට තෝරන්න">
       <div class="csw">${COLORS.map(([n, name, hex], k) =>
         `<button type="button" data-col="${k}" class="${k===ci?'on':''}" aria-pressed="${k===ci}" title="${n} ${name}" aria-label="${n} ${name}" style="--c:${hex}"></button>`).join('')}</div>
-      <span class="cname">${COLORS[ci][0]} · ${COLORS[ci][1]}</span></div>`; };
+      <span class="cname">${COLORS[ci][0]} · ${tx('colour.' + COLORS[ci][0], esc(COLORS[ci][1]))}</span></div>`; };
   function pickColor(root, p, k){
     colorPick.set(p.id, k);
     root.querySelectorAll('.csw button').forEach(b => { const on = +b.dataset.col === k; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
-    const nm = root.querySelector('.cname'); if (nm) nm.textContent = COLORS[k][0] + ' · ' + COLORS[k][1];
+    const nm = root.querySelector('.cname'); if (nm) nm.innerHTML = COLORS[k][0] + ' · ' + tx('colour.' + COLORS[k][0], esc(COLORS[k][1]));
     root.querySelectorAll('a.btn-wa').forEach(a => a.href = waLink(p));
     const v = root.querySelector('.p3d'); if (v){ v.dataset.color = COLORS[k][2]; v.dispatchEvent(new CustomEvent('color', { detail: COLORS[k][2] })); }
   }
@@ -1069,8 +1080,8 @@
   // Korean sheet / 0.47 mm / 10 year warranty apply to the sheet-metal items only (not PVC ceiling items)
   const priceBoxes = p => !hasProf(p) ? '' : `
     <div class="pfacts">
-      <span class="pf-k"><b>Korean</b> තහඩු · <b>${window.AD_SHEET_MM || 0.47}mm</b></span>
-      <span class="pf-w"><b>10</b> Year Warranty <small>· අවුරුදු 10 වගකීම</small></span>
+      <span class="pf-k">${tx('fact.korean', `<b>Korean</b> තහඩු · <b>${window.AD_SHEET_MM || 0.47}mm</b>`)}</span>
+      <span class="pf-w">${tx('fact.warranty', '<b>10</b> Year Warranty <small>· අවුරුදු 10 වගකීම</small>')}</span>
     </div>`;
   const variantBtns = () => '';
   // switch version: update prices + WhatsApp text in place (the 3D model keeps running)
@@ -1085,20 +1096,23 @@
     : hasCeil(p)
     ? `<div class="pimg p3d ${cls}" data-kind="ceil" data-model="${esc(p.model)}" data-finish="${esc(finOf(p)?.name || '')}" data-img="${esc(finOf(p)?.img || p.image_url || '')}"></div>`
     : `<div class="pimg ${cls}" ${(finOf(p)?.img || p.image_url)?`style="background-image:url('${esc(finOf(p)?.img || p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>`;
+  // size · colour line: each part is its own field (editable in the item view)
+  const subOf = p => [['size', 'Size'], ['colour', 'Colour']].filter(([f]) => p[f] || EDIT)
+    .map(([f, ph]) => `<span data-pf="${f}" data-pid="${p.id}" data-ph="${ph}">${esc(p[f] || '')}</span>`).join(' · ');
   function prodCard(p){
-    const sub = [p.size, p.colour].filter(Boolean).map(esc).join(' · ');
+    const sub = subOf(p);
     return `
       <article class="prod" data-item="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} — විස්තර බලන්න">
         ${media(p)}
         <div class="pb">
-          <h3>${esc(p.name)}</h3>
+          <h3 data-pid="${p.id}">${esc(p.name)}</h3>
           ${sub?`<span class="psub">${sub}</span>`:''}
           ${variantBtns(p)}
           ${colorBtns(p)}${finBtns(p)}
           ${priceBoxes(p)}
           <div class="pbtns">
-            <span class="btn btn-blue order">විස්තර බලන්න</span>
-            <a class="btn btn-wa order" target="_blank" rel="noopener" href="${waLink(p)}">WhatsApp විමසන්න</a>
+            <span class="btn btn-blue order">${tx('btn.details', 'විස්තර බලන්න')}</span>
+            <a class="btn btn-wa order" target="_blank" rel="noopener" href="${waLink(p)}">${tx('btn.wa', 'WhatsApp විමසන්න')}</a>
           </div>
         </div>
       </article>`;
@@ -1110,25 +1124,25 @@
   function openItem(id, push = true){
     const p = PRODUCTS.find(x => x.id == id); if (!p) return;
     openId = p.id;
-    const sub = [p.size, p.colour].filter(Boolean).map(esc).join(' · ');
+    const sub = subOf(p);
     const cat = CATS.find(c => c.id == p.category_id);
     dlg.querySelector('.iv-body').innerHTML = `
       <div class="iv-media">
         ${media(p, 'iv-3d')}
-        ${hasProf(p) || hasCeil(p) ? `<p class="iv-tip">ඇඟිල්ලෙන් ඕනම පැත්තකට කරකවන්න · ඇඟිලි දෙකෙන් zoom කරන්න</p>` : ''}
+        ${hasProf(p) || hasCeil(p) ? `<p class="iv-tip">${tx('tip.rotate', 'ඇඟිල්ලෙන් ඕනම පැත්තකට කරකවන්න · ඇඟිලි දෙකෙන් zoom කරන්න')}</p>` : ''}
       </div>
       <div class="iv-info">
-        ${cat ? `<span class="iv-cat">${esc(cat.name)}</span>` : ''}
-        <h2 data-pf="name">${esc(p.name)}</h2>
+        ${cat ? `<span class="iv-cat" data-cat="${cat.id}" data-cf="name">${esc(cat.name)}</span>` : ''}
+        <h2 data-pf="name" data-pid="${p.id}">${esc(p.name)}</h2>
         ${sub?`<p class="psub">${sub}</p>`:''}
-        ${p.description || EDIT ? `<p class="iv-desc" data-pf="description">${esc(p.description || '')}</p>` : ''}
+        ${p.description || EDIT ? `<p class="iv-desc" data-pf="description" data-pid="${p.id}">${esc(p.description || '')}</p>` : ''}
         ${variantBtns(p)}
         ${colorBtns(p)}${finBtns(p)}
         ${priceBoxes(p)}
-        ${hasProf(p) ? `<button type="button" class="btn btn-blue block js-dims" aria-expanded="false">📏 මිනුම් පෙන්වන්න</button>
+        ${hasProf(p) ? `<button type="button" class="btn btn-blue block js-dims" aria-expanded="false">${tx('btn.dims.show', '📏 මිනුම් පෙන්වන්න')}</button>
           <div class="prof" hidden>${profileSVG(p.model)}</div>` : ''}
-        <a class="btn btn-wa block" target="_blank" rel="noopener" href="${waLink(p)}">WhatsApp විමසන්න</a>
-        <a class="btn btn-red block" href="tel:+${PHONE}">📞 අමතන්න</a>
+        <a class="btn btn-wa block" target="_blank" rel="noopener" href="${waLink(p)}">${tx('btn.wa', 'WhatsApp විමසන්න')}</a>
+        <a class="btn btn-red block" href="tel:+${PHONE}">${tx('btn.call', '📞 අමතන්න')}</a>
       </div>`;
     dlg.hidden = false; document.body.classList.add('iv-open');
     dlg.querySelector('.iv-box').scrollTop = 0;                 // every item opens from the top
@@ -1159,7 +1173,7 @@
     const d = e.target.closest('.js-dims'); if (!d) return;
     const box = dlg.querySelector('.prof'), show = box.hidden;
     box.hidden = !show; d.setAttribute('aria-expanded', show);
-    d.textContent = show ? '📏 මිනුම් හංගන්න' : '📏 මිනුම් පෙන්වන්න';
+    d.innerHTML = show ? tx('btn.dims.hide', '📏 මිනුම් හංගන්න') : tx('btn.dims.show', '📏 මිනුම් පෙන්වන්න');
     const v = dlg.querySelector('.p3d'); if (v) v.dispatchEvent(new CustomEvent('dims', { detail: show }));
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && openId != null) closeItem(); });
@@ -1175,20 +1189,20 @@
     const mains = kids(null).filter(c=>deep(c.id));
     const loose = PRODUCTS.filter(p=>!p.category_id || !CATS.some(c=>c.id==p.category_id));
     if (!(shopMain==='other' && loose.length) && !mains.some(c=>c.id==shopMain)) shopMain = mains[0]?.id ?? (loose.length ? 'other' : null);
-    tabs.innerHTML = mains.map(c=>`<button data-main="${c.id}" class="${c.id==shopMain?'on':''}">${esc(c.name)}${c.name_en?` <span>${esc(c.name_en)}</span>`:''}</button>`).join('')
-      + (loose.length ? `<button data-main="other" class="${shopMain==='other'?'on':''}">වෙනත් <span>Other</span></button>` : '');
+    tabs.innerHTML = mains.map(c=>`<button data-main="${c.id}" class="${c.id==shopMain?'on':''}"><i class="cn" data-cat="${c.id}" data-cf="name">${esc(c.name)}</i>${c.name_en||EDIT?` <span data-cat="${c.id}" data-cf="name_en">${esc(c.name_en||'')}</span>`:''}</button>`).join('')
+      + (loose.length ? `<button data-main="other" class="${shopMain==='other'?'on':''}">${tx('shop.other', 'වෙනත්')} <span>${tx('shop.other.en', 'Other')}</span></button>` : '');
     if (shopMain==='other'){ box.innerHTML = `<div class="products">${loose.map(prodCard).join('')}</div>`; window.dispatchEvent(new Event('shop:render')); return; }
     const subs = kids(shopMain).filter(c=>PRODUCTS.some(p=>p.category_id==c.id));
     const direct = PRODUCTS.filter(p=>p.category_id==shopMain);
     if (shopSub!=='all' && !subs.some(c=>c.id==shopSub)) shopSub='all';
     let html = subs.length>1 || (subs.length && direct.length) ? `<div class="sizes">
-        <button data-sub="all" class="${shopSub==='all'?'on':''}"><b>සියල්ල</b></button>
-        ${subs.map(c=>`<button data-sub="${c.id}" class="${c.id==shopSub?'on':''}"><b>${esc(bigLabel(c.name))}</b><small>${esc(c.name)}</small></button>`).join('')}
+        <button data-sub="all" class="${shopSub==='all'?'on':''}"><b>${tx('shop.all', 'සියල්ල')}</b></button>
+        ${subs.map(c=>`<button data-sub="${c.id}" class="${c.id==shopSub?'on':''}"><b>${tx('catbig.' + c.id, esc(bigLabel(c.name)))}</b><small data-cat="${c.id}" data-cf="name">${esc(c.name)}</small></button>`).join('')}
       </div>` : '';
     const groups = (shopSub==='all' ? subs : subs.filter(c=>c.id==shopSub)).map(c=>({c, items:PRODUCTS.filter(p=>p.category_id==c.id)}));
     if (shopSub==='all' && direct.length) groups.push({c:null, items:direct});
     html += groups.map(g=>`
-      ${g.c && groups.length>1 ? `<h3 class="shop-grp">${esc(g.c.name)}${g.c.note?` <small>${esc(g.c.note)}</small>`:''}</h3>` : ''}
+      ${g.c && groups.length>1 ? `<h3 class="shop-grp"><span data-cat="${g.c.id}" data-cf="name">${esc(g.c.name)}</span>${g.c.note?` <small data-cat="${g.c.id}" data-cf="note">${esc(g.c.note)}</small>`:''}</h3>` : ''}
       <div class="products">${g.items.map(prodCard).join('')}</div>`).join('');
     box.innerHTML = html;
     window.dispatchEvent(new Event('shop:render'));
@@ -1333,7 +1347,7 @@
   async function start(){
     if (started) return; started = true; io.disconnect(); removeEventListener('scroll', near);
     try {
-      lib = await import('./install3d.js');
+      lib = await import('./install3d.js?v=20261125e');
       const P = window.AD_PROFILES;
       gSel.innerHTML = lib.GUTTERS.map(k => `<option value="${k}">${P[k].title}</option>`).join('');
       vSel.innerHTML = lib.VALANCES.map(k => `<option value="${k}">${P[k].title}</option>`).join('') + '<option value="none">නැත · Timber fascia only</option>';

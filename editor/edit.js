@@ -42,6 +42,14 @@
       font:700 15px/1.3 Inter,'Noto Sans Sinhala',sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:92vw;text-align:center}
     .ad-toast.err{background:#b42318}
     .ad-toast{pointer-events:none}
+    body.ad-edit [data-tk], body.ad-edit [data-cat]{outline:1.5px dashed rgba(11,78,162,.45);outline-offset:2px;border-radius:3px;box-shadow:0 0 0 3.5px rgba(255,255,255,.35)}
+    body.ad-edit [data-tk]:hover, body.ad-edit [data-cat]:hover{outline:2px solid #0b4ea2}
+    body.ad-edit .prod [data-tk], body.ad-edit .prod [data-pf]{outline:0;box-shadow:none}
+    body.ad-edit [data-pf]:empty::before{content:attr(data-ph);opacity:.45}
+    body.ad-edit .inst-key{display:grid !important}
+    .ad-bar{flex-direction:column;align-items:stretch}
+    .ad-bar .ad-row{display:flex;gap:6px}
+    .ad-bar textarea{width:min(340px,86vw);font:600 16px/1.4 Inter,'Noto Sans Sinhala',sans-serif;border:0;border-radius:8px;padding:10px;resize:vertical;color:#111}
     .ad-bar[hidden], .ad-toast[hidden], .ad-note[hidden]{display:none !important}
     .ad-note{position:fixed;inset:auto 12px 12px 12px;z-index:2147483001;background:#b42318;color:#fff;padding:14px;border-radius:12px;font:700 15px/1.4 Inter,'Noto Sans Sinhala',sans-serif;text-align:center}
     .ad-note a{color:#fff}`;
@@ -53,23 +61,41 @@
     clearTimeout(tt); tt = setTimeout(() => el.hidden = true, kind === 'err' ? 6000 : 2200);
   }
 
-  // ---------- floating buttons next to what is being edited ----------
+  // ---------- floating bar next to what is being edited ----------
   const bar = document.createElement('div'); bar.className = 'ad-bar'; bar.hidden = true; document.body.appendChild(bar);
-  bar.addEventListener('mousedown', e => e.preventDefault());           // keep the text focused while pressing a button
-  function showBar(el, buttons){
-    bar.innerHTML = ''; buttons.forEach(([label, cls, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = label;
-      b.onclick = e => { e.preventDefault(); e.stopPropagation(); fn(); }; bar.appendChild(b); });
+  bar.addEventListener('mousedown', e => { if (e.target.tagName !== 'TEXTAREA') e.preventDefault(); });   // keep the text focused
+  let barFor = null;                                                     // element the bar belongs to
+  function showBar(el, buttons, field){
+    bar.innerHTML = ''; barFor = el;
+    if (field) bar.appendChild(field);
+    const row = document.createElement('div'); row.className = 'ad-row';
+    buttons.forEach(([label, cls, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = label;
+      b.onclick = e => { e.preventDefault(); e.stopPropagation(); fn(); }; row.appendChild(b); });
+    bar.appendChild(row); bar.classList.toggle('ad-box', !!field);
     bar.hidden = false; placeBar(el);
   }
+  const hideBar = () => { bar.hidden = true; barFor = null; };
   function placeBar(el){
     if (bar.hidden || !el) return;
+    el = resolve(el); if (!el) return;
     const r = el.getBoundingClientRect(), bw = bar.offsetWidth, bh = bar.offsetHeight;
     let top = r.top - bh - 8; if (top < 8) top = Math.min(r.bottom + 8, innerHeight - bh - 8);
-    bar.style.top = top + 'px'; bar.style.left = Math.max(8, Math.min(r.left, innerWidth - bw - 8)) + 'px';
+    bar.style.top = Math.max(8, top) + 'px'; bar.style.left = Math.max(8, Math.min(r.left, innerWidth - bw - 8)) + 'px';
   }
-  addEventListener('scroll', () => placeBar(cur?.el), true); addEventListener('resize', () => placeBar(cur?.el));
+  addEventListener('scroll', () => placeBar(barFor), true); addEventListener('resize', () => placeBar(barFor));
 
-  // ---------- text ----------
+  // what can be edited, and the same thing again after the page redrew it (e.g. after switching a shop tab)
+  const EDITABLE = '[data-ek],[data-s],[data-pf],[data-ei],[data-tk],[data-cat]';
+  function resolve(el){
+    if (!el || el.isConnected) return el;
+    const d = el.dataset, sel = d.ek ? `[data-ek="${CSS.escape(d.ek)}"]` : d.tk ? `[data-tk="${CSS.escape(d.tk)}"]` : d.s ? `[data-s="${d.s}"]`
+      : d.cat ? `[data-cat="${d.cat}"][data-cf="${d.cf}"]` : d.pf ? `[data-pf="${d.pf}"][data-pid="${d.pid}"]` : null;
+    return sel ? [...document.querySelectorAll(sel)].find(x => x.offsetParent !== null) || document.querySelector(sel) : null;
+  }
+  const kindOf = el => el.dataset.ek ? 'text' : el.dataset.tk ? 'ui' : el.dataset.s ? 'setting' : el.dataset.cat ? 'category' : el.dataset.pf ? 'item' : '';
+  const canReset = el => !!(el.dataset.ek || el.dataset.tk);
+
+  // ---------- text, edited right where it is ----------
   let cur = null;                                                        // { el, before }
   const plain = el => el.textContent.replace(/\s+/g, ' ').trim();
   function begin(el){
@@ -80,32 +106,66 @@
     el.classList.add('ad-editing'); el.spellcheck = false; el.focus();
     const sel = getSelection(), rg = document.createRange(); rg.selectNodeContents(el); rg.collapse(false); sel.removeAllRanges(); sel.addRange(rg);
     const btns = [['✓ Save', 'ok', () => finish(true)], ['✕', 'no', () => finish(false)]];
-    if (el.dataset.ek) btns.push(['↺ මුල් එක', 'orig', () => original(el)]);
+    if (canReset(el)) btns.push(['↺ මුල් එක', 'orig', () => original(el)]);
     showBar(el, btns);
   }
-  function stop(el){ el.contentEditable = 'false'; el.removeAttribute('contenteditable'); el.classList.remove('ad-editing'); bar.hidden = true; }
+  function stop(el){ el.contentEditable = 'false'; el.removeAttribute('contenteditable'); el.classList.remove('ad-editing'); hideBar(); }
   async function finish(save){
     if (!cur) return; const { el, before } = cur; cur = null; stop(el);
     if (!save){ el.innerHTML = before; return; }
+    await commit(el, before);
+  }
+
+  // ---------- text on a button or link: the tap still works; ✏️ opens a small box to change the words ----------
+  function chip(el, act){
+    if (cur) finish(true);
+    // the tap may redraw the button (e.g. "show" → "hide"): then edit what the same button shows now
+    const now = () => el.isConnected ? el : (act?.isConnected && act.querySelector(EDITABLE)) || resolve(el);
+    showBar(el, [['✏️ වෙනස් කරන්න', '', () => box(now())], ['✕', 'no', hideBar]]);
+    setTimeout(() => { barFor = now(); placeBar(barFor); }, 80);
+  }
+  function box(el){
+    if (!el) return hideBar();
+    const ta = document.createElement('textarea'); ta.value = el.innerText.trim(); ta.rows = Math.min(4, Math.max(1, Math.ceil(ta.value.length / 34)));
+    const go = async () => { const before = el.innerHTML; hideBar(); el.textContent = ta.value.replace(/\s*\n\s*/g, ' ').trim(); await commit(el, before); };
+    ta.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); go(); } if (e.key === 'Escape') hideBar(); };
+    const btns = [['✓ Save', 'ok', go], ['✕', 'no', hideBar]];
+    if (canReset(el)) btns.push(['↺ මුල් එක', 'orig', () => { hideBar(); original(el); }]);
+    showBar(el, btns, ta); ta.focus(); ta.select();
+  }
+
+  // ---------- saving: each kind of text goes where it belongs ----------
+  const upsertText = (key, value) => rest('site_texts?on_conflict=key', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ key, value, updated_at: new Date().toISOString() }) });
+  const dropText = key => rest('site_texts?key=eq.' + encodeURIComponent(key), { method: 'DELETE' });
+  async function commit(el, before){
     const html = ED.clean(el.innerHTML);
-    if (html === ED.clean(before)) return;                               // nothing changed
-    if (el.dataset.s) return saveSetting(el, before);
-    if (el.dataset.pf) return saveProduct(el, before);
+    if (html === ED.clean(before)) { el.innerHTML = before; return; }  // nothing changed
+    const kind = kindOf(el);
+    if (kind === 'setting') return saveSetting(el, before);
+    if (kind === 'item') return saveProduct(el, before);
+    if (kind === 'category') return saveCategory(el, before);
     if (!plain(el)){ el.innerHTML = before; return tell('හිස් කරන්න බැහැ — ↺ මුල් එක ඔබන්න · Text cannot be empty', 'err'); }
-    el.innerHTML = html; ED.syncCount(el);
     try {
-      if (html === ED.clean(ED.original(el))) await rest('site_texts?key=eq.' + encodeURIComponent(el.dataset.ek), { method: 'DELETE' });
-      else await rest('site_texts?on_conflict=key', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-        body: JSON.stringify({ key: el.dataset.ek, value: html, updated_at: new Date().toISOString() }) });
+      if (kind === 'ui'){
+        const k = el.dataset.tk, def = ED.uiDefault(k);
+        if (def != null && html === ED.clean(def)) await dropText('ui:' + k); else await upsertText('ui:' + k, html);
+        ED.setUI(k, def != null && html === ED.clean(def) ? null : html);   // every copy of this text changes
+      } else {
+        el.innerHTML = html; ED.syncCount(el);
+        if (html === ED.clean(ED.original(el))) await dropText(el.dataset.ek); else await upsertText(el.dataset.ek, html);
+      }
       tell('✓ Save වුණා — site එකේ වෙනස් වුණා');
     } catch (err){ el.innerHTML = before; tell('Save වුණේ නැහැ: ' + err.message, 'err'); }
   }
   async function original(el){
     if (cur?.el === el){ cur = null; stop(el); }
-    if (el.dataset.ei) bar.hidden = true;
-    try { await rest((el.dataset.ei ? 'site_texts?key=eq.' + encodeURIComponent(el.dataset.ei) : 'site_texts?key=eq.' + encodeURIComponent(el.dataset.ek)), { method: 'DELETE' });
-      ED.reset(el); if (el.dataset.ek) ED.syncCount(el); tell('↺ මුල් එක දැම්මා'); }
-    catch (err){ tell('වුණේ නැහැ: ' + err.message, 'err'); }
+    hideBar();
+    try {
+      if (el.dataset.tk){ await dropText('ui:' + el.dataset.tk); ED.setUI(el.dataset.tk, null); }
+      else { await dropText(el.dataset.ei || el.dataset.ek); ED.reset(el); if (el.dataset.ek) ED.syncCount(el); }
+      tell('↺ මුල් එක දැම්මා');
+    } catch (err){ tell('වුණේ නැහැ: ' + err.message, 'err'); }
   }
 
   // contact details, counters → settings (same as the admin app's Settings page)
@@ -118,6 +178,7 @@
       if (col === 'phone_orders' || col === 'phone_owner'){
         const a = el.closest('a[href^="tel:"]'), old = a && a.getAttribute('href');
         if (old) document.querySelectorAll(`a[href="${old}"]`).forEach(x => { x.href = telHref(val); x.querySelectorAll('[data-s]').forEach(b => b.textContent = val); if (x.dataset.s) x.textContent = val; });
+        else el.textContent = val;
       } else if (el.dataset.count != null){ el.dataset.count = val; el.textContent = val + (el.dataset.suffix || ''); }
       else {
         el.textContent = val;
@@ -127,16 +188,29 @@
       tell('✓ Save වුණා (සැකසුම්) — site එකේ වෙනස් වුණා');
     } catch (err){ el.innerHTML = before; tell('Save වුණේ නැහැ: ' + err.message, 'err'); }
   }
-  // item name / description (item view)
+  // item name / size / colour / description
   async function saveProduct(el, before){
-    const p = PRODUCTS.find(x => x.id == openId); if (!p){ el.innerHTML = before; return; }
-    const f = el.dataset.pf, val = el.innerText.replace(/\n{3,}/g, '\n\n').trim();
+    const p = PRODUCTS.find(x => x.id == (el.dataset.pid || openId)); if (!p){ el.innerHTML = before; return; }
+    const f = el.dataset.pf, val = (f === 'description' ? el.innerText.replace(/\n{3,}/g, '\n\n') : plain(el)).trim();
     if (f === 'name' && !val){ el.innerHTML = before; return tell('නම හිස් කරන්න බැහැ · Name cannot be empty', 'err'); }
     try {
       await rest('products?id=eq.' + encodeURIComponent(p.id), { method: 'PATCH', body: JSON.stringify({ [f]: val }) });
-      p[f] = val; el.textContent = val;
+      p[f] = val;
+      document.querySelectorAll(`[data-pf="${f}"][data-pid="${p.id}"]`).forEach(x => x.textContent = val); el.textContent = val;
       if (f === 'name') document.querySelectorAll(`.prod[data-item="${p.id}"] h3`).forEach(h => h.textContent = val);
       tell('✓ Save වුණා — භාණ්ඩය වෙනස් වුණා');
+    } catch (err){ el.innerHTML = before; tell('Save වුණේ නැහැ: ' + err.message, 'err'); }
+  }
+  // category names (shop tabs, size buttons, group headings, the label in the item view)
+  async function saveCategory(el, before){
+    const id = +el.dataset.cat, f = el.dataset.cf, val = plain(el), c = CATS.find(x => x.id == id);
+    if (!c){ el.innerHTML = before; return; }
+    if (f === 'name' && !val){ el.innerHTML = before; return tell('නම හිස් කරන්න බැහැ · Name cannot be empty', 'err'); }
+    try {
+      await rest('categories?id=eq.' + id, { method: 'PATCH', body: JSON.stringify({ [f]: val || null }) });
+      c[f] = val || null;
+      document.querySelectorAll(`[data-cat="${id}"][data-cf="${f}"]`).forEach(x => x.textContent = val); el.textContent = val;
+      tell('✓ Save වුණා — category නම වෙනස් වුණා');
     } catch (err){ el.innerHTML = before; tell('Save වුණේ නැහැ: ' + err.message, 'err'); }
   }
 
@@ -146,7 +220,7 @@
   function beginImg(el){
     if (cur) finish(true);
     imgEl = el;
-    showBar(el, [['📷 පින්තූරය මාරු කරන්න', '', () => pick.click()], ['↺ මුල් එක', 'orig', () => original(el)], ['✕', 'no', () => { bar.hidden = true; imgEl = null; }]]);
+    showBar(el, [['📷 පින්තූරය මාරු කරන්න', '', () => pick.click()], ['↺ මුල් එක', 'orig', () => original(el)], ['✕', 'no', () => { hideBar(); imgEl = null; }]]);
   }
   const resize = (file, max = 1600) => new Promise((ok, bad) => {
     const im = new Image(); im.onload = () => {
@@ -156,7 +230,7 @@
     }; im.onerror = () => bad(new Error('පින්තූරය කියවන්න බැහැ · Cannot read the photo')); im.src = URL.createObjectURL(file);
   });
   pick.onchange = async () => {
-    const file = pick.files[0], el = imgEl; pick.value = ''; bar.hidden = true; if (!file || !el) return;
+    const file = pick.files[0], el = imgEl; pick.value = ''; hideBar(); if (!file || !el) return;
     try {
       tell('Upload වෙනවා… · Uploading…');
       const blob = await resize(file), t = await token(); if (!t) throw new Error('Login කරලා නැහැ');
@@ -174,10 +248,19 @@
   function enable(){
   document.addEventListener('click', e => {
     if (bar.contains(e.target) || e.target === pick) return;          // the photo picker's own click is not a tap elsewhere
-    const el = e.target.closest('[data-ek],[data-s],[data-pf],[data-ei]');
-    if (!el){ if (cur) finish(true); if (imgEl && !bar.hidden){ bar.hidden = true; imgEl = null; } return; }
-    e.preventDefault(); e.stopPropagation();
-    if (el.dataset.ei) beginImg(el); else begin(el);
+    const el = e.target.closest(EDITABLE);
+    const outside = () => { if (cur) finish(true); else if (!bar.hidden && !bar.classList.contains('ad-box')) hideBar(); imgEl = null; };
+    if (!el || el.closest('.prod')){ outside(); return; }              // item cards: tap opens the item, edit there
+    if (cur?.el === el){ e.preventDefault(); e.stopPropagation(); return; }   // clicking inside the text being edited
+    if (el.dataset.ei){ e.preventDefault(); e.stopPropagation(); beginImg(el); return; }
+    const act = el.closest('a[href], button, label, [role="button"]');
+    if (act){                                                            // a button / link: keep it working, offer ✏️
+      const href = act.tagName === 'A' ? act.getAttribute('href') || '' : '';
+      if (act.tagName === 'A' && !href.startsWith('#')) e.preventDefault();   // no calls / WhatsApp / leaving the page while editing
+      if (cur) finish(true);
+      chip(el, act); return;
+    }
+    e.preventDefault(); e.stopPropagation(); begin(el);
   }, true);
   document.addEventListener('keydown', e => {
     if (!cur) return;

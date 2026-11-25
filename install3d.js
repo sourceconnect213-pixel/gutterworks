@@ -420,13 +420,16 @@ export function mountInstall(stage, ui, opts = {}){
     { k: 'flow', views: {section:'L',full:'L'},    si: 'වැසි ජලය ගලන දිශාව', en: 'Rainwater flow', step: 6, at: onRoof(-15, zA, AMP + 1.4) },
   ];
   const labelBox = ui.labels, svg = ui.lines;
+  // label words can be changed from the web editor (site texts "ui:inst.<k>.si / .en")
+  const TX = window.AD_TX || ((k, d) => d);
+  LABELS.forEach(L => { L.si = TX(`inst.${L.k}.si`, L.si); L.en = TX(`inst.${L.k}.en`, L.en); });
   LABELS.forEach((L, i) => {
     L.n = i + 1;
     L.el = document.createElement('div'); L.el.className = 'il il-' + L.k; L.el.hidden = true;
-    L.el.innerHTML = `<i>${L.n}</i><span><b>${L.si}</b><em>${L.en}</em></span>`;
+    L.el.innerHTML = `<i>${L.n}</i><span><b data-tk="inst.${L.k}.si">${L.si}</b><em data-tk="inst.${L.k}.en">${L.en}</em></span>`;
     labelBox.appendChild(L.el);
   });
-  ui.legend.innerHTML = LABELS.map(L => `<li data-k="${L.k}"><i>${L.n}</i><b>${L.si}</b> <em>${L.en}</em></li>`).join('');
+  ui.legend.innerHTML = LABELS.map(L => `<li data-k="${L.k}"><i>${L.n}</i><b data-tk="inst.${L.k}.si">${L.si}</b> <em data-tk="inst.${L.k}.en">${L.en}</em></li>`).join('');
 
   // ---------- timeline ----------
   const STEP = 2.4, NSTEPS = 7;
