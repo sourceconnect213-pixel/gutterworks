@@ -191,40 +191,44 @@ export function mountInstall(stage, ui, opts = {}){
   add(gutter, 2, 0, new THREE.Vector3(0, 22, 0), 0.9);
 
   // ---------- 4. internal brackets + fixing screws ----------
-  // Flat galvanised steel bar (as in the owner's photo), hidden inside the gutter, across its top:
-  // tab down the back wall, screwed through it into the fascia; bar straight across the gutter;
-  // foot down the inside of the front wall, riveted to it. Water flows freely underneath.
+  // Z-shaped galvanised flat bar with a stiffening rib (as in the owner's photos), hidden inside the gutter:
+  // tab bent DOWN the back wall, screwed through it into the fascia; ribbed bar straight across the top of
+  // the gutter; foot bent UP the inside of the front wall, riveted to it. Water flows freely underneath.
   const IBT = 0.12, IBW = 1.0;                             // ≈3 mm × 25 mm flat bar
   const n = gpts.length;
   const tx = gx + T / 2 + IBT / 2;                       // tab line on the back wall
   const frontTop = Math.max(...gpts.filter(p => p[0] > OX).map(p => p[1]));
-  let yb = Math.min(backTop, frontTop) - 0.45;            // bar height: below the top folds of both walls
-  // the front wall where the bar meets it: the non-flat segment on the front side that crosses height yb
-  let fseg = null;
-  for (let tries = 0; tries < 8; tries++){
-    fseg = null;
+  const frontSegAt = y => {                              // non-flat front-side segment crossing height y
     for (let i = 1; i < n; i++){
       const [x1, y1] = gpts[i - 1], [x2, y2] = gpts[i];
       if (Math.min(x1, x2) <= OX || Math.abs(y2 - y1) < 1e-6) continue;
-      if (Math.min(y1, y2) <= yb && Math.max(y1, y2) >= yb){ fseg = { x1, y1, x2, y2 }; break; }
+      if (Math.min(y1, y2) <= y && Math.max(y1, y2) >= y) return { x1, y1, x2, y2 };
     }
+    return null;
+  };
+  // bar height: below the back wall's top fold, and low enough that the foot fits up the front wall
+  let yb = Math.min(backTop - 0.45, frontTop - 1.1), fseg = null;
+  for (let tries = 0; tries < 8; tries++){
+    fseg = frontSegAt(yb);
+    const hi = fseg ? Math.max(fseg.y1, fseg.y2) : yb;
+    if (fseg && hi - yb >= 0.7) break;                    // room for the foot above the bar
     const lo = fseg ? Math.min(fseg.y1, fseg.y2) : yb;
-    if (fseg && yb - lo >= 0.7) break;                    // room for the foot below the bar
-    yb = lo - 0.05;                                        // otherwise move the bar down to the next part of the front wall
+    if (fseg && hi - lo >= 0.85){ yb = hi - 0.8; break; }  // long enough part: lower the bar within it
+    yb = lo - 0.05;                                        // otherwise use the next part of the front wall down
   }
   const fl = Math.hypot(fseg.x2 - fseg.x1, fseg.y2 - fseg.y1);
   const fu = [(fseg.x2 - fseg.x1) / fl, (fseg.y2 - fseg.y1) / fl];            // along the front wall
   const fin = [-fu[1], fu[0]];                                                 // toward the inside of the gutter
   const fk = (yb - fseg.y1) / (fseg.y2 - fseg.y1), off = T / 2 + IBT / 2;
-  const fTop = [fseg.x1 + (fseg.x2 - fseg.x1) * fk + fin[0] * off, yb];
-  const down = fu[1] > 0 ? [-fu[0], -fu[1]] : fu;                               // down along the front wall
-  const footLen = Math.min(0.9, (yb - Math.min(fseg.y1, fseg.y2)) / Math.abs(down[1]) - 0.05);
-  const fBot = [fTop[0] + down[0] * footLen, fTop[1] + down[1] * footLen];
+  const fBot = [fseg.x1 + (fseg.x2 - fseg.x1) * fk + fin[0] * off, yb];       // where the bar meets the front wall
+  const up = fu[1] > 0 ? fu : [-fu[0], -fu[1]];                                // up along the front wall
+  const footLen = Math.min(0.9, (Math.max(fseg.y1, fseg.y2) - yb) / Math.abs(up[1]) - 0.05);
+  const fTop = [fBot[0] + up[0] * footLen, fBot[1] + up[1] * footLen];         // top of the foot
   const bpath = [
-    [tx, yb - 0.95],                                       // bottom of the tab (on the back wall)
-    [tx, yb],                                              // top of the tab
-    fTop,                                                  // bar across the top of the gutter
-    fBot,                                                  // foot down the front wall
+    [tx, yb - 0.95],                                       // bottom of the tab (bent down the back wall)
+    [tx, yb],                                              // tab meets the bar
+    fBot,                                                  // ribbed bar across the top of the gutter
+    fTop,                                                  // foot bent up the front wall
   ];
   const steelMats = { outside: M.steel, inside: M.steel, edge: M.steel, foldMat: lineSteel, insideLineMat: lineSteel };
   const UP = new THREE.Vector3(0, 1, 0);
@@ -238,6 +242,12 @@ export function mountInstall(stage, ui, opts = {}){
   const screwAt = [];
   BRACKET_Z.forEach((zc, i) => {
     const b = buildSheet(bpath, IBT, IBW, steelMats); b.position.z = zc;
+    { // stiffening rib pressed along the middle of the bar (top face)
+      const ax = tx + 0.25, bx = fBot[0] - 0.25, L = bx - ax;
+      const rib = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, L, 8), M.steel);
+      rib.rotation.z = Math.PI / 2; rib.position.set((ax + bx) / 2, yb + IBT / 2, 0);   // half sunk into the bar
+      b.add(rib);
+    }
     add(b, 3, i * 0.1, new THREE.Vector3(0, 9, 0));
     const spots = [
       { p: [tx + IBT / 2, yb - 0.5], axis: new THREE.Vector3(1, 0, 0), len: 1.3 },   // through the tab + gutter wall into the fascia

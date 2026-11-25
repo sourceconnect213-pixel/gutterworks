@@ -363,6 +363,7 @@
   .inst-key b{font-family:"Noto Sans Sinhala";font-weight:800}
   .inst-key em{font-style:normal;color:var(--muted);font-size:.78rem}
   .inst-stage:not(.inst-wide) ~ .inst-key{display:grid}
+  .inst-steps[hidden]{display:none!important}
   .inst-steps{list-style:none;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
   .inst-steps li{background:var(--bg);border:1.5px solid transparent;border-radius:14px;padding:12px 14px;transition:border-color .25s,background .25s}
   .inst-steps li.on{background:#eaf2ff;border-color:var(--blue)}
@@ -717,7 +718,7 @@
         </div>
       </div>
       <ol class="inst-key" id="inst-key" aria-label="Labels"></ol>
-      <ol class="inst-steps" id="inst-steps">
+      <ol class="inst-steps" id="inst-steps" hidden>
         <li><button type="button" data-step="0"><span class="sn">1</span><span class="st"><b>පරාල සහ බිත්තිය</b><em>Rafters</em></span></button><p>පරාල (2" × 4") බිත්තියෙන් අඩියක් හමාරකට වඩා පිටතට නෙරා ඇත (eave overhang). පරාල කෙළවර සිරස්ව කපා ඇත (plumb cut).</p></li>
         <li><button type="button" data-step="1"><span class="sn">2</span><span class="st"><b>වඩිම්බුව සහ වඩිම්බු ආවරණය</b><em>Fascia & valance board</em></span></button><p>1" × 8" වඩිම්බු ලෑල්ල පරාල කෙළවරවලට සවි කෙරේ. ඉන්පසු වහලේ මුළු දිගටම 12" Waddimbu Valance Board (තීන්ත ගාපු තහඩු) එක වඩිම්බුව උඩින් සවි කෙරේ — පහළ නැවීම වඩිම්බුවට යටින් ද, ඉහළ නැවීම වඩිම්බුව උඩින් ද අල්ලා ගනී.</p></li>
         <li><button type="button" data-step="2"><span class="sn">3</span><span class="st"><b>වැහිපීල්ල</b><em>Rain gutter</em></span></button><p>වැහිපීල්ල වඩිම්බුවට තදින් තබයි — සමතල පිටුපස බිත්තිය වඩිම්බුව පැත්තට, පඩි සහිත මුහුණත පිටතට. කෙළවර stop end එකෙන් වසා ඇත.</p></li>
