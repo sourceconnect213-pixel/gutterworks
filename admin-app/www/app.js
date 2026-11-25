@@ -188,10 +188,11 @@
     pipe18: '18" Down Pipe (4" × 4", 2" collar)',
     wall12a: '12" Wall Flashing · මෝස්තර 1', wall12b: '12" Wall Flashing · මෝස්තර 2',
     ridge18a: '18" Ridge Cap · මෝස්තර 1', ridge18b: '18" Ridge Cap · මෝස්තර 2',
-    // ceiling items (shown with their photos on the website)
+    // ceiling items: H / L / U Corner + Top Molding in 3D on the website, the rest with photos
     'ceil-panel': 'සිවිලිම් · Panel Sheet', 'ceil-wall-angle': 'සිවිලිම් · L Corner', 'ceil-h-joiner': 'සිවිලිම් · H Corner',
     'ceil-u-trim': 'සිවිලිම් · U Corner', 'ceil-edge-trim': 'සිවිලිම් · Edge Trim', 'ceil-cove': 'සිවිලිම් · Top Molding',
-    'ceil-gi-channel': 'සිවිලිම් · GI Channel', 'ceil-gi-angle': 'සිවිලිම් · GI L Angle' };
+    'ceil-gi-channel': 'සිවිලිම් · GI Channel', 'ceil-gi-angle': 'සිවිලිම් · GI L Angle',
+    'ceil-2x2': 'සිවිලිම් · 2x2 ටයිල්' };
   const VNAMES = [['Korean','K'], ['Chinese','C']];
   const variantsOf = p => Array.isArray(p.variants) ? p.variants.filter(v => v && v.name) : [];
   const UNITS = ['per ft', 'each', 'per sq.ft', 'per sheet', 'per meter'];

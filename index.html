@@ -943,6 +943,9 @@
   const kids = id => CATS.filter(c => (c.parent_id ?? null) == (id ?? null)).sort((a,b)=>(a.sort-b.sort)||(a.id-b.id));
   const bigLabel = n => { const m = String(n).match(/\d+(\.\d+)?\s*("|”|inch|in\b|mm|ft)?/i); return m ? m[0].replace(/\s*(inch|in)\b/i,'"').replace(/\s+/g,'') : String(n).split(/\s+/)[0]; };
   const hasProf = p => !!(p.model && window.AD_PROFILES && AD_PROFILES[p.model]);
+  // ceiling accessories with a 3D model in ceil3d.js: H Corner, L Corner, U Corner, Top Molding
+  const CEIL_3D = ['ceil-h-joiner','ceil-wall-angle','ceil-u-trim','ceil-cove'];
+  const hasCeil = p => CEIL_3D.includes(p.model);
   const has = v => v != null && v !== '';
   // Korean / Chinese (or other) versions of one item: p.variants = [{name, code, price, fixing_price}]
   const variantsOf = p => Array.isArray(p.variants) ? p.variants.filter(v => v && v.name) : [];
@@ -980,7 +983,9 @@
     finPick.set(p.id, k); const f = finsOf(p)[k];
     root.querySelectorAll('[data-fin]').forEach(b => { const on = +b.dataset.fin === k; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
     const nm = root.querySelector('.cname'); if (nm) nm.textContent = (f.si ? f.si + ' · ' : '') + f.name;
-    const im = root.querySelector('.pimg'); if (im) im.style.backgroundImage = `url('${f.img}')`;
+    const im = root.querySelector('.pimg');
+    if (im && im.classList.contains('p3d')){ im.dataset.finish = f.name; im.dataset.img = f.img; im.dispatchEvent(new CustomEvent('fin', { detail: f.name })); }
+    else if (im) im.style.backgroundImage = `url('${f.img}')`;
     root.querySelectorAll('a.btn-wa').forEach(a => a.href = waLink(p));
   }
   const curVar = p => { const vs = variantsOf(p); return vs.length ? vs[Math.min(chosen.get(p.id) || 0, vs.length-1)] : null; };
@@ -1004,6 +1009,8 @@
   }
   const media = (p, cls='') => hasProf(p)
     ? `<div class="pimg p3d ${cls}" data-model="${esc(p.model)}" data-color="${colOf(p)[2]}"></div>`
+    : hasCeil(p)
+    ? `<div class="pimg p3d ${cls}" data-kind="ceil" data-model="${esc(p.model)}" data-finish="${esc(finOf(p)?.name || '')}" data-img="${esc(finOf(p)?.img || p.image_url || '')}"></div>`
     : `<div class="pimg ${cls}" ${(finOf(p)?.img || p.image_url)?`style="background-image:url('${esc(finOf(p)?.img || p.image_url)}')"`:''}>${p.image_url?'':(p.size?`<span class="pimg-size">${esc(p.size)}</span>`:'🏠')}</div>`;
   function prodCard(p){
     const sub = [p.size, p.colour].filter(Boolean).map(esc).join(' · ');
@@ -1035,7 +1042,7 @@
     dlg.querySelector('.iv-body').innerHTML = `
       <div class="iv-media">
         ${media(p, 'iv-3d')}
-        ${hasProf(p) ? `<p class="iv-tip">ඇඟිල්ලෙන් ඕනම පැත්තකට කරකවන්න · ඇඟිලි දෙකෙන් zoom කරන්න</p>` : ''}
+        ${hasProf(p) || hasCeil(p) ? `<p class="iv-tip">ඇඟිල්ලෙන් ඕනම පැත්තකට කරකවන්න · ඇඟිලි දෙකෙන් zoom කරන්න</p>` : ''}
       </div>
       <div class="iv-info">
         ${cat ? `<span class="iv-cat">${esc(cat.name)}</span>` : ''}
@@ -1178,11 +1185,16 @@
   const cards = new Map();   // element → model
   let big = null, lib = null;
   const getLib = () => lib ||= import('./gutter3d.js');
+  let clib = null; const getCeil = () => clib ||= import('./ceil3d.js');
+  // one mount for both kinds: sheet-metal items (profiles.js) and ceiling accessories (ceil3d.js)
   async function mount3d(el, interactive){
+    if (el.dataset.kind === 'ceil'){ const { mountCeil } = await getCeil(); if (!el.isConnected) return null;
+      const m = mountCeil(el, el.dataset.model, { interactive, fin: el.dataset.finish });
+      el.addEventListener('fin', ev => m.setFinish(ev.detail)); return m; }
     const { mountGutter } = await getLib(); if (!el.isConnected) return null;
     return mountGutter(el, el.dataset.model, { interactive, color: el.dataset.color });
   }
-  const no3d = el => el.classList.add('no3d');
+  const no3d = el => { el.classList.add('no3d'); if (el.dataset.img) el.style.background = `#e8eef7 url('${el.dataset.img}') center/cover no-repeat`; };
   const io = new IntersectionObserver(es => es.forEach(async e => {
     if (!e.isIntersecting || cards.has(e.target)) return;
     io.unobserve(e.target);
