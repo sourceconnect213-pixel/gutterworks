@@ -1185,7 +1185,9 @@
   const cards = new Map();   // element → model
   let big = null, lib = null;
   const getLib = () => lib ||= import('./gutter3d.js');
-  let clib = null; const getCeil = () => clib ||= import('./ceil3d.js');
+  // ?v= changes with every update of the ceiling models, so phones never keep an old copy
+  const CEIL_V = '20261125c';
+  let clib = null; const getCeil = () => clib ||= import(`./ceil3d.js?v=${CEIL_V}`);
   // one mount for both kinds: sheet-metal items (profiles.js) and ceiling accessories (ceil3d.js)
   async function mount3d(el, interactive){
     if (el.dataset.kind === 'ceil'){ const { mountCeil } = await getCeil(); if (!el.isConnected) return null;
