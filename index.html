@@ -1214,8 +1214,9 @@
     window.__instGeo = () => api.geometry();
     window.__dbgApi = api;
   }
-  const io = new IntersectionObserver(async (es, o) => {
-    if (!es[0].isIntersecting) return; o.disconnect();
+  let started = false;
+  async function start(){
+    if (started) return; started = true; io.disconnect(); removeEventListener('scroll', near);
     try {
       lib = await import('./install3d.js');
       const P = window.AD_PROFILES;
@@ -1224,8 +1225,11 @@
       mount();
       document.getElementById('inst-load').remove();
     } catch (err) { document.getElementById('inst-load').textContent = '3D not supported on this device'; console.warn(err); }
-  }, { rootMargin: '300px' });
-  io.observe(stage);
+  }
+  // start when the diagram comes near the screen (observer + a scroll check as a fallback)
+  const io = new IntersectionObserver(es => { if (es[0].isIntersecting) start(); }, { rootMargin: '300px' });
+  const near = () => { const r = stage.getBoundingClientRect(); if (r.top < innerHeight + 300 && r.bottom > -300) start(); };
+  io.observe(stage); addEventListener('scroll', near, { passive: true }); near();
   playBtn.onclick = () => api && api.toggle();
   document.getElementById('inst-replay').onclick = () => api && api.replay();
   segBtns.forEach(b => b.onclick = () => { locked = true; api && api.setView(b.dataset.view); });

@@ -185,7 +185,9 @@ export function mountInstall(stage, ui, opts = {}){
   const gmesh = buildSheet(gpts, T, LEN, gutterMats); gmesh.position.z = -LEN / 2; gutter.add(gmesh);
   const stop = new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape(gpts.map(([x, y]) => new THREE.Vector2(x, y)))), M.paint);
   stop.position.z = -LEN + 0.02; gutter.add(stop);
-  const hole = box(3.1, 0.02, 3.1, M.dark); hole.position.set(OX, gy + 0.03, OUTLET_Z); gutter.add(hole);
+  // outlet nozzle: sized to fit the gutter's flat bottom (never wider than 3")
+  const NOZ = Math.min(3, BW_ - 0.5);
+  const hole = box(NOZ - 0.1, 0.02, NOZ - 0.1, M.dark); hole.position.set(OX, gy + 0.03, OUTLET_Z); gutter.add(hole);
   add(gutter, 2, 0, new THREE.Vector3(0, 22, 0), 0.9);
 
   // ---------- 4. internal brackets + fixing screws ----------
@@ -257,12 +259,18 @@ export function mountInstall(stage, ui, opts = {}){
 
   // ---------- 6. outlet, down pipe (with 45° bends), pipe clips, drain ----------
   const XW = WALL_X + PIPE / 2 + 1.25;                  // pipe centre beside the wall
-  const P1 = new THREE.Vector3(OX, gy - 0.9, OUTLET_Z), P2 = new THREE.Vector3(OX, gy - 6, OUTLET_Z);
-  const P3 = new THREE.Vector3(XW, P2.y - (OX - XW), OUTLET_Z), P4 = new THREE.Vector3(XW, GROUND + 8, OUTLET_Z);
+  // The pipe hangs in front of the valance board / fascia (never through it): its back face sits just
+  // in front of the face, and the 45° bend back toward the wall starts below the valance's bottom edge.
+  const FACE_BOTTOM = vpts ? Math.min(...vpts.map(p => p[1])) - T / 2 : FAS_BOT;
+  const PX = Math.max(OX, VAL_FACE + PIPE / 2 + 0.15);       // pipe centre line
+  const P2Y = Math.min(gy - 6, FACE_BOTTOM - 1.6);           // bend: inner corner ≥ 0.75" below the face bottom
+  const P1 = new THREE.Vector3(PX, gy - 0.9, OUTLET_Z), P2 = new THREE.Vector3(PX, P2Y, OUTLET_Z);
+  const P3 = new THREE.Vector3(XW, P2.y - (PX - XW), OUTLET_Z), P4 = new THREE.Vector3(XW, GROUND + 8, OUTLET_Z);
   const P5 = new THREE.Vector3(XW + 4.5, GROUND + 3.5, OUTLET_Z);
   const outlet = new THREE.Group();
-  [[0, 1.75], [0, -1.75], [1.75, 0], [-1.75, 0]].forEach(([dx, dz]) => {
-    const w = box(dx ? 0.05 : 3.5, 3, dz ? 0.05 : 3.5, M.paint); w.position.set(OX + dx, gy - 1.5, OUTLET_Z + dz); outlet.add(w);
+  const nh = NOZ / 2;
+  [[0, nh], [0, -nh], [nh, 0], [-nh, 0]].forEach(([dx, dz]) => {
+    const w = box(dx ? 0.05 : NOZ, 3, dz ? 0.05 : NOZ, M.paint); w.position.set(OX + dx, gy - 1.5, OUTLET_Z + dz); outlet.add(w);
   });
   add(outlet, 5, 0, new THREE.Vector3(0, -8, 0), 0.6);
   // one continuous square pipe with mitred bends (all bends lie in the x-y plane)
@@ -317,7 +325,7 @@ export function mountInstall(stage, ui, opts = {}){
   A(new THREE.Vector3(SHEET_EDGE_X + 0.4, sheetUnder(SHEET_EDGE_X) + 0.9, zA), new THREE.Vector3(OX + 0.3, gy + 1.0, zA));
   [[-8, -22], [-28, -42], [-48, -62]].forEach(([z1, z2]) => A(new THREE.Vector3(OX, gy + 0.9, z1), new THREE.Vector3(OX, gy + 0.9, z2)));   // along the gutter to the outlet at the end
   const pz = OUTLET_Z + PIPE / 2 + 1.6;
-  A(new THREE.Vector3(OX + 3, gy - 1, pz), new THREE.Vector3(OX + 3, P2.y - 1, pz));
+  A(new THREE.Vector3(PX + 3, gy - 1, pz), new THREE.Vector3(PX + 3, P2.y - 1, pz));
   A(new THREE.Vector3(P2.x - 3, P2.y - 3.5, pz), new THREE.Vector3(P3.x + 5, P3.y + 1.5, pz));
   A(new THREE.Vector3(XW + 4, -40, pz), new THREE.Vector3(XW + 4, -56, pz));
   A(new THREE.Vector3(P5.x + 1, P5.y + 1, pz - 1.6), new THREE.Vector3(P5.x + 6, GROUND + 0.6, pz - 1.6));
@@ -351,7 +359,7 @@ export function mountInstall(stage, ui, opts = {}){
     { k: 'screw', views: {section:'R'},   si: 'සවි කිරීමේ ඉස්කුරුප්පු', en: 'Fixing screws', step: 3, at: screwAt[0] },
     { k: 'bracket', views: {section:'R'}, si: 'වැහිපීලි ආධාරකය', en: 'Gutter bracket', step: 3, at: new THREE.Vector3((bpath[1][0] + bpath[2][0]) / 2 + 0.1, (bpath[1][1] + bpath[2][1]) / 2, BRACKET_Z[0] + 0.5) },
     { k: 'gutter', views: {section:'R',full:'L'},  si: 'වැහිපීල්ල', en: 'Rain gutter', step: 2, at: new THREE.Vector3(FRONT_X - 0.6, gy + 2.2, -4) },
-    { k: 'outlet', views: {full:'R'},  si: 'පිටවුම', en: 'Outlet', step: 5, at: new THREE.Vector3(OX + 1.75, gy - 2, OUTLET_Z + 1.75) },
+    { k: 'outlet', views: {full:'R'},  si: 'පිටවුම', en: 'Outlet', step: 5, at: new THREE.Vector3(OX + NOZ / 2, gy - 0.5, OUTLET_Z + NOZ / 2) },
     { k: 'pipe', views: {full:'R'},    si: 'ඩවුන් පයිප්ප', en: 'Down pipe', step: 5, at: new THREE.Vector3(XW + PIPE / 2, -48, OUTLET_Z + PIPE / 2) },
     { k: 'clip', views: {full:'R'},    si: 'පයිප්ප ක්ලිප්', en: 'Pipe clip', step: 5, at: clipAt[0] },
     { k: 'flow', views: {section:'L',full:'L'},    si: 'වැසි ජලය ගලන දිශාව', en: 'Rainwater flow', step: 6, at: onRoof(-15, zA, AMP + 1.4) },
@@ -538,7 +546,7 @@ export function mountInstall(stage, ui, opts = {}){
     setArrows(on){ arrowsOn = on; },
     state(){ return { t, playing, view, labels: labelsOn, arrows: arrowsOn }; },
     _debugCam(px, py, pz, tx, ty, tz){ userCam = true; camera.position.set(px, py, pz); controls.target.set(tx, ty, tz); },
-    geometry(){ return { gutter: GKEY, valance: VKEY, FAS_BOT, VAL_FACE, gx, gy, backTop, BL, BR, FRONT_X, SHEET_EDGE_X, sheetY: sheetUnder(SHEET_EDGE_X), bpath, vpts, gpts }; },
+    geometry(){ return { PX, P2Y, FACE_BOTTOM, NOZ, OX,  gutter: GKEY, valance: VKEY, FAS_BOT, VAL_FACE, gx, gy, backTop, BL, BR, FRONT_X, SHEET_EDGE_X, sheetY: sheetUnder(SHEET_EDGE_X), bpath, vpts, gpts }; },
     get playing(){ return playing; },
     dispose(){
       renderer.setAnimationLoop(null); ro.disconnect(); controls.dispose();
