@@ -30,25 +30,27 @@ const bow = ([ax, ay], [bx, by], s, n = 12) => {
 function hCorner(){
   const t = 1.33, yTop = t / 2 + SLOT + t / 2;
   return { parts: [
-    { pts: [[-20, 0], [20, 0]], t, deco: () => true },                                  // 40 mm face flange
+    { pts: [[-20, 0], [20, 0]], t },                                                    // 40 mm back flange (hidden, white)
     { pts: [[0, 0], [0, yTop]], t, back: true, buried: 'both' },                        // web
-    { pts: [[-9.5, yTop - 0.7], [-5, yTop - 0.1], [0, yTop], [5, yTop - 0.1], [9.5, yTop - 0.7]], t, deco: () => true },
-  ], len: 110, rot: Math.PI, ...PE };
+    // narrow rounded face: the part seen in the room, the only part in colour
+    { pts: [[9.5, yTop - 0.7], [5, yTop - 0.1], [0, yTop], [-5, yTop - 0.1], [-9.5, yTop - 0.7]], t, deco: () => true },
+  ], len: 110, rot: 0, ...PE };
 }
 function lCorner(){
   const t = 1.25, L = 25.4;                                     // 1" legs, colour on both outer faces
   return { parts: [{ pts: [[L, 0], [L, L], [0, L]], t, deco: () => true }], len: 110, rot: 0, ...PE };
 }
 function uCorner(){
-  const t = 1.06, y = t / 2 + SLOT + t / 2;                     // face flange + channel (straight lip, no hook)
-  return { parts: [{ pts: [[0, 0], [32, 0], [32, y], [18, y]], t, deco: () => true }], len: 110, rot: Math.PI, ...PE };
+  const t = 1.06, y = t / 2 + SLOT + t / 2;                     // wide back flange (hidden, white) + channel
+  return { parts: [{ pts: [[0, 0], [32, 0], [32, y], [18, y]], t, deco: i => i >= 1 }],        // colour: edge + narrow face only
+    len: 110, rot: 0, ...PE };
 }
 function topMolding(){
-  // wall on the left (x = 0). The top lip reaches out further than the curved face, then turns down over the panel.
-  const t = 1.21, S = 22, y = S + t / 2 + SLOT + t / 2, L = 30, D = 4;
+  // wall on the left (x = 0). The back leg on the wall is taller than the curved face; colour on the curved face only.
+  const t = 1.21, S = 22, y = S + t / 2 + SLOT + t / 2, L = 30;
   const face = bow([0, 0], [S, S], 4.5);
   return { parts: [
-    { pts: [[L, y - D], [L, y], [0, y], [0, 0], ...face.slice(1)], t, deco: () => true },   // lip + turn, wall leg, face
+    { pts: [[L, y], [0, y], [0, 0], ...face.slice(1)], t, deco: i => i >= 2 },              // top leg, wall leg, face
     { pts: [[S, S], [0, S]], t, back: true, buried: 'end' },                                // ceiling leg (floor of the slot)
   ], len: 110, rot: Math.PI / 2, ...PE };
 }
