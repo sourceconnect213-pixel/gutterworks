@@ -59,6 +59,9 @@
     if (error) throw error;
     return { path, url: sb.storage.from('photos').getPublicUrl(path).data.publicUrl };
   }
+  // photos stored with the website (e.g. images/ceiling/...) are relative: resolve them against the live site
+  const SITE = 'https://sourceconnect213-pixel.github.io/gutterworks/';
+  const imgUrl = u => { try { return new URL(u, SITE).href; } catch { return ''; } };
   const removeFiles = paths => { paths = paths.filter(Boolean); return paths.length ? sb.storage.from('photos').remove(paths) : null; };
 
   // ---------- auth ----------
@@ -218,7 +221,7 @@
     const sub = [p.size, p.colour, p.unit].filter(Boolean).map(esc).join(' · ');
     return `
       <div class="card irow" data-item="${p.id}" style="animation-delay:${Math.min(i,10)*25}ms">
-        <div class="th" style="${p.image_url ? `background-image:url('${esc(p.image_url)}')` : ''}">${p.image_url ? '' : (p.model ? '📏' : '📦')}</div>
+        <div class="th" style="${p.image_url ? `background-image:url('${esc(imgUrl(p.image_url))}')` : ''}">${p.image_url ? '' : (p.model ? '📏' : '📦')}</div>
         <div class="info">
           <b>${esc(p.name)}</b>
           ${sub ? `<small>${sub}</small>` : ''}
@@ -242,7 +245,7 @@
       const mains = childrenOf(null);
       html += `<div class="tiles">` + mains.map((c,i) => `
         <button class="tile" data-open="${c.id}" style="animation-delay:${i*40}ms">
-          <span class="tile-img" style="${c.image_url ? `background-image:url('${esc(c.image_url)}')` : ''}">${c.image_url ? '' : esc(firstLetter(c.name))}</span>
+          <span class="tile-img" style="${c.image_url ? `background-image:url('${esc(imgUrl(c.image_url))}')` : ''}">${c.image_url ? '' : esc(firstLetter(c.name))}</span>
           <b>${esc(c.name)}</b>${c.name_en ? `<small>${esc(c.name_en)}</small>` : ''}
           <em>${childrenOf(c.id).length} වර්ග · ${countDeep(c.id)} භාණ්ඩ</em>
         </button>`).join('') +
@@ -257,7 +260,7 @@
       const isMain = path.length === 1;
       html += `
         <div class="cat-head">
-          <div class="ch-img" style="${cur.image_url ? `background-image:url('${esc(cur.image_url)}')` : ''}"></div>
+          <div class="ch-img" style="${cur.image_url ? `background-image:url('${esc(imgUrl(cur.image_url))}')` : ''}"></div>
           <div class="ch-txt"><h2>${esc(cur.name)}</h2>${cur.name_en ? `<small>${esc(cur.name_en)}</small>` : ''}${cur.note ? `<p>${esc(cur.note)}</p>` : ''}</div>
           <button class="icon-btn" data-editcat="${cur.id}" aria-label="Edit category">✎</button>
         </div>`;
@@ -319,7 +322,7 @@
     openSheet(isNew ? (isSub ? 'අලුත් ප්‍රමාණයක් / වර්ගයක්' : 'අලුත් ප්‍රධාන වර්ගයක්') : kind + ' වෙනස් කරන්න', `
       ${isSub ? `<p class="hint">"${esc(catById(c.parent_id)?.name)}" යටතේ</p>` : ''}
       <div class="img-pick">
-        <div class="th" id="ct-th" style="${c.image_url ? `background-image:url('${esc(c.image_url)}')` : ''}">${c.image_url ? '' : '📷'}</div>
+        <div class="th" id="ct-th" style="${c.image_url ? `background-image:url('${esc(imgUrl(c.image_url))}')` : ''}">${c.image_url ? '' : '📷'}</div>
         <label class="btn ghost">Photo තෝරන්න<input type="file" name="image" accept="image/*" hidden id="ct-img"></label>
       </div>
       <label>නම (සිංහලෙන්) *<input name="name" required value="${esc(c.name)}" placeholder="${isSub ? 'උදා: 12&quot; වැහිපීලි' : 'උදා: වැහිපීලි'}"></label>
@@ -354,7 +357,7 @@
     const unitOpts = UNITS.map(u => `<option value="${u}">`).join('');
     openSheet(isNew ? 'අලුත් භාණ්ඩයක්' : 'භාණ්ඩය වෙනස් කරන්න', `
       <div class="img-pick">
-        <div class="th" id="it-th" style="${p.image_url ? `background-image:url('${esc(p.image_url)}')` : ''}">${p.image_url ? '' : '📷'}</div>
+        <div class="th" id="it-th" style="${p.image_url ? `background-image:url('${esc(imgUrl(p.image_url))}')` : ''}">${p.image_url ? '' : '📷'}</div>
         <label class="btn ghost">Photo තෝරන්න<input type="file" name="image" accept="image/*" hidden id="it-img"></label>
       </div>
       <label>නම · Name *<input name="name" required value="${esc(p.name)}" placeholder='උදා: 12" Box Gutter'></label>
@@ -378,7 +381,7 @@
       </div>
       <label>ඒකකය · Unit<input name="unit" list="unit-list" value="${esc(p.unit || (isNew ? 'per ft' : ''))}"><datalist id="unit-list">${unitOpts}</datalist></label>
       <label>විස්තරය · Description<textarea name="description" rows="2">${esc(p.description)}</textarea></label>
-      ${needsStep2 ? '' : `<label>මිනුම් රූපය · Measurements drawing<select name="model">${Object.entries(MODELS).map(([k,v]) => `<option value="${k}" ${(p.model||'')===k?'selected':''}>${v}</option>`).join('')}</select></label>`}
+      ${needsStep2 ? '' : `<label>මිනුම් රූපය · Measurements drawing<select name="model">${Object.entries(MODELS).map(([k,v]) => `<option value="${k}" ${(p.model||'')===k?'selected':''}>${v}</option>`).join('')}${p.model && !(p.model in MODELS) ? `<option value="${esc(p.model)}" selected>${esc(p.model)} · (photo item)</option>` : ''}</select></label>`}
       <label>පිළිවෙල (අඩු අංකය මුලින්)<input name="sort" inputmode="numeric" value="${p.sort ?? 0}"></label>
       <div class="switch">තොගයේ ඇත · Website එකේ පෙන්වන්න<input type="checkbox" name="in_stock" ${p.in_stock!==false?'checked':''}></div>`,
       async fd => {
