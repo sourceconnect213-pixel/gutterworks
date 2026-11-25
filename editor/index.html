@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#05285a">
+<meta name="robots" content="noindex">
+<title>A.D. Engineering · Main Admin</title>
+<link rel="icon" href="../admin/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Noto+Sans+Sinhala:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#05285a;--blue:#0b4ea2;--red:#e31e24;--line:#d0d5dd;--muted:#667085}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font:500 15px/1.45 Inter,'Noto Sans Sinhala',sans-serif;color:#101828;background:#eef2f7}
+  [hidden]{display:none!important}
+  button{font:inherit;cursor:pointer}
+  /* login */
+  .login{min-height:100%;display:grid;place-items:center;padding:20px;background:linear-gradient(160deg,#05285a,#0b4ea2)}
+  .card{width:100%;max-width:400px;background:#fff;border-radius:18px;padding:26px 22px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+  .card img{width:74px;display:block;margin:0 auto 6px}
+  .card h1{margin:0;text-align:center;font-size:1.35rem;color:var(--navy)}
+  .card .sub{margin:2px 0 18px;text-align:center;color:var(--muted)}
+  .card label{display:block;font-weight:700;margin:12px 0 6px;font-size:.95rem}
+  .card input[type=email],.card input[type=password],.card input[type=text]{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;min-height:48px}
+  .pw{position:relative}.pw input{padding-right:52px}
+  .pw button{position:absolute;right:4px;top:4px;bottom:4px;width:44px;border:0;background:none;font-size:1.2rem}
+  .card .chk{display:flex;gap:8px;align-items:center;font-weight:600;margin:10px 0 0}
+  .go{width:100%;margin-top:18px;border:0;border-radius:12px;background:var(--red);color:#fff;font-weight:800;padding:14px;min-height:50px}
+  .err{color:#b42318;font-weight:700;min-height:1.4em;margin:10px 0 0;text-align:center}
+  /* app */
+  .app{display:flex;flex-direction:column;height:100%}
+  .top{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;background:var(--navy);color:#fff}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;margin-right:6px;white-space:nowrap}
+  .brand img{width:34px;height:34px;background:#fff;border-radius:8px;padding:3px}
+  .seg{display:flex;background:rgba(255,255,255,.12);border-radius:12px;padding:3px}
+  .seg button{border:0;background:none;color:#fff;padding:9px 12px;border-radius:9px;min-height:40px;font-weight:700;white-space:nowrap}
+  .seg button.on{background:#fff;color:var(--navy)}
+  .sp{flex:1}
+  .tb{border:0;border-radius:10px;padding:9px 12px;min-height:40px;font-weight:700;background:rgba(255,255,255,.14);color:#fff;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center}
+  .tb.red{background:var(--red)}
+  .status{font-weight:700;font-size:.9rem;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.14);max-width:46ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .status.ok{background:#16a34a}.status.err{background:#b42318}
+  .tip{background:#fff8d6;color:#5c4a00;padding:8px 12px;font-weight:600;font-size:.92rem;border-bottom:1px solid #f0e2a0}
+  .stage{flex:1;min-height:0;display:flex;justify-content:center;align-items:stretch;padding:0;overflow:auto;background:#dfe5ee}
+  .stage iframe{border:0;background:#fff;width:100%;height:100%;display:block}
+  .stage.phone,.stage.tablet{padding:14px}
+  .stage.phone iframe{width:390px;max-width:100%;height:844px;max-height:calc(100% - 4px);border-radius:26px;box-shadow:0 0 0 10px #101828,0 18px 40px rgba(0,0,0,.35)}
+  .stage.tablet iframe{width:820px;max-width:100%;border-radius:16px;box-shadow:0 0 0 8px #101828,0 18px 40px rgba(0,0,0,.3)}
+  @media (max-width:760px){
+    .brand span{display:none}
+    .devs{display:none}
+    .status{order:9;flex-basis:100%;max-width:none;text-align:center}
+  }
+</style>
+</head>
+<body>
+
+<!-- login (same admin account as the APK / web admin) -->
+<div class="login" id="login" hidden>
+  <form class="card" id="login-form">
+    <img src="../admin/logo-mark.png" alt="A.D. Engineering">
+    <h1>A.D. Engineering</h1>
+    <p class="sub">Main Admin · Site එක edit කරන්න</p>
+    <label for="em">Email</label><input id="em" type="email" autocomplete="username" required>
+    <label for="pw">Password · මුරපදය</label>
+    <div class="pw"><input id="pw" type="password" autocomplete="current-password" required><button type="button" id="eye" aria-label="Show password">👁</button></div>
+    <label class="chk"><input type="checkbox" id="show"> Password පෙන්වන්න · Show password</label>
+    <button class="go" type="submit">ඇතුල් වන්න · Login</button>
+    <p class="err" id="err" role="alert"></p>
+  </form>
+</div>
+
+<div class="app" id="app" hidden>
+  <div class="top">
+    <div class="brand"><img src="../admin/logo-mark.png" alt=""><span>Main Admin</span></div>
+    <div class="seg" role="tablist">
+      <button type="button" data-tab="site" class="on">✏️ Site එක</button>
+      <button type="button" data-tab="admin">⚙ භාණ්ඩ / පින්තූර / ඉල්ලීම්</button>
+    </div>
+    <div class="seg devs" id="devs">
+      <button type="button" data-dev="phone" title="Phone">📱</button>
+      <button type="button" data-dev="tablet" title="Tablet">💻</button>
+      <button type="button" data-dev="desktop" class="on" title="Desktop">🖥</button>
+    </div>
+    <span class="status" id="status">Loading…</span>
+    <span class="sp"></span>
+    <button type="button" class="tb" id="reload">↻</button>
+    <a class="tb" href="../" target="_blank" rel="noopener">Site ↗</a>
+    <button type="button" class="tb red" id="logout">Logout</button>
+  </div>
+  <div class="tip" id="tip">ඕනම අකුරක් ටච් කරන්න → වෙනස් කරන්න → <b>✓ Save</b> · පින්තූරයක් ටච් කරලා 📷 මාරු කරන්න · භාණ්ඩයක් open කරලා නම / විස්තරය වෙනස් කරන්න · <b>↺ මුල් එක</b> = පරණ එකට</div>
+  <div class="stage" id="stage-site"><iframe id="site" title="Website (edit)"></iframe></div>
+  <div class="stage" id="stage-admin" hidden><iframe id="adm" title="Admin"></iframe></div>
+</div>
+
+<script src="../config.js"></script>
+<script src="../admin/supabase.js"></script>
+<script>
+(() => {
+  const CFG = window.AD_CONFIG || {};
+  const $ = s => document.querySelector(s);
+  // same login storage as the admin app, so logging in here also logs in the admin tab (and back)
+  const sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, storageKey: 'ad-admin-auth' } });
+
+  // used by the website frame (editor/edit.js) for saving
+  let stT;
+  window.AD_EDITOR = {
+    token: async () => (await sb.auth.getSession()).data.session?.access_token || null,
+    status(msg, kind){ const s = $('#status'); s.textContent = msg; s.className = 'status ' + (kind || ''); clearTimeout(stT);
+      stT = setTimeout(() => { s.textContent = 'Edit mode · ටච් කරලා වෙනස් කරන්න'; s.className = 'status'; }, kind === 'err' ? 8000 : 3500); },
+    ready(){ this.status('Edit mode · ටච් කරලා වෙනස් කරන්න'); $('#status').className = 'status'; }
+  };
+
+  const show = id => { $('#login').hidden = id !== 'login'; $('#app').hidden = id !== 'app'; };
+  async function start(){
+    const { data } = await sb.auth.getSession();
+    if (!data.session) return show('login');
+    const { data: ok, error } = await sb.rpc('is_admin');
+    if (error || !ok){ await sb.auth.signOut(); $('#err').textContent = 'මේ account එකට admin අවසර නැහැ · Not an admin'; return show('login'); }
+    show('app');
+    if (!$('#site').src) $('#site').src = '../index.html?edit=1';
+  }
+
+  // login
+  const eye = on => { $('#pw').type = on ? 'text' : 'password'; $('#show').checked = on; $('#eye').textContent = on ? '🙈' : '👁'; };
+  $('#eye').onclick = () => eye($('#pw').type === 'password');
+  $('#show').onchange = e => eye(e.target.checked);
+  $('#login-form').onsubmit = async e => {
+    e.preventDefault(); $('#err').textContent = '';
+    const b = e.target.querySelector('.go'); b.disabled = true; b.textContent = '…';
+    const { error } = await sb.auth.signInWithPassword({ email: $('#em').value.trim(), password: $('#pw').value });
+    b.disabled = false; b.textContent = 'ඇතුල් වන්න · Login';
+    if (error) { $('#err').textContent = 'Email හෝ password වැරදියි · ' + error.message; return; }
+    start();
+  };
+  $('#logout').onclick = async () => { await sb.auth.signOut(); $('#site').removeAttribute('src'); $('#adm').removeAttribute('src'); show('login'); };
+
+  // tabs, device sizes, reload
+  document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
+    const t = b.dataset.tab;
+    document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', x === b));
+    $('#stage-site').hidden = t !== 'site'; $('#stage-admin').hidden = t !== 'admin';
+    $('#tip').hidden = t !== 'site'; $('#devs').style.visibility = t === 'site' ? '' : 'hidden';
+    if (t === 'admin' && !$('#adm').src) $('#adm').src = '../admin/';
+  });
+  document.querySelectorAll('[data-dev]').forEach(b => b.onclick = () => {
+    document.querySelectorAll('[data-dev]').forEach(x => x.classList.toggle('on', x === b));
+    $('#stage-site').className = 'stage ' + (b.dataset.dev === 'desktop' ? '' : b.dataset.dev);
+  });
+  $('#reload').onclick = () => {
+    const f = $('#stage-admin').hidden ? $('#site') : $('#adm');
+    if (f === $('#site')) f.src = '../index.html?edit=1&t=' + Date.now(); else f.contentWindow?.location.reload();
+  };
+  sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_OUT') show('login'); });
+  start();
+})();
+</script>
+</body>
+</html>

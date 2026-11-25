@@ -840,6 +840,78 @@
     ...opts, headers: {apikey: CFG.SUPABASE_KEY, Authorization: 'Bearer ' + CFG.SUPABASE_KEY, 'Content-Type': 'application/json', ...(opts.headers||{})}
   });
 
+  // ---------- texts & photos changed from the web editor (/editor/) ----------
+  // Every static text and photo gets a key from where it is and what it said originally, so a saved change
+  // (table site_texts) lands on the same place for every visitor. The editor itself lives in editor/edit.js.
+  const EDIT = new URLSearchParams(location.search).has('edit');
+  const AD_ED = (() => {
+    const ROOTS = 'header, .phones, section[id], footer, nav.mbar';
+    const SKIP = '#products, #shop-filters, #gallery, #item-view, #inst-labels, #inst-lines, #inst-cap, #inst-key, #inst-steps, #inst-play, #inst-load, #lb, #yr, script, style, select, option, textarea, input, svg, .wa-float';
+    const SET_ID = { 'c-email':'email', 'c-main':'shop_main', 'c-branch':'shop_branch', 'c-hours':'hours', 'c-closed':'closed_note',
+                     'st-years':'years', 'st-projects':'projects', 'st-warranty':'warranty' };
+    const SET_TEL = { 'tel:+94764493749':'phone_orders', 'tel:+94755350030':'phone_owner' };
+    const FMT = new Set(['B','STRONG','EM','I','SMALL','U','BR']);
+    const isFmt = el => FMT.has(el.tagName) || (el.tagName === 'SPAN' && !el.id && !el.classList.contains('tick') && [...el.children].every(isFmt));
+    const norm = h => h.replace(/\s+/g, ' ').trim();
+    const hash = t => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) >>> 0; return h.toString(36); };
+    const area = el => { const r = el.closest(ROOTS); return r.id || r.classList[0] || r.tagName.toLowerCase(); };
+    const orig = new Map();                                   // element → original html / photo
+    // keep simple formatting only (bold, italic, small, line breaks, styled spans); everything else becomes plain text
+    function clean(html){
+      const d = new DOMParser().parseFromString('<div>' + html + '</div>', 'text/html').body.firstChild;
+      (function walk(n){ [...n.childNodes].forEach(c => {
+        if (c.nodeType === 3) return;
+        if (c.nodeType !== 1 || /^(SCRIPT|STYLE|TEMPLATE|IFRAME|OBJECT|EMBED|NOSCRIPT|SVG|MATH)$/i.test(c.tagName)){ c.remove(); return; }
+        walk(c);
+        if (c.tagName === 'DIV' || c.tagName === 'P'){ c.before(document.createElement('br')); c.replaceWith(...c.childNodes); return; }
+        if (!FMT.has(c.tagName) && c.tagName !== 'SPAN'){ c.replaceWith(...c.childNodes); return; }
+        const cls = c.tagName === 'SPAN' ? c.getAttribute('class') : null;
+        [...c.attributes].forEach(a => c.removeAttribute(a.name)); if (cls) c.setAttribute('class', cls);
+      }); })(d);
+      return d.innerHTML.replace(/^(<br>)+|(<br>)+$/g, '').trim();
+    }
+    function scan(){
+      const seen = {};
+      const keyOf = (el, base) => { const k = area(el) + ':' + base; seen[k] = (seen[k] || 0) + 1; return k + ':' + (seen[k] - 1); };
+      const roots = [...document.querySelectorAll(ROOTS)];
+      roots.forEach(r => r.querySelectorAll('a[href^="tel:"]').forEach(a => {
+        const col = SET_TEL[a.getAttribute('href')]; if (!col) return;
+        if (a.classList.contains('big')) a.dataset.s = col; else a.querySelectorAll('b').forEach(b => b.dataset.s = col);
+      }));
+      Object.entries(SET_ID).forEach(([id, col]) => { const el = document.getElementById(id); if (el) el.dataset.s = col; });
+      for (const r of roots) for (const el of [r, ...r.querySelectorAll('*')]){
+        if (el.closest(SKIP) || el.dataset.s || el.parentElement?.closest('[data-ek],[data-s]')) continue;
+        if (el.tagName === 'IMG'){ el.dataset.ei = 'img:' + keyOf(el, hash(el.getAttribute('src') || '')); orig.set(el, el.getAttribute('src')); continue; }
+        if (el.matches('.svc .img, .hero-photo')){ el.dataset.ei = 'img:' + keyOf(el, hash(el.getAttribute('style') || el.className)); orig.set(el, el.style.backgroundImage); continue; }
+        const texts = [...el.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim());
+        if (!texts.length || el.querySelector('[data-s]')) {
+          if (texts.length) texts.forEach(t => { const w = document.createElement('span'); w.className = 'ek-w'; t.replaceWith(w); w.append(t);
+            w.dataset.ek = keyOf(w, hash(norm(w.innerHTML))); orig.set(w, w.innerHTML); });
+          continue;
+        }
+        if ([...el.children].every(isFmt)){ el.dataset.ek = keyOf(el, hash(norm(el.innerHTML))); orig.set(el, el.innerHTML); }
+        else texts.forEach(t => { const w = document.createElement('span'); w.className = 'ek-w'; t.replaceWith(w); w.append(t);
+          w.dataset.ek = keyOf(w, hash(norm(w.innerHTML))); orig.set(w, w.innerHTML); });
+      }
+    }
+    function setImg(el, url){
+      if (el.tagName === 'IMG'){ el.src = url; el.removeAttribute('srcset'); }
+      else el.style.backgroundImage = url ? `url('${url.replace(/'/g, '%27')}')` : orig.get(el);
+    }
+    function apply(rows){
+      const m = new Map((rows || []).map(r => [r.key, r.value]));
+      document.querySelectorAll('[data-ek]').forEach(el => { if (m.has(el.dataset.ek)) { el.innerHTML = clean(m.get(el.dataset.ek)); syncCount(el); } });
+      document.querySelectorAll('[data-ei]').forEach(el => { const u = m.get(el.dataset.ei); if (u && /^https:\/\//.test(u)) setImg(el, u); });
+    }
+    // animated counters (e.g. "2" shops) count up to data-count: keep it equal to the edited number
+    const syncCount = el => { if (el.dataset.count == null) return; const n = parseInt(el.textContent.replace(/\D/g, ''), 10); if (!isNaN(n)) el.dataset.count = n; };
+    const reset = el => { if (el.dataset.ei) { if (el.tagName === 'IMG') el.src = orig.get(el); else el.style.backgroundImage = orig.get(el); } else el.innerHTML = orig.get(el); };
+    scan();
+    return { clean, apply, reset, setImg, syncCount, original: el => orig.get(el) };
+  })();
+  window.AD_ED = AD_ED;
+  if (EDIT){ const sc = document.createElement('script'); sc.src = 'editor/edit.js?v=' + Date.now(); document.body.appendChild(sc); }
+
   document.getElementById('yr').textContent = new Date().getFullYear();
   document.querySelectorAll('.js-wa').forEach(a => { a.href = 'https://wa.me/' + PHONE; a.target = '_blank'; a.rel = 'noopener'; });
 
@@ -887,6 +959,7 @@
 
   // ---------- Motion: scroll reveal + counters ----------
   const counters = el => {
+    if (EDIT) return;                                    // edit mode: numbers stay still so they can be tapped and changed
     const end=+el.dataset.count, suf=el.dataset.suffix||'', t0=performance.now(), dur=1600;
     const step=t=>{ const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3); el.textContent=Math.round(end*e)+suf; if(k<1) requestAnimationFrame(step); };
     requestAnimationFrame(step);
@@ -1046,9 +1119,9 @@
       </div>
       <div class="iv-info">
         ${cat ? `<span class="iv-cat">${esc(cat.name)}</span>` : ''}
-        <h2>${esc(p.name)}</h2>
+        <h2 data-pf="name">${esc(p.name)}</h2>
         ${sub?`<p class="psub">${sub}</p>`:''}
-        ${p.description?`<p class="iv-desc">${esc(p.description)}</p>`:''}
+        ${p.description || EDIT ? `<p class="iv-desc" data-pf="description">${esc(p.description || '')}</p>` : ''}
         ${variantBtns(p)}
         ${colorBtns(p)}${finBtns(p)}
         ${priceBoxes(p)}
@@ -1138,6 +1211,7 @@
   shopBox.onkeydown = e => { if ((e.key==='Enter'||e.key===' ') && e.target.matches('.prod')) { e.preventDefault(); openItem(e.target.dataset.item); } };
   async function loadLive(){
     if(!DB) return;
+    api('site_texts?select=key,value').then(r => r.ok ? r.json() : []).then(AD_ED.apply).catch(() => {});
     try{
       const [st, pr, pl, ph, ct] = await Promise.all([
         api('settings?id=eq.1&select=*').then(r=>r.ok?r.json():[]),
