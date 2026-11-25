@@ -239,7 +239,17 @@ export function mountInstall(stage, ui, opts = {}){
     const hex = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 6), M.screw); hex.position.y = 0.12;
     inner.add(shank, washer, hex); s.userData.inner = inner; return s;
   }
-  const screwAt = [];
+  const screwAt = []; let boltAt = null;
+  function makeBolt(){                                     // local +y points into the gutter; head at y < 0 (outside)
+    const s = new THREE.Group(), inner = new THREE.Group(); s.add(inner);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 18, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), M.paint);
+    head.scale.y = 0.45;                                   // low mushroom (truss) head, painted like the gutter
+    const slot = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.04, 0.06), M.paintEdge); slot.position.y = -0.13;
+    const len = T + IBT + 0.13 + 0.3;                      // wall + bar + nut + a little thread showing
+    const shank = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.085, len, 10), M.screw); shank.position.y = len / 2;
+    const nut = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.13, 0.36), M.screw); nut.position.y = T + IBT + 0.065;
+    inner.add(head, slot, shank, nut); s.userData.inner = inner; return s;
+  }
   BRACKET_Z.forEach((zc, i) => {
     const b = buildSheet(bpath, IBT, IBW, steelMats); b.position.z = zc;
     { // stiffening rib pressed along the middle of the bar (top face)
@@ -251,13 +261,24 @@ export function mountInstall(stage, ui, opts = {}){
     add(b, 3, i * 0.1, new THREE.Vector3(0, 9, 0));
     const spots = [
       { p: [tx + IBT / 2, yb - 0.5], axis: new THREE.Vector3(1, 0, 0), len: 1.3 },   // through the tab + gutter wall into the fascia
-      { p: [(fTop[0] + fBot[0]) / 2 + fin[0] * IBT / 2, (fTop[1] + fBot[1]) / 2 + fin[1] * IBT / 2], axis: new THREE.Vector3(fin[0], fin[1], 0), len: 0.16 },   // rivet through the foot + front wall
     ];
     spots.forEach(({ p, axis, len }, j) => {
       const s = makeScrew(len); s.position.set(p[0], p[1], zc); s.quaternion.setFromUnitVectors(UP, axis);
       add(s, 3, 0.45 + i * 0.08 + j * 0.08, axis.clone().multiplyScalar(1.6), 0.55, 6 * Math.PI);
       if (i === 0) screwAt.push(new THREE.Vector3(p[0] + 0.15, p[1], zc));
     });
+    // front: bolt (owner's photo) — coloured mushroom head on the outside of the front wall, shank through the
+    // wall and the bracket foot, square nut tightened on the inside
+    {
+      const fm = [(fTop[0] + fBot[0]) / 2, (fTop[1] + fBot[1]) / 2];           // foot middle (bar centre line)
+      const wallOut = [fm[0] - fin[0] * (off + T / 2), fm[1] - fin[1] * (off + T / 2)];   // outside face of the front wall
+      const bolt = makeBolt();
+      bolt.position.set(wallOut[0], wallOut[1], zc);
+      const ax = new THREE.Vector3(fin[0], fin[1], 0);
+      bolt.quaternion.setFromUnitVectors(UP, ax);
+      add(bolt, 3, 0.62 + i * 0.08, ax.clone().multiplyScalar(-1.6), 0.55, 6 * Math.PI);
+      if (i === 0) boltAt = new THREE.Vector3(wallOut[0] - fin[0] * 0.25, wallOut[1] - fin[1] * 0.25, zc);
+    }
   });
 
   // ---------- 5. purlins + roof covering ----------
@@ -390,6 +411,7 @@ export function mountInstall(stage, ui, opts = {}){
     { k: 'valance', views: VKEY ? {section:'R',full:'L'} : {}, si: 'වඩිම්බු ආවරණය', en: 'Valance board', step: 1.3, at: new THREE.Vector3(VAL_FACE, -6.6, -0.5) },
     { k: 'fascia', views: {section:'R',full:'L'},  si: 'වඩිම්බුව', en: 'Fascia board', step: 1, at: new THREE.Vector3(FAS_T / 2, -4.5, 0) },
     { k: 'screw', views: {section:'R'},   si: 'සවි කිරීමේ ඉස්කුරුප්පු', en: 'Fixing screws', step: 3, at: screwAt[0] },
+    { k: 'bolt', views: {section:'R'}, si: 'ඇණය සහ මුරිච්චිය', en: 'Bolt & square nut', step: 3, at: boltAt },
     { k: 'bracket', views: {section:'R'}, si: 'වැහිපීලි ආධාරකය', en: 'Gutter bracket', step: 3, at: new THREE.Vector3((bpath[1][0] + bpath[2][0]) / 2 + 0.1, (bpath[1][1] + bpath[2][1]) / 2, BRACKET_Z[0] + 0.5) },
     { k: 'gutter', views: {section:'R',full:'L'},  si: 'වැහිපීල්ල', en: 'Rain gutter', step: 2, at: new THREE.Vector3(FRONT_X - 0.6, gy + 2.2, -4) },
     { k: 'outlet', views: {full:'R'},  si: 'පිටවුම', en: 'Outlet', step: 5, at: new THREE.Vector3(OX + NOZ / 2, gy - 0.5, OUTLET_Z + NOZ / 2) },

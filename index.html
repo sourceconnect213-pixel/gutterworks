@@ -349,6 +349,7 @@
   .inst-seg button.on{background:var(--blue);color:#fff}
   .inst-load{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-weight:600}
   .inst-bar{margin-top:12px;display:grid;gap:10px}
+  #inst-seek[hidden]{display:none!important}
   #inst-seek{width:100%;height:44px;accent-color:var(--blue);cursor:pointer}
   .inst-opts{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
   .inst-opts .tg{font:700 .9rem "Noto Sans Sinhala",Inter,sans-serif;min-height:44px;padding:0 16px;border-radius:24px;border:1.5px solid #c9d3e0;background:#fff;color:var(--muted);cursor:pointer}
@@ -709,7 +710,7 @@
         <div class="inst-load" id="inst-load">3D diagram loading…</div>
       </div>
       <div class="inst-bar">
-        <input type="range" id="inst-seek" min="0" max="1000" value="0" step="1" aria-label="කාල රේඛාව · Timeline">
+        <input type="range" hidden id="inst-seek" min="0" max="1000" value="0" step="1" aria-label="කාල රේඛාව · Timeline">
         <div class="inst-opts">
           <button type="button" id="inst-lbl" class="tg on" aria-pressed="true">අංක <span>Labels</span></button>
           <button type="button" id="inst-arr" class="tg on" aria-pressed="true">ඊතල <span>Arrows</span></button>
