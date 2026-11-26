@@ -192,7 +192,9 @@
     'ceil-panel': 'සිවිලිම් · Panel Sheet', 'ceil-wall-angle': 'සිවිලිම් · L Corner', 'ceil-h-joiner': 'සිවිලිම් · H Corner',
     'ceil-u-trim': 'සිවිලිම් · U Corner', 'ceil-edge-trim': 'සිවිලිම් · Edge Trim', 'ceil-cove': 'සිවිලිම් · Top Molding',
     'ceil-gi-channel': 'සිවිලිම් · GI Channel', 'ceil-gi-angle': 'සිවිලිම් · GI L Angle',
-    'ceil-2x2': 'සිවිලිම් · 2x2 ටයිල්', 'ceil-main-tee': 'සිවිලිම් · Main Tee' };
+    'ceil-2x2': 'සිවිලිම් · 2x2 ටයිල්', 'ceil-main-tee': 'සිවිලිම් · Main Tee',
+    // boxed fixings: box + pieces in 3D on the website (pack3d.js)
+    'pack-cn1': 'ඇණ · Concrete Nails 1"', 'pack-cn15': 'ඇණ · Concrete Nails 1½"', 'pack-ws15': 'Wood Screws 1½"', 'pack-nb': 'Nut & Bolt' };
   const VNAMES = [['Korean','K'], ['Chinese','C']];
   const variantsOf = p => Array.isArray(p.variants) ? p.variants.filter(v => v && v.name) : [];
   const UNITS = ['per ft', 'each', 'per sq.ft', 'per sheet', 'per meter'];
