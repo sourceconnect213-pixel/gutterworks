@@ -198,16 +198,16 @@ function ring(c, rr, plane, a0, a1, n = 10){                    // arc points of
   return Array.from({ length: n + 1 }, (_, i) => { const a = THREE.MathUtils.degToRad(a0 + (a1 - a0) * i / n);
     return plane === 'xy' ? V(c + rr * Math.cos(a), rr * Math.sin(a), 0) : V(c + rr * Math.cos(a), 0, rr * Math.sin(a)); });
 }
-function jackLink(L, w, r){                                      // twisted figure-8: one end upright, the other flat
+function jackLink(L, w, r, seg = 140, rad = 8){                                      // twisted figure-8: one end upright, the other flat
   const c = 0.31 * L, rr = 0.5 * w;                             // long teardrop loops with a wide opening
   const pts = [V(0, 0, 0), ...ring(c, rr, 'xy', 125, -125, 14), V(0, 0, 0), ...ring(-c, rr, 'xz', -55, -305, 14)];
-  return { geo: new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, 'centripetal'), 140, r, 8, true), pitch: 2 * c + rr, lift: rr * 0.72 + r };
+  return { geo: new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, 'centripetal'), seg, r, rad, true), pitch: 2 * c + rr, lift: rr * 0.72 + r };
 }
-function berekaLink(L, w, r){                                    // flat figure-8: closed loop + open hook with a knob
+function berekaLink(L, w, r, seg = 150, rad = 10){                                    // flat figure-8: closed loop + open hook with a knob
   const c = 0.33 * L, rr = 0.42 * w;
   const pts = [...ring(c, rr, 'xy', 140, -150, 12), V(0.04 * L, -0.04 * w, 0), ...ring(-c, rr, 'xy', 35, 325, 14), V(-0.04 * L, 0.04 * w, 0)];
   const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal');
-  return { geo: new THREE.TubeGeometry(curve, 150, r, 10, false), knob: pts[0], pitch: 2 * c + rr, lift: rr * 0.72 + r };
+  return { geo: new THREE.TubeGeometry(curve, seg, r, rad, false), knob: pts[0], pitch: 2 * c + rr, lift: rr * 0.72 + r };
 }
 // lay a chain of links along a floor path (x, z points), links alternately turned 90°
 function layChain(group, path, link, mat, knobMat){
@@ -430,19 +430,19 @@ export function mountPack(container, key, opts = {}){
     const b = cast(endcap(coat(def.colours[1], 0.42, 0.25), M.galv)); b.scale.x = -1; b.rotation.x = Math.PI / 2; b.position.set(40, 0.4, 70); b.rotation.z = -0.35; world.add(b);
   }
   if (def.item === 'jack'){
-    const link = jackLink(40, 15, 1.8);                                   // PVC coated wire ≈ 3.6 mm
+    const link = jackLink(40, 15, 1.8, 90, 7);                                   // PVC coated wire ≈ 3.6 mm
     layChain(world, [[-110, -30], [-60, -55], [-5, -30], [45, -50], [110, -25]], link, coat(def.colours[0], 0.32));
     layChain(world, [[-110, 40], [-55, 20], [0, 50], [55, 28], [110, 52]], link, coat(def.colours[1], 0.32));
     const lab = loader.load(BASE + 'chain-label.jpg'); lab.colorSpace = THREE.SRGBColorSpace; texs.push(lab);
-    def.colours.forEach((c, i) => { const pk = packet(M, link, coat(c, 0.32), lab, { w: 180, l: 150, t: 42, lw: 96, lh: 56, n: 120 }, rnd);
+    def.colours.forEach((c, i) => { const pk = packet(M, jackLink(40, 15, 1.8, 44, 5), coat(c, 0.32), lab, { w: 180, l: 150, t: 42, lw: 96, lh: 56, n: 75 }, rnd);
       pk.position.set(i ? 92 : -92, 0, -165); pk.rotation.y = i ? -0.18 : 0.15; world.add(pk); });
   }
   if (def.item === 'bereka'){
-    const link = berekaLink(36, 14, 2.6);                                 // moulded plastic, ≈ 5 mm thick
+    const link = berekaLink(36, 14, 2.6, 90, 8);                                 // moulded plastic, ≈ 5 mm thick
     layChain(world, [[-110, -32], [-60, -58], [-5, -30], [50, -52], [110, -28]], link, coat(def.colours[0], 0.3));
     layChain(world, [[-110, 42], [-55, 18], [0, 50], [55, 26], [110, 52]], link, coat(def.colours[1], 0.3));
     const lab = loader.load(BASE + 'bereka-label.jpg'); lab.colorSpace = THREE.SRGBColorSpace; texs.push(lab);
-    def.colours.forEach((c, i) => { const pk = packet(M, link, coat(c, 0.3), lab, { w: 140, l: 210, t: 48, lw: 72, lh: 134, n: 110 }, rnd);
+    def.colours.forEach((c, i) => { const pk = packet(M, berekaLink(36, 14, 2.6, 44, 5), coat(c, 0.3), lab, { w: 140, l: 210, t: 48, lw: 72, lh: 134, n: 70 }, rnd);
       pk.position.set(i ? 82 : -82, 0, -190); pk.rotation.y = i ? -0.12 : 0.1; world.add(pk); });
   }
   // floor that only shows the soft shadows (the card's own background stays)
