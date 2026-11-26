@@ -195,7 +195,8 @@
     'ceil-2x2': 'සිවිලිම් · 2x2 ටයිල්', 'ceil-main-tee': 'සිවිලිම් · Main Tee',
     // boxed fixings: box + pieces in 3D on the website (pack3d.js)
     'pack-cn1': 'ඇණ · Concrete Nails 1"', 'pack-cn15': 'ඇණ · Concrete Nails 1½"', 'pack-ws15': 'Wood Screws 1½"', 'pack-nb': 'Nut & Bolt',
-    'pack-rv-hasky': 'Blind Rivets · Hasky Silver', 'pack-rv-maroon': 'Blind Rivets · Maroon', 'pack-disc4': 'Hasky Stone Turbo Disc 4"' };
+    'pack-rv-hasky': 'Blind Rivets · Hasky Silver', 'pack-rv-maroon': 'Blind Rivets · Maroon', 'pack-disc4': 'Hasky Stone Turbo Disc 4"',
+    'sun-nozzle': 'Nozzle', 'sun-silicon': 'Silicone', 'sun-cup': 'Chain Cup', 'sun-endcap': 'Eng Cup', 'sun-ironchain': 'Iron Chain', 'sun-bereka': 'Bereka Alusis' };
   const VNAMES = [['Korean','K'], ['Chinese','C']];
   const variantsOf = p => Array.isArray(p.variants) ? p.variants.filter(v => v && v.name) : [];
   const UNITS = ['per ft', 'each', 'per sq.ft', 'per sheet', 'per meter'];

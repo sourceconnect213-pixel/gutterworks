@@ -28,6 +28,13 @@ export const PACKS = {
   // 4" (Ø105 mm) stone turbo disc: box of 12, one blister pack leaning on it, one disc lying in front
   'pack-disc4':     { box: { L: 128, H: 145, D: 60, front: 'd1-front', back: 'd1-front', left: 'd1-side', right: 'd1-side', top: 'd1-top', bottom: '#e8e6e1' },
                       item: 'disc' },
+  // ---- gutter / roof sundries (no box: the pieces themselves) ----
+  'sun-nozzle':  { item: 'nozzle' },                                       // gutter outlet nozzle, maroon outside, galvalume inside
+  'sun-silicon': { item: 'silicone' },                                     // TEC-BOND Silicone, general purpose
+  'sun-cup':     { item: 'cups', colours: ['#a3121b', '#16161a'] },        // rain chain cups: red + black
+  'sun-endcap':  { item: 'endcap', colours: ['#5a1d1b', '#1e1f22'] },      // 12" step gutter end piece: maroon + black
+  'sun-ironchain': { item: 'jack', colours: ['#5c1a1f', '#1f4430'] },      // PVC coated iron chain: maroon + green
+  'sun-bereka':  { item: 'bereka', colours: ['#6b171d', '#141416'] },      // Bereka Alusis plastic chain (B&A, 8 yards): maroon + black
 };
 export const hasPack = key => !!PACKS[key];
 
@@ -115,6 +122,107 @@ function discMesh(M, tex){
   return g;
 }
 
+// ---------- sundries ----------
+// a thin sheet: painted face and galvalume face 0.2 mm apart (each seen from its own side), from a quad a-b-c-d
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+function quad(a, b, c, d){
+  const g = new THREE.BufferGeometry().setFromPoints([a, b, c, a, c, d]); g.computeVertexNormals(); return g;
+}
+function sheet(group, a, b, c, d, outward, paint, galv){       // outward: direction the painted face looks
+  const n = outward.clone().normalize().multiplyScalar(0.2);
+  const m1 = new THREE.Mesh(quad(...[a, b, c, d].map(p => p.clone().add(n))), paint);
+  const m2 = new THREE.Mesh(quad(...[a, b, c, d].map(p => p.clone().sub(n))), galv);
+  group.add(m1, m2);
+}
+function nozzle(M){
+  const g = new THREE.Group(), H = 170, tw = 100, td = 72, bw = 84, bd = 58, F = 12, TAB = 55;
+  const T = [V(-tw/2, H, -td/2), V(tw/2, H, -td/2), V(tw/2, H, td/2), V(-tw/2, H, td/2)];
+  const Bt = [V(-bw/2, 0, -bd/2), V(bw/2, 0, -bd/2), V(bw/2, 0, bd/2), V(-bw/2, 0, bd/2)];
+  for (let i = 0; i < 4; i++){
+    const j = (i + 1) % 4, mid = T[i].clone().add(T[j]).add(Bt[i]).add(Bt[j]).multiplyScalar(0.25);
+    const out = mid.clone().setY(0).normalize();
+    sheet(g, Bt[i], Bt[j], T[j], T[i], out, M.paint, M.galv);                                        // wall
+    if (i === 0){ sheet(g, T[i], T[j], T[j].clone().setY(H + TAB), T[i].clone().setY(H + TAB), V(0, 0, -1), M.paint, M.galv); continue; }   // back tab
+    const o = out.clone().multiplyScalar(F);
+    sheet(g, T[i], T[j], T[j].clone().add(o), T[i].clone().add(o), V(0, -1, 0), M.paint, M.galv);   // lip folded out (galvalume up)
+  }
+  return g;
+}
+// 12" step gutter end piece: the gutter's own cross-section (inches → mm) with 12 mm folded edges
+const STEP12 = [[0, 4.25], [0, 3.5], [0.5, 3.5], [0.5, 2], [1, 2], [1, 0.5], [1.5, 0.5], [1.5, 0], [4.5, 0], [4.5, 2.75]].map(([x, y]) => [x * IN, y * IN]);
+function endcap(paint, galv){
+  const g = new THREE.Group(), F = 12, P = STEP12;
+  const shape = new THREE.Shape(P.map(([x, y]) => new THREE.Vector2(x, y)));
+  const plate = new THREE.ShapeGeometry(shape);
+  const a = new THREE.Mesh(plate, paint); a.position.z = 0.2; const b = new THREE.Mesh(plate, galv); b.position.z = -0.2; g.add(a, b);
+  let area = 0; for (let i = 0; i < P.length; i++){ const [x1, y1] = P[i], [x2, y2] = P[(i + 1) % P.length]; area += x1 * y2 - x2 * y1; }
+  for (let i = 0; i < P.length - 1; i++){                                                             // every edge but the open diagonal
+    const [x1, y1] = P[i], [x2, y2] = P[i + 1], l = Math.hypot(x2 - x1, y2 - y1);
+    const out = area > 0 ? V((y2 - y1) / l, -(x2 - x1) / l, 0) : V(-(y2 - y1) / l, (x2 - x1) / l, 0);
+    sheet(g, V(x1, y1, 0), V(x2, y2, 0), V(x2, y2, -F), V(x1, y1, -F), out, paint, galv);
+  }
+  const c = new THREE.Box3().setFromObject(g).getCenter(new THREE.Vector3()); g.children.forEach(m => { m.position.x -= c.x; m.position.y -= c.y; });
+  return g;
+}
+function cartridge(M, label){
+  const g = new THREE.Group(), R = 24, L = 205;
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(R, R, L, 64, 1, true), new THREE.MeshStandardMaterial({ map: label, roughness: 0.42, side: THREE.DoubleSide }));
+  body.position.y = L / 2; body.rotation.y = Math.PI; g.add(body);                                    // printed front faces +z
+  g.add(new THREE.Mesh(lathe([[R - 0.6, L], [R, L], [R - 1, L + 3], [14, L + 8], [13, L + 10], [13, L + 18], [9.5, L + 19], [8.5, L + 32], [0, L + 33]], 40), M.plastic));
+  g.add(new THREE.Mesh(thread(8.9, 2.2, L + 21, L + 30, 0.55), M.plastic));
+  g.add(new THREE.Mesh(lathe([[0, 5], [R - 2.5, 5], [R - 2.5, 1.5], [R - 0.3, 0], [R, 0.6]], 40), M.plastic));   // plunger end
+  return g;
+}
+function nozzleTip(M){ return new THREE.Mesh(lathe([[0, 0], [9.6, 0], [9.6, 14], [7.5, 16], [2.2, 92], [0, 92]], 32), M.clear); }
+// rain chain cup: cone to a small hole, opening into 8 pointed petals
+function cupGeometry(){
+  const h = 95, NU = 40, NT = 128, pos = [], idx = [];
+  for (let i = 0; i <= NU; i++) for (let j = 0; j <= NT; j++){
+    const u = i / NU, th = j / NT * Math.PI * 2;
+    let r, y;
+    if (u <= 0.7){ r = 8 + 18 * (u / 0.7); y = u * h; }
+    else {
+      // broad petals with a pointed tip: full height at the petal middle, cut down to 30 % between petals
+      const k = 1 - Math.abs(Math.sin(4 * th)), tmax = 0.42 + 0.58 * Math.pow(k, 0.35);
+      const t = Math.min((u - 0.7) / 0.3, tmax);
+      r = 26 + 13 * t + 4 * t * t; y = 0.7 * h + t * 0.3 * h;
+    }
+    pos.push(r * Math.sin(th), y, r * Math.cos(th));
+  }
+  for (let i = 0; i < NU; i++) for (let j = 0; j < NT; j++){ const a = i * (NT + 1) + j, b = a + NT + 1; idx.push(a, b, a + 1, b, b + 1, a + 1); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+// chain links (axis = +x, centred on the origin)
+function ring(c, rr, plane, a0, a1, n = 10){                    // arc points of a link end
+  return Array.from({ length: n + 1 }, (_, i) => { const a = THREE.MathUtils.degToRad(a0 + (a1 - a0) * i / n);
+    return plane === 'xy' ? V(c + rr * Math.cos(a), rr * Math.sin(a), 0) : V(c + rr * Math.cos(a), 0, rr * Math.sin(a)); });
+}
+function jackLink(L, w, r){                                      // twisted figure-8: one end upright, the other flat
+  const c = 0.31 * L, rr = 0.5 * w;                             // long teardrop loops with a wide opening
+  const pts = [V(0, 0, 0), ...ring(c, rr, 'xy', 125, -125, 14), V(0, 0, 0), ...ring(-c, rr, 'xz', -55, -305, 14)];
+  return { geo: new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, 'centripetal'), 140, r, 8, true), pitch: 2 * c + rr, lift: rr * 0.72 + r };
+}
+function berekaLink(L, w, r){                                    // flat figure-8: closed loop + open hook with a knob
+  const c = 0.33 * L, rr = 0.42 * w;
+  const pts = [...ring(c, rr, 'xy', 140, -150, 12), V(0.04 * L, -0.04 * w, 0), ...ring(-c, rr, 'xy', 35, 325, 14), V(-0.04 * L, 0.04 * w, 0)];
+  const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal');
+  return { geo: new THREE.TubeGeometry(curve, 150, r, 10, false), knob: pts[0], pitch: 2 * c + rr, lift: rr * 0.72 + r };
+}
+// lay a chain of links along a floor path (x, z points), links alternately turned 90°
+function layChain(group, path, link, mat, knobMat){
+  const curve = new THREE.CatmullRomCurve3(path.map(([x, z]) => V(x, 0, z)), false, 'centripetal');
+  const n = Math.floor(curve.getLength() / link.pitch), q = new THREE.Quaternion(), roll = new THREE.Quaternion(), X = V(1, 0, 0);
+  for (let i = 0; i < n; i++){
+    const t = (i + 0.5) / n, p = curve.getPointAt(t), d = curve.getTangentAt(t);
+    q.setFromUnitVectors(X, d);
+    roll.setFromAxisAngle(X, (i % 2 ? 1 : -1) * Math.PI / 4);
+    const m = new THREE.Mesh(link.geo, mat); m.quaternion.copy(q).multiply(roll); m.position.set(p.x, link.lift, p.z);
+    m.castShadow = m.receiveShadow = true; group.add(m);
+    if (link.knob){ const k = new THREE.Mesh(new THREE.SphereGeometry(link.lift * 0.45, 12, 10), knobMat || mat); k.position.copy(link.knob); m.add(k); }
+  }
+}
+
 export function mountPack(container, key, opts = {}){
   const def = PACKS[key]; if (!def) throw new Error('No pack ' + key);
   const interactive = !!opts.interactive, B = def.box;
@@ -156,13 +264,20 @@ export function mountPack(container, key, opts = {}){
     rim: new THREE.MeshStandardMaterial({ color: 0x8e9296, metalness: 0.7, roughness: 0.6 }),
     cardEdge: new THREE.MeshStandardMaterial({ color: 0xd8d2c8, roughness: 0.8 }),
     cardBack: new THREE.MeshStandardMaterial({ color: 0xf1ede6, roughness: 0.8 }),
+    paint: new THREE.MeshStandardMaterial({ color: 0x5a1d1b, metalness: 0.25, roughness: 0.42, side: THREE.DoubleSide }),   // maroon colour coat
+    galv: new THREE.MeshStandardMaterial({ color: 0xc6ccd2, metalness: 0.75, roughness: 0.42, side: THREE.DoubleSide }),   // galvalume inside
+    plastic: new THREE.MeshStandardMaterial({ color: 0xf0f0ec, roughness: 0.45 }),
+    clear: new THREE.MeshStandardMaterial({ color: 0xf2f2ee, roughness: 0.25, transparent: true, opacity: 0.62 }),
   };
+  const coat = (c, rough = 0.34, metal = 0) => new THREE.MeshStandardMaterial({ color: c, roughness: rough, metalness: metal, side: THREE.DoubleSide });
 
   // ---------- the box (order: right, left, top, bottom, front, back) ----------
-  const box = new THREE.Mesh(new THREE.BoxGeometry(B.L, B.H, B.D),
-    [B.right, B.left, B.top, B.bottom, B.front, B.back].map(face));
-  box.position.set(0, B.H / 2, -B.D / 2 - 4); box.castShadow = box.receiveShadow = true;
-  const world = new THREE.Group(); world.add(box);
+  const world = new THREE.Group();
+  let box = null;
+  if (B){
+    box = new THREE.Mesh(new THREE.BoxGeometry(B.L, B.H, B.D), [B.right, B.left, B.top, B.bottom, B.front, B.back].map(face));
+    box.position.set(0, B.H / 2, -B.D / 2 - 4); box.castShadow = box.receiveShadow = true; world.add(box);
+  }
 
   // ---------- the pile in front: lying flat, no two overlapping ----------
   const rnd = rng(key.split('').reduce((a, c) => a * 31 + c.charCodeAt(0), 7) % 2147483647 || 1);
@@ -176,7 +291,7 @@ export function mountPack(container, key, opts = {}){
     if (cr(p, q, r) * cr(p, q, s) < 0 && cr(r, s, p) * cr(r, s, q) < 0) return 0;      // the two shanks cross
     return Math.min(d(p, q, r), d(p, q, s), d(r, s, p), d(r, s, q));
   };
-  const zone = { x0: -B.L * 0.55, x1: B.L * 0.55, z0: 6, z1: 6 + Math.max(40, B.L * 0.42) };
+  const zone = loose ? { x0: -B.L * 0.55, x1: B.L * 0.55, z0: 6, z1: 6 + Math.max(40, B.L * 0.42) } : null;
   for (let i = 0, tries = 0; loose && i < def.count && tries < 900; tries++){
     const f = make(), len = f.L;
     const yaw = rnd() * Math.PI * 2, cx = zone.x0 + rnd() * (zone.x1 - zone.x0), cz = zone.z0 + rnd() * (zone.z1 - zone.z0);
@@ -249,11 +364,53 @@ export function mountPack(container, key, opts = {}){
     disc.position.set(B.L * 0.32, 1.1, 78); disc.rotation.y = 0.5; disc.traverse(o => { if (o.isMesh){ o.castShadow = true; o.receiveShadow = true; } });
     world.add(disc);
   }
+  // ---------- sundries ----------
+  const cast = o => { o.traverse(m => { if (m.isMesh){ m.castShadow = true; m.receiveShadow = true; } }); return o; };
+  if (def.item === 'nozzle') world.add(cast(nozzle(M)));
+  if (def.item === 'silicone'){
+    const lt = loader.load(BASE + 'sil-label.jpg'); lt.colorSpace = THREE.SRGBColorSpace; lt.anisotropy = renderer.capabilities.getMaxAnisotropy(); texs.push(lt);
+    [[-56, -18, 0.25], [0, -26, -0.1], [56, -18, -0.3]].forEach(([x, z, ry]) => { const c = cast(cartridge(M, lt)); c.position.set(x, 0, z); c.rotation.y = ry; world.add(c); });
+    const lying = cast(cartridge(M, lt)); lying.rotation.set(0, 0.18, Math.PI / 2); lying.rotateX(-0.5); lying.position.set(118, 24, 46); world.add(lying);
+    const tip = cast(nozzleTip(M)); tip.rotation.set(0, -0.6, Math.PI / 2); tip.position.set(-40, 9.6, 52); world.add(tip);
+  }
+  if (def.item === 'cups'){
+    const geo = cupGeometry(), h = 95, step = h - 20, N = 4;
+    def.colours.forEach((col, ci) => {
+      const mat = coat(col, ci ? 0.4 : 0.26), x = ci ? 52 : -52, ch = new THREE.Group();
+      for (let k = 0; k < N; k++){
+        const y = 40 + (N - 1 - k) * step, cup = new THREE.Mesh(geo, mat); cup.position.set(x, y, 0); cup.rotation.y = k * 0.4 + ci; ch.add(cup);
+        if (k < N - 1) for (const sx of [-1, 1]){                                                     // wire hooks to the cup below
+          const yb = y - step;
+          const pts = [V(x + sx * 9, y + 10, 0), V(x + sx * 16, y - 4, 0), V(x + sx * 30, yb + 0.8 * h + 6, 0), V(x + sx * 31, yb + 0.8 * h - 2, 0)];
+          ch.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 1.1, 6), mat));
+        }
+      }
+      const top = 40 + (N - 1) * step + h;
+      for (const sx of [-1, 1]) ch.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([V(x + sx * 31, top - 4, 0), V(x + sx * 24, top + 22, 0), V(x, top + 34, 0)]), 24, 1.1, 6), mat));
+      world.add(cast(ch));
+    });
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(190, 8, 10), M.galv); bar.position.set(0, 40 + (N - 1) * step + h + 38, 0); world.add(cast(bar));
+  }
+  if (def.item === 'endcap'){
+    // maroon one standing (painted face to the front, folded edges behind), black one lying in front showing its galvalume inside
+    const a = cast(endcap(coat(def.colours[0], 0.42, 0.25), M.galv)); a.position.set(-10, 4.25 * IN / 2 + 0.5, -40); a.rotation.y = 0.2; world.add(a);
+    const b = cast(endcap(coat(def.colours[1], 0.42, 0.25), M.galv)); b.scale.x = -1; b.rotation.x = Math.PI / 2; b.position.set(40, 0.4, 70); b.rotation.z = -0.35; world.add(b);
+  }
+  if (def.item === 'jack'){
+    const link = jackLink(40, 15, 1.8);                                   // PVC coated wire ≈ 3.6 mm
+    layChain(world, [[-110, -30], [-60, -55], [-5, -30], [45, -50], [110, -25]], link, coat(def.colours[0], 0.32));
+    layChain(world, [[-110, 40], [-55, 20], [0, 50], [55, 28], [110, 52]], link, coat(def.colours[1], 0.32));
+  }
+  if (def.item === 'bereka'){
+    const link = berekaLink(36, 14, 2.6);                                 // moulded plastic, ≈ 5 mm thick
+    layChain(world, [[-110, -32], [-60, -58], [-5, -30], [50, -52], [110, -28]], link, coat(def.colours[0], 0.3));
+    layChain(world, [[-110, 42], [-55, 18], [0, 50], [55, 26], [110, 52]], link, coat(def.colours[1], 0.3));
+  }
   // floor that only shows the soft shadows (the card's own background stays)
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.ShadowMaterial({ opacity: 0.22 }));
   floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; world.add(floor);
   // centre everything (box + pile) on the turning point
-  const all = new THREE.Box3().setFromObject(box); world.children.forEach(o => o !== floor && all.expandByObject(o));
+  const all = new THREE.Box3(); world.children.forEach(o => o !== floor && all.expandByObject(o));
   const c = all.getCenter(new THREE.Vector3()); world.position.set(-c.x, 0, -c.z);
   scene.add(world);
 
@@ -264,8 +421,8 @@ export function mountPack(container, key, opts = {}){
   controls.minPolarAngle = 0.05; controls.maxPolarAngle = Math.PI / 2 - 0.02;   // stays above the floor
   controls.autoRotate = true; controls.autoRotateSpeed = interactive ? 0.9 : 1.2;
   if (interactive) renderer.domElement.style.touchAction = 'none'; else renderer.domElement.style.pointerEvents = 'none';
-  const size = all.getSize(new THREE.Vector3()), R = Math.hypot(size.x, size.y, size.z) / 2 * 1.02;
-  controls.target.set(0, size.y * 0.32, 0);
+  const size = all.getSize(new THREE.Vector3()), R = Math.hypot(size.x, size.y, size.z) / 2 * (size.y > size.x * 0.9 ? 1.12 : 1.02);
+  controls.target.set(0, size.y * (size.y > size.x * 0.9 ? 0.48 : 0.32), 0);      // tall things (hanging cups): look at the middle
   const DIR = new THREE.Vector3(0.38, 0.62, 1).normalize();
   const fit = () => { const v = THREE.MathUtils.degToRad(camera.fov), hh = 2 * Math.atan(Math.tan(v / 2) * camera.aspect); return R / Math.sin(Math.min(v, hh) / 2); };
   const HOME = new THREE.Vector3(); let anim = null;

@@ -1031,7 +1031,8 @@
   const CEIL_3D = ['ceil-h-joiner','ceil-wall-angle','ceil-u-trim','ceil-cove','ceil-gi-channel','ceil-gi-angle','ceil-main-tee'];
   const hasCeil = p => CEIL_3D.includes(p.model);
   // boxed fixings (nails, screws, nut & bolt) shown as their box + the pieces in 3D (pack3d.js)
-  const PACK_3D = ['pack-cn1','pack-cn15','pack-ws15','pack-nb','pack-rv-hasky','pack-rv-maroon','pack-disc4'];
+  const PACK_3D = ['pack-cn1','pack-cn15','pack-ws15','pack-nb','pack-rv-hasky','pack-rv-maroon','pack-disc4',
+    'sun-nozzle','sun-silicon','sun-cup','sun-endcap','sun-ironchain','sun-bereka'];
   const hasPack = p => PACK_3D.includes(p.model);
   const has = v => v != null && v !== '';
   // Korean / Chinese (or other) versions of one item: p.variants = [{name, code, price, fixing_price}]
@@ -1279,7 +1280,7 @@
   let big = null, lib = null;
   const getLib = () => lib ||= import('./gutter3d.js');
   // ?v= changes with every update of the ceiling models, so phones never keep an old copy
-  const CEIL_V = '20261126b';
+  const CEIL_V = '20261126c';
   let clib = null; const getCeil = () => clib ||= import(`./ceil3d.js?v=${CEIL_V}`);
   // one mount for both kinds: sheet-metal items (profiles.js) and ceiling accessories (ceil3d.js)
   let plib = null; const getPack = () => plib ||= import(`./pack3d.js?v=${CEIL_V}`);
