@@ -24,3 +24,6 @@ begin
   select x.model, x.name, x.cat, x.size, x.colour, x.sort, x.descr, x.img, '[]'::jsonb, true, 'each', '[]'::jsonb
     from _s x where not exists (select 1 from public.products p where p.model = x.model);
 end $$;
+
+-- Iron Chain: size from its packet label (SL PVC Colour Chain, 8 yards)
+update public.products set size = '8 Yards', description = 'PVC ආලේප කළ යකඩ දම්වැල (SL PVC Colour Chain) · යාර 8 · Made in Sri Lanka' where model = 'sun-ironchain';

@@ -223,6 +223,36 @@ function layChain(group, path, link, mat, knobMat){
   }
 }
 
+// a sealed clear plastic packet with the chain links tangled inside and the maker's label on top
+function packet(M, link, mat, labelTex, { w, l, t, lw, lh, n }, rnd){
+  const g = new THREE.Group();
+  const bag = new THREE.BoxGeometry(w, t, l, 16, 6, 20), p = bag.attributes.position;
+  for (let i = 0; i < p.count; i++){                                          // pillow shape: full in the middle, flat at the edges
+    const nx = p.getX(i) / (w / 2), nz = p.getZ(i) / (l / 2), y = p.getY(i);
+    const s = Math.sqrt(Math.max(0.04, (1 - Math.abs(nx) ** 5) * (1 - Math.abs(nz) ** 5)));
+    p.setY(i, y > 0 ? y * s : y * (0.35 + 0.65 * s));
+  }
+  bag.computeVertexNormals();
+  const film = new THREE.Mesh(bag, M.film); film.renderOrder = 2; g.add(film);
+  for (const sz of [-1, 1]){ const seal = new THREE.Mesh(new THREE.BoxGeometry(w + 2, 0.8, 10), M.seal); seal.position.set(0, -t * 0.12, sz * (l / 2 + 3)); g.add(seal); }
+  // the chain inside: links lying mostly flat (any direction, small tilts), all of each link inside the bag
+  const half = link.pitch * 0.85, up = link.lift;                                // half a link's length, and its height
+  for (let i = 0; i < n; i++){
+    const x = (rnd() - 0.5) * (w - 2 * half - 8), z = (rnd() - 0.5) * (l - 2 * half - 8);
+    const s = Math.sqrt(Math.max(0.05, (1 - Math.abs(x / (w / 2)) ** 5) * (1 - Math.abs(z / (l / 2)) ** 5)));
+    const room = Math.max(0, (t / 2) * s - up - 2.5);                             // space above/below the middle at this spot
+    const m = new THREE.Mesh(link.geo, mat);
+    m.position.set(x, (rnd() * 2 - 1) * room * 0.9 - t * 0.06, z);
+    m.quaternion.setFromEuler(new THREE.Euler((rnd() < 0.5 ? 0 : Math.PI / 2) + (rnd() - 0.5) * 0.5, rnd() * Math.PI * 2, (rnd() - 0.5) * 0.35, 'YXZ'));
+    g.add(m);
+  }
+  const label = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh), new THREE.MeshStandardMaterial({ map: labelTex, roughness: 0.6 }));
+  label.rotation.x = -Math.PI / 2; label.position.y = t / 2 + 0.6; g.add(label);
+  const bb = new THREE.Box3().setFromObject(g); g.children.forEach(c => c.position.y -= bb.min.y);
+  g.traverse(o => { if (o.isMesh && o !== film){ o.castShadow = true; o.receiveShadow = true; } });
+  return g;
+}
+
 export function mountPack(container, key, opts = {}){
   const def = PACKS[key]; if (!def) throw new Error('No pack ' + key);
   const interactive = !!opts.interactive, B = def.box;
@@ -268,6 +298,8 @@ export function mountPack(container, key, opts = {}){
     galv: new THREE.MeshStandardMaterial({ color: 0xc6ccd2, metalness: 0.75, roughness: 0.42, side: THREE.DoubleSide }),   // galvalume inside
     plastic: new THREE.MeshStandardMaterial({ color: 0xf0f0ec, roughness: 0.45 }),
     clear: new THREE.MeshStandardMaterial({ color: 0xf2f2ee, roughness: 0.25, transparent: true, opacity: 0.62 }),
+    film: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.12, metalness: 0, transparent: true, opacity: 0.26, envMapIntensity: 1.6, depthWrite: false, side: THREE.DoubleSide }),
+    seal: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, transparent: true, opacity: 0.45, depthWrite: false }),
   };
   const coat = (c, rough = 0.34, metal = 0) => new THREE.MeshStandardMaterial({ color: c, roughness: rough, metalness: metal, side: THREE.DoubleSide });
 
@@ -370,8 +402,9 @@ export function mountPack(container, key, opts = {}){
   if (def.item === 'silicone'){
     const lt = loader.load(BASE + 'sil-label.jpg'); lt.colorSpace = THREE.SRGBColorSpace; lt.anisotropy = renderer.capabilities.getMaxAnisotropy(); texs.push(lt);
     [[-56, -18, 0.25], [0, -26, -0.1], [56, -18, -0.3]].forEach(([x, z, ry]) => { const c = cast(cartridge(M, lt)); c.position.set(x, 0, z); c.rotation.y = ry; world.add(c); });
-    const lying = cast(cartridge(M, lt)); lying.rotation.set(0, 0.18, Math.PI / 2); lying.rotateX(-0.5); lying.position.set(118, 24, 46); world.add(lying);
-    const tip = cast(nozzleTip(M)); tip.rotation.set(0, -0.6, Math.PI / 2); tip.position.set(-40, 9.6, 52); world.add(tip);
+    // one lying in front, clear of the standing ones (its axis runs from x = 120 towards the left and forward)
+    const lying = cast(cartridge(M, lt)); lying.rotation.set(0, 0.3, Math.PI / 2, 'YXZ'); lying.position.set(120, 24, 42); world.add(lying);
+    const tip = cast(nozzleTip(M)); tip.rotation.set(0, 0, Math.PI / 2); tip.position.set(-60, 9.6, 36); world.add(tip);
   }
   if (def.item === 'cups'){
     const geo = cupGeometry(), h = 95, step = h - 20, N = 4;
@@ -400,11 +433,17 @@ export function mountPack(container, key, opts = {}){
     const link = jackLink(40, 15, 1.8);                                   // PVC coated wire ≈ 3.6 mm
     layChain(world, [[-110, -30], [-60, -55], [-5, -30], [45, -50], [110, -25]], link, coat(def.colours[0], 0.32));
     layChain(world, [[-110, 40], [-55, 20], [0, 50], [55, 28], [110, 52]], link, coat(def.colours[1], 0.32));
+    const lab = loader.load(BASE + 'chain-label.jpg'); lab.colorSpace = THREE.SRGBColorSpace; texs.push(lab);
+    def.colours.forEach((c, i) => { const pk = packet(M, link, coat(c, 0.32), lab, { w: 180, l: 150, t: 42, lw: 96, lh: 56, n: 120 }, rnd);
+      pk.position.set(i ? 92 : -92, 0, -165); pk.rotation.y = i ? -0.18 : 0.15; world.add(pk); });
   }
   if (def.item === 'bereka'){
     const link = berekaLink(36, 14, 2.6);                                 // moulded plastic, ≈ 5 mm thick
     layChain(world, [[-110, -32], [-60, -58], [-5, -30], [50, -52], [110, -28]], link, coat(def.colours[0], 0.3));
     layChain(world, [[-110, 42], [-55, 18], [0, 50], [55, 26], [110, 52]], link, coat(def.colours[1], 0.3));
+    const lab = loader.load(BASE + 'bereka-label.jpg'); lab.colorSpace = THREE.SRGBColorSpace; texs.push(lab);
+    def.colours.forEach((c, i) => { const pk = packet(M, link, coat(c, 0.3), lab, { w: 140, l: 210, t: 48, lw: 72, lh: 134, n: 110 }, rnd);
+      pk.position.set(i ? 82 : -82, 0, -190); pk.rotation.y = i ? -0.12 : 0.1; world.add(pk); });
   }
   // floor that only shows the soft shadows (the card's own background stays)
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.ShadowMaterial({ opacity: 0.22 }));
